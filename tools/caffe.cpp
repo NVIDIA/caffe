@@ -158,6 +158,9 @@ int train() {
     Caffe::SetDevice(gpus[0]);
     Caffe::set_mode(Caffe::GPU);
     Caffe::set_solver_count(gpus.size());
+#ifdef USE_CNMEM
+    Caffe::set_memory_pool(true, gpus);
+#endif
   }
 
   shared_ptr<Solver<float> > solver(caffe::GetSolver<float>(solver_param));
@@ -176,6 +179,8 @@ int train() {
     solver->Solve();
   }
   LOG(INFO) << "Optimization Done.";
+
+  solver.reset();
   return 0;
 }
 RegisterBrewFunction(train);

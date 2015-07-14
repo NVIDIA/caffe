@@ -98,6 +98,9 @@ void CuDNNConvolutionLayer<Dtype>::LayerSetUp(
     CUDNN_CHECK(cudnnCreate(&handle_[g]));
     CUDNN_CHECK(cudnnSetStream(handle_[g], stream_[g]));
     workspace[g] = NULL;
+#ifdef USE_CNMEM
+    // CNMEM_CHECK(cnmemRegisterStream(stream_[g]));
+#endif
   }
 
   // Set the indexing parameters.
@@ -142,7 +145,12 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 
   // Specify workspace limit for kernels directly until we have a
   // planning strategy and a rewrite of Caffe's GPU memory mangagement
-  size_t workspace_limit_bytes = 8*1024*1024;
+  size_t workspace_limit_bytes;
+  if (Caffe::get_memory_pool()) {
+    workspace_limit_bytes = Caffe::availableMemoryGPU();
+  } else {
+    workspace_limit_bytes = 8*1024*1024;
+  }
 
   for (int i = 0; i < bottom.size(); i++) {
     cudnn::setTensor4dDesc<Dtype>(&bottom_descs_[i],
@@ -186,6 +194,11 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
       fwd_algo_[i],
       &(workspace_fwd_sizes_[i])));
 
+    if (Caffe::get_memory_pool()) {
+    // restrict to only 1 convolution at a time for memory allocation purposes
+      workspace_limit_bytes = Caffe::availableMemoryGPU();
+    } 
+    //
     // choose backward algorithm for filter
     if (!this->layer_param_.convolution_param().has_cudnnbwdfilteralgo()) {
       CUDNN_CHECK(cudnnGetConvolutionBackwardFilterAlgorithm(handle_[0],
@@ -218,6 +231,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
           bwd_data_algo_[i], &workspace_bwd_data_sizes_[i]) );
   }
 
+#ifndef USE_CNMEM
   // reduce over all workspace sizes to get a maximum to allocate / reallocate
   size_t total_workspace_fwd = 0;
   size_t total_workspace_bwd_data = 0;
@@ -244,9 +258,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
     workspaceSizeInBytes = total_max_workspace;
 
     // free the existing workspace and allocate a new (larger) one
-    if (this->workspaceData) {
-      cudaFree(this->workspaceData);
-    }
+    cudaFree(this->workspaceData);
 
     cudaError_t err = cudaMalloc(&(this->workspaceData), workspaceSizeInBytes);
     if (err != cudaSuccess) {
@@ -275,6 +287,7 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
       workspace[g] = reinterpret_cast<char *>(workspaceData) + g*max_workspace;
     }
   }
+#endif
 
   // Tensor descriptor for bias.
   if (this->bias_term_) {

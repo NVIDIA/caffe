@@ -73,6 +73,7 @@ class SyncedMemory {
   SyncedHead head_;
   bool own_cpu_data_;
   bool own_gpu_data_;
+  int gpu_device_;
 
   DISABLE_COPY_AND_ASSIGN(SyncedMemory);
 };  // class SyncedMemory

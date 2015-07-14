@@ -83,13 +83,15 @@ GPUParams<Dtype>::GPUParams(shared_ptr<Solver<Dtype> > root_solver, int device)
 
   // Allocate device buffers
   CUDA_CHECK(cudaSetDevice(device));
-  CUDA_CHECK(cudaMalloc(&data_, size_ * sizeof(Dtype)));
+  // CUDA_CHECK(cudaMalloc(&data_, size_ * sizeof(Dtype)));
+  Caffe::mallocGPU(reinterpret_cast<void **>(&data_), size_ * sizeof(Dtype));
 
   // Copy blob values
   const vector<shared_ptr<Blob<Dtype> > >& net = root_solver->net()->params();
   apply_buffers(net, data_, size_, copy);
 
-  CUDA_CHECK(cudaMalloc(&diff_, size_ * sizeof(Dtype)));
+  // CUDA_CHECK(cudaMalloc(&diff_, size_ * sizeof(Dtype)));
+  Caffe::mallocGPU(reinterpret_cast<void **>(&diff_), size_ * sizeof(Dtype));
   caffe_gpu_set(size_, Dtype(0), diff_);
 
   CUDA_CHECK(cudaSetDevice(initial_device));
@@ -101,8 +103,8 @@ GPUParams<Dtype>::GPUParams(shared_ptr<Solver<Dtype> > root_solver, int device)
 template<typename Dtype>
 GPUParams<Dtype>::~GPUParams() {
 #ifndef CPU_ONLY
-  CUDA_CHECK(cudaFree(data_));
-  CUDA_CHECK(cudaFree(diff_));
+  Caffe::freeGPU(data_);
+  Caffe::freeGPU(diff_);
 #endif
 }
 
@@ -223,7 +225,8 @@ P2PSync<Dtype>::P2PSync(shared_ptr<Solver<Dtype> > root_solver,
     }
     // Allocate receiving buffer on parent
     CUDA_CHECK(cudaSetDevice(peer));
-    CUDA_CHECK(cudaMalloc(&parent_grads_, size_ * sizeof(Dtype)));
+    Caffe::mallocGPU(reinterpret_cast<void **>(&parent_grads_),
+                     size_ * sizeof(Dtype), cudaStreamDefault);
     CUDA_CHECK(cudaSetDevice(self));
   }
 
@@ -242,8 +245,8 @@ P2PSync<Dtype>::~P2PSync() {
   CUDA_CHECK(cudaSetDevice(self));
 
   if (parent_) {
-    CUDA_CHECK(cudaFree(parent_grads_));
     const int peer = parent_->solver_->param().device_id();
+    Caffe::freeGPU(parent_grads_, cudaStreamDefault);
     int access;
     CUDA_CHECK(cudaDeviceCanAccessPeer(&access, self, peer));
     if (access) {

@@ -18,6 +18,11 @@
 
 #include "caffe/util/device_alternate.hpp"
 
+#ifdef USE_CNMEM
+// cuMEM integration
+#include <cnmem.h>
+#endif
+
 // gflags 2.1 issue: namespace google was changed to gflags without warning.
 // Luckily we will be able to use GFLAGS_GFLAGS_H_ to detect if it is version
 // 2.1. If yes, we will add a temporary solution to redirect the namespace.
@@ -154,6 +159,26 @@ class Caffe {
   inline static void set_solver_count(int val) { Get().solver_count_ = val; }
   inline static bool root_solver() { return Get().root_solver_; }
   inline static void set_root_solver(bool val) { Get().root_solver_ = val; }
+  inline static void set_memory_pool(bool val) { Get().use_memory_pool_ = val; }
+  inline static void set_memory_pool(bool val, std::vector<int>& g) { 
+    Get().use_memory_pool_ = val;
+    Get().gpus_ = g;
+  }
+  inline static bool get_memory_pool() {
+#ifdef USE_CNMEM
+    return Get().use_memory_pool_;
+#else
+    return false;
+#endif
+  }
+  inline static std::vector<int> get_gpus() { return Get().gpus_; }
+  static void mallocGPU(void **ptr, size_t size);
+  static void mallocGPU(void **ptr, size_t size, cudaStream_t stream);
+  static void freeGPU(void *ptr);
+  static void freeGPU(void *ptr, cudaStream_t stream);
+  static size_t availableMemoryGPU();
+  static void InitMemoryPool(const std::vector<int>& gpus);
+  static void FinalizeMemoryPool();
 
  protected:
 #ifndef CPU_ONLY
@@ -165,6 +190,8 @@ class Caffe {
   Brew mode_;
   int solver_count_;
   bool root_solver_;
+  bool use_memory_pool_;
+  std::vector<int> gpus_;
 
  private:
   // The private constructor to avoid duplicate instantiation.

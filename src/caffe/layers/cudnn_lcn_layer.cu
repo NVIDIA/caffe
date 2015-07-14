@@ -15,6 +15,11 @@ void CuDNNLCNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* top_data = top[0]->mutable_gpu_data();
 
+#ifdef USE_CNMEM
+  Caffe::mallocGPU(&this->tempData1, this->tempDataSize);
+  Caffe::mallocGPU(&this->tempData2, this->tempDataSize);
+#endif
+
   CUDNN_CHECK(cudnnDivisiveNormalizationForward(
         handle_, norm_desc_, CUDNN_DIVNORM_PRECOMPUTED_MEANS,
         cudnn::dataType<Dtype>::one,
@@ -23,6 +28,11 @@ void CuDNNLCNLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
         this->tempData1, this->tempData2,
         cudnn::dataType<Dtype>::zero,
         top_desc_, top_data) );
+
+#ifdef USE_CNMEM
+  Caffe::freeGPU(this->tempData1);
+  Caffe::freeGPU(this->tempData2);
+#endif
 }
 
 template <typename Dtype>
@@ -33,6 +43,11 @@ void CuDNNLCNLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   const Dtype* bottom_data = bottom[0]->gpu_data();
   Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
 
+#ifdef USE_CNMEM
+  Caffe::mallocGPU(&this->tempData1, this->tempDataSize);
+  Caffe::mallocGPU(&this->tempData2, this->tempDataSize);
+#endif
+
   CUDNN_CHECK(cudnnDivisiveNormalizationBackward(
         handle_, norm_desc_, CUDNN_DIVNORM_PRECOMPUTED_MEANS,
         cudnn::dataType<Dtype>::one,
@@ -42,6 +57,11 @@ void CuDNNLCNLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
         cudnn::dataType<Dtype>::zero,
         bottom_desc_, bottom_diff,
         NULL) );
+
+#ifdef USE_CNMEM
+  Caffe::freeGPU(this->tempData1);
+  Caffe::freeGPU(this->tempData2);
+#endif
 }
 
 INSTANTIATE_LAYER_GPU_FUNCS(CuDNNLCNLayer);

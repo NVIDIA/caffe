@@ -2,6 +2,7 @@
 #include <glog/logging.h>
 #include <cstdio>
 #include <ctime>
+#include <vector>
 
 #include "caffe/common.hpp"
 #include "caffe/util/rng.hpp"
@@ -52,7 +53,7 @@ void GlobalInit(int* pargc, char*** pargv) {
 
 Caffe::Caffe()
     : random_generator_(), mode_(Caffe::CPU),
-      solver_count_(1), root_solver_(true) { }
+      solver_count_(1), root_solver_(true), use_memory_pool_(false) { }
 
 Caffe::~Caffe() { }
 
@@ -96,7 +97,7 @@ void* Caffe::RNG::generator() {
 
 Caffe::Caffe()
     : cublas_handle_(NULL), curand_generator_(NULL), random_generator_(),
-    mode_(Caffe::CPU), solver_count_(1), root_solver_(true) {
+    mode_(Caffe::CPU), solver_count_(1), root_solver_(true), use_memory_pool_(false) {
   // Try to create a cublas handler, and report an error if failed (but we will
   // keep the program running as one might just want to run CPU code).
   if (cublasCreate(&cublas_handle_) != CUBLAS_STATUS_SUCCESS) {
@@ -156,6 +157,36 @@ void Caffe::SetDevice(const int device_id) {
       cluster_seedgen()));
 }
 
+#ifdef USE_CNMEM
+void Caffe::InitMemoryPool(const std::vector<int>& gpus) {
+  cnmemDevice_t *devs = new cnmemDevice_t[gpus.size()];
+
+  int initial_device;
+  CUDA_CHECK(cudaGetDevice(&initial_device));
+
+  for (int i = 0; i < gpus.size(); i++) {
+    CUDA_CHECK(cudaSetDevice(gpus[i]));
+
+    devs[i].device = gpus[i];
+
+    size_t free, used;
+    CUDA_CHECK(cudaMemGetInfo(&free, &used));
+
+    devs[i].size = size_t(0.9*free);
+    devs[i].numStreams = 0;
+    devs[i].streams = NULL;
+  }
+  CNMEM_CHECK(cnmemInit(gpus.size(), devs, CNMEM_FLAGS_DEFAULT));
+  CUDA_CHECK(cudaSetDevice(initial_device));
+  cudaDeviceSynchronize();
+}
+
+void Caffe::FinalizeMemoryPool() {
+  CNMEM_CHECK(cnmemFinalize());
+}
+#endif
+
+
 void Caffe::DeviceQuery() {
   cudaDeviceProp prop;
   int device;
@@ -191,6 +222,75 @@ void Caffe::DeviceQuery() {
   return;
 }
 
+void Caffe::mallocGPU(void **ptr, size_t size, cudaStream_t stream) {
+  if (size == 0) {
+    *ptr = NULL;
+    return;
+  }
+  int cdevice;
+  cudaGetDevice(&cdevice);
+  if (!Caffe::get_memory_pool()) {
+    cudaMalloc(ptr, size);
+  } else {
+#ifdef USE_CNMEM
+    int device;
+    cudaGetDevice(&device);
+    cnmemStatus_t status = cnmemRegisterStream(stream);
+    status = cnmemMalloc(ptr, size, stream);
+
+    if (status == CNMEM_STATUS_NOT_INITIALIZED) {
+      Caffe::InitMemoryPool(Caffe::get_gpus());
+      cnmemRegisterStream(stream);
+      CNMEM_CHECK(cnmemMalloc(ptr, size, stream));
+    }
+    cudaSetDevice(device);
+#endif
+  }
+}
+
+void Caffe::mallocGPU(void **ptr, size_t size) {
+  Caffe::mallocGPU(ptr, size, cudaStreamDefault);
+}
+
+void Caffe::freeGPU(void *ptr, cudaStream_t stream) {
+  if (!ptr) {
+    return;
+  }
+  if (!Caffe::get_memory_pool()) {
+    cudaFree(ptr);
+  } else {
+#ifdef USE_CNMEM
+    int device;
+    cudaGetDevice(&device);
+    cudaDeviceSynchronize();
+    CNMEM_CHECK(cnmemRegisterStream(stream));
+    CNMEM_CHECK(cnmemFree(ptr, stream));
+    cudaSetDevice(device);
+#endif
+  }
+  ptr = NULL;
+}
+
+void Caffe::freeGPU(void *ptr) {
+  Caffe::freeGPU(ptr, cudaStreamDefault);
+}
+
+size_t Caffe::availableMemoryGPU() {
+  size_t free, used;
+  if (Caffe::get_memory_pool) {
+#ifdef USE_CNMEM
+    int device;
+    cudaGetDevice(&device);
+    cudaDeviceSynchronize();
+    CNMEM_CHECK(cnmemMemGetInfo(&used, &free, cudaStreamDefault));
+    cudaSetDevice(device);
+#endif
+  } else {
+    CUDA_CHECK(cudaMemGetInfo(&free, &used));
+  }
+
+  return free;
+}
 
 class Caffe::RNG::Generator {
  public:
