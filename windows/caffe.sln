@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "caffe", "caffe.vcxproj", "{7E01FA5A-D307-406F-8879-F0F041FF95BF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcaffe", "libcaffe.vcxproj", "{49F30D86-400C-4D77-96BF-408894047509}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pycaffe", "pycaffe.vcxproj", "{26ABCF14-DA2E-4852-815B-9FBCE2E99CAE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7E01FA5A-D307-406F-8879-F0F041FF95BF}.Debug|x64.ActiveCfg = Debug|x64
+		{7E01FA5A-D307-406F-8879-F0F041FF95BF}.Debug|x64.Build.0 = Debug|x64
+		{7E01FA5A-D307-406F-8879-F0F041FF95BF}.Release|x64.ActiveCfg = Release|x64
+		{7E01FA5A-D307-406F-8879-F0F041FF95BF}.Release|x64.Build.0 = Release|x64
+		{49F30D86-400C-4D77-96BF-408894047509}.Debug|x64.ActiveCfg = Debug|x64
+		{49F30D86-400C-4D77-96BF-408894047509}.Debug|x64.Build.0 = Debug|x64
+		{49F30D86-400C-4D77-96BF-408894047509}.Release|x64.ActiveCfg = Release|x64
+		{49F30D86-400C-4D77-96BF-408894047509}.Release|x64.Build.0 = Release|x64
+		{26ABCF14-DA2E-4852-815B-9FBCE2E99CAE}.Debug|x64.ActiveCfg = Debug|x64
+		{26ABCF14-DA2E-4852-815B-9FBCE2E99CAE}.Debug|x64.Build.0 = Debug|x64
+		{26ABCF14-DA2E-4852-815B-9FBCE2E99CAE}.Release|x64.ActiveCfg = Release|x64
+		{26ABCF14-DA2E-4852-815B-9FBCE2E99CAE}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -3,6 +3,10 @@
 #include <cstdio>
 #include <ctime>
 
+#ifdef _WIN32
+#include <process.h>
+#endif
+
 #include "caffe/common.hpp"
 #include "caffe/util/rng.hpp"
 
@@ -45,7 +49,9 @@ void GlobalInit(int* pargc, char*** pargv) {
   // Google logging.
   ::google::InitGoogleLogging(*(pargv)[0]);
   // Provide a backtrace on segfault.
+#ifndef _WIN32
   ::google::InstallFailureSignalHandler();
+#endif
 }
 
 #ifdef CPU_ONLY  // CPU-only Caffe.
