@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="UserMacros">
+    <ExternRoot>$(SolutionDir)extern</ExternRoot>
+  </PropertyGroup>
+  <ItemDefinitionGroup />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="boost\boost.props" />
+    <Import Project="cudnn\cudnn.props" />
+    <Import Project="gflags\gflags.props" />
+    <Import Project="glog\glog.props" />
+    <Import Project="hdf5\hdf5.props" />
+    <Import Project="leveldb\leveldb.props" />
+    <Import Project="lmdb\lmdb.props" />
+    <Import Project="mkl\mkl.props" />
+    <Import Project="opencv\opencv.props" />
+    <Import Project="protobuf\protobuf.props" />
+    <Import Project="python\python.props" />
+    <Import Project="snappy\snappy.props" />
+  </ImportGroup>
+</Project>

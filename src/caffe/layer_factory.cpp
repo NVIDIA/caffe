@@ -11,6 +11,90 @@
 
 namespace caffe {
 
+
+//////////////////////////////////////////////////////////////////////////
+// Implementation of layer registration for windows must be in
+// a specific object-unit. Otherwise the layer registration and
+// creation fail.
+//////////////////////////////////////////////////////////////////////////
+
+template class LayerRegistry <float>;
+template class LayerRegistry <double>;
+
+template <typename Dtype>
+LayerRegistry<Dtype>::LayerRegistry()
+{
+
+}
+
+
+template <typename Dtype>
+typename LayerRegistry<Dtype>::CreatorRegistry& LayerRegistry<Dtype>::Registry()
+{
+    static CreatorRegistry* g_registry_ = new CreatorRegistry();
+    return *g_registry_;
+}
+
+
+template <typename Dtype>
+void LayerRegistry<Dtype>::AddCreator(const string& type, Creator creator)
+{
+    CreatorRegistry& registry = Registry();
+#ifndef _WIN32
+    CHECK_EQ(registry.count(type), 0)
+        << "Layer type " << type << " already registered.";
+#else
+    // On windows this will happen, as the layers need to be explicitly
+    // registered. Once that explicit registration is done, the implicit
+    // layer registration is performed as well which in turn results
+    // to two registration calls for the same type.
+    if (registry.count(type) > 0)
+        return;
+#endif
+    registry[type] = creator;
+}
+
+
+template <typename Dtype>
+shared_ptr<Layer<Dtype> > LayerRegistry<Dtype>::CreateLayer(const LayerParameter& param)
+{
+    if (Caffe::root_solver()) {
+        LOG(INFO) << "Creating layer " << param.name();
+    }
+    const string& type = param.type();
+    CreatorRegistry& registry = Registry();
+    CHECK_EQ(registry.count(type), 1) << "Unknown layer type: " << type
+        << " (known types: " << LayerTypeList() << ")";
+    return registry[type](param);
+}
+
+
+template <typename Dtype>
+string LayerRegistry<Dtype>::LayerTypeList()
+{
+    CreatorRegistry& registry = Registry();
+    string layer_types;
+    for (typename CreatorRegistry::iterator iter = registry.begin();
+        iter != registry.end(); ++iter) {
+        if (iter != registry.begin()) {
+            layer_types += ", ";
+        }
+        layer_types += iter->first;
+    }
+    return layer_types;
+}
+
+
+template <typename Dtype>
+LayerRegisterer<Dtype>::LayerRegisterer(const string& type, shared_ptr<Layer<Dtype> >(*creator)(const LayerParameter&))
+{
+    // LOG(INFO) << "Registering layer type: " << type;
+    LayerRegistry<Dtype>::AddCreator(type, creator);
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+
 // Get convolution layer according to engine.
 template <typename Dtype>
 shared_ptr<Layer<Dtype> > GetConvolutionLayer(
@@ -209,4 +293,7 @@ REGISTER_LAYER_CREATOR(Python, GetPythonLayer);
 
 // Layers that use their constructor as their default creator should be
 // registered in their corresponding cpp files. Do not register them here.
+
+
+
 }  // namespace caffe

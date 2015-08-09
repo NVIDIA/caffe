@@ -7,6 +7,7 @@
 
 #include "boost/algorithm/string.hpp"
 #include "caffe/caffe.hpp"
+#include "caffe/layer_forcereg.hpp"
 
 using caffe::Blob;
 using caffe::Caffe;

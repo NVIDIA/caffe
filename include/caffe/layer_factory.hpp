@@ -56,48 +56,20 @@ class LayerRegistry {
   typedef shared_ptr<Layer<Dtype> > (*Creator)(const LayerParameter&);
   typedef std::map<string, Creator> CreatorRegistry;
 
-  static CreatorRegistry& Registry() {
-    static CreatorRegistry* g_registry_ = new CreatorRegistry();
-    return *g_registry_;
-  }
+  static CreatorRegistry& Registry();
 
   // Adds a creator.
-  static void AddCreator(const string& type, Creator creator) {
-    CreatorRegistry& registry = Registry();
-    CHECK_EQ(registry.count(type), 0)
-        << "Layer type " << type << " already registered.";
-    registry[type] = creator;
-  }
+  static void AddCreator(const string& type, Creator creator);
 
   // Get a layer using a LayerParameter.
-  static shared_ptr<Layer<Dtype> > CreateLayer(const LayerParameter& param) {
-    if (Caffe::root_solver()) {
-      LOG(INFO) << "Creating layer " << param.name();
-    }
-    const string& type = param.type();
-    CreatorRegistry& registry = Registry();
-    CHECK_EQ(registry.count(type), 1) << "Unknown layer type: " << type
-        << " (known types: " << LayerTypeList() << ")";
-    return registry[type](param);
-  }
+  static shared_ptr<Layer<Dtype> > CreateLayer(const LayerParameter& param);
 
  private:
   // Layer registry should never be instantiated - everything is done with its
   // static variables.
-  LayerRegistry() {}
+  LayerRegistry();
 
-  static string LayerTypeList() {
-    CreatorRegistry& registry = Registry();
-    string layer_types;
-    for (typename CreatorRegistry::iterator iter = registry.begin();
-         iter != registry.end(); ++iter) {
-      if (iter != registry.begin()) {
-        layer_types += ", ";
-      }
-      layer_types += iter->first;
-    }
-    return layer_types;
-  }
+  static string LayerTypeList();
 };
 
 
@@ -105,10 +77,7 @@ template <typename Dtype>
 class LayerRegisterer {
  public:
   LayerRegisterer(const string& type,
-                  shared_ptr<Layer<Dtype> > (*creator)(const LayerParameter&)) {
-    // LOG(INFO) << "Registering layer type: " << type;
-    LayerRegistry<Dtype>::AddCreator(type, creator);
-  }
+                  shared_ptr<Layer<Dtype> > (*creator)(const LayerParameter&));
 };
 
 

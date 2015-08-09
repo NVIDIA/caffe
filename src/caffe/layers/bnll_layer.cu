@@ -6,7 +6,11 @@
 
 namespace caffe {
 
+#ifndef _WIN32
 const float kBNLL_THRESHOLD = 50.;
+#else
+#define kBNLL_THRESHOLD 50.
+#endif
 
 template <typename Dtype>
 __global__ void BNLLForward(const int n, const Dtype* in, Dtype* out) {

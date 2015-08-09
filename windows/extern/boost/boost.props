@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="UserMacros">
+    <BinDebug>$(BinDebug);$(ExternRoot)\boost\bin\boost_chrono-vc120-mt-gd-1_58.dll;$(ExternRoot)\boost\bin\boost_thread-vc120-mt-gd-1_58.dll;$(ExternRoot)\boost\bin\boost_date_time-vc120-mt-gd-1_58.dll;$(ExternRoot)\boost\bin\boost_python-vc120-mt-gd-1_58.dll;$(ExternRoot)\boost\bin\boost_system-vc120-mt-gd-1_58.dll</BinDebug>
+    <BinRelease>$(BinRelease);$(ExternRoot)\boost\bin\boost_chrono-vc120-mt-1_58.dll;$(ExternRoot)\boost\bin\boost_thread-vc120-mt-1_58.dll;$(ExternRoot)\boost\bin\boost_date_time-vc120-mt-1_58.dll;$(ExternRoot)\boost\bin\boost_python-vc120-mt-1_58.dll;$(ExternRoot)\boost\bin\boost_system-vc120-mt-1_58.dll</BinRelease>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(ExternRoot)\boost\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(ExternRoot)\boost\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <Lib>
+      <AdditionalLibraryDirectories>$(ExternRoot)\boost\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="$(Configuration)=='Debug'">
+    <Link>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="$(Configuration)=='Release'">
+    <Link>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup />
+</Project>

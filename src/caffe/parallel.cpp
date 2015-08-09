@@ -3,9 +3,12 @@
 #endif
 #include <glog/logging.h>
 #include <stdio.h>
+
+#ifndef _WIN32
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#endif
 
 #include <cstdlib>
 #include <sstream>
