@@ -17,7 +17,8 @@ class gpu_memory {
 
   class arena {
    public:
-    arena(const std::vector<int>& gpus, PoolMode m = CubPool, bool debug = false) {
+    arena(const std::vector<int>& gpus,
+          PoolMode m = CubPool, bool debug = false) {
       init(gpus, m, debug);
     }
     ~arena() {
