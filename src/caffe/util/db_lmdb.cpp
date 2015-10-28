@@ -2,12 +2,10 @@
 #include "caffe/util/db_lmdb.hpp"
 
 #include <sys/stat.h>
-
 #include <string>
 
-namespace caffe { namespace db {
 
-const size_t LMDB_MAP_SIZE = 1099511627776;  // 1 TB
+namespace caffe { namespace db {
 
 void LMDB::Open(const string& source, Mode mode) {
   MDB_CHECK(mdb_env_create(&mdb_env_));
