@@ -10,7 +10,9 @@
 #include "cnmem.h"
 #endif
 
+#ifndef CPU_ONLY
 #include "cub/cub/util_allocator.cuh"
+#endif
 
 namespace caffe {
 
