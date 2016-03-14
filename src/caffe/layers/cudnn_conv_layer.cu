@@ -29,11 +29,11 @@ namespace caffe {
       Dtype* top_data = top[i]->mutable_gpu_data();
 
       // Test free space and force reshape if allocations have changed
-      size_t workspace_limit_bytes, total_memory;
-      gpu_memory::getInfo(&workspace_limit_bytes, &total_memory);
-      if (workspace_fwd_sizes_[i] > workspace_limit_bytes) {
-          this->Reshape(bottom, top);
-      }
+      // size_t workspace_limit_bytes, total_memory;
+      // gpu_memory::getInfo(&workspace_limit_bytes, &total_memory);
+      // if (workspace_fwd_sizes_[i] > workspace_limit_bytes) {
+      //     this->Reshape(bottom, top);
+      // }
 
       // !!!! Not safe if group_ > 1 !!!!
       workspace.reserve(workspace_fwd_sizes_[i]);
@@ -74,6 +74,7 @@ namespace caffe {
       // NOLINT_NEXT_LINE(whitespace/operators)
       CUDA_CHECK(cudaStreamSynchronize(cudaStreamLegacy));
     }
+    forward_pass_called = true;
   }
 
   template <typename Dtype>
@@ -100,12 +101,12 @@ namespace caffe {
         const Dtype* top_diff = top[i]->gpu_diff();
 
         // Test free space and force reshape if allocations have changed
-        size_t workspace_limit_bytes, total_memory;
-        gpu_memory::getInfo(&workspace_limit_bytes, &total_memory);
-        if (workspace_bwd_filter_sizes_[i] > workspace_limit_bytes ||
-           workspace_bwd_data_sizes_[i] > workspace_limit_bytes) {
-            this->Reshape(bottom, top);
-        }
+        // size_t workspace_limit_bytes, total_memory;
+        // gpu_memory::getInfo(&workspace_limit_bytes, &total_memory);
+        // if (workspace_bwd_filter_sizes_[i] > workspace_limit_bytes ||
+        //    workspace_bwd_data_sizes_[i] > workspace_limit_bytes) {
+        //     this->Reshape(bottom, top);
+        // }
 
         // To remove pressure on allocator, allocate the larger of the
         // workspaces needed for the following steps
@@ -175,6 +176,7 @@ namespace caffe {
         // NOLINT_NEXT_LINE(whitespace/operators)
         CUDA_CHECK(cudaStreamSynchronize(cudaStreamLegacy));
     }
+    backward_pass_called = true;
   }
 
   INSTANTIATE_LAYER_GPU_FUNCS(CuDNNConvolutionLayer);

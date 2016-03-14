@@ -305,6 +305,8 @@ class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
       const vector<bool>& propagate_down, const vector<Blob<Dtype>*>& bottom);
 
   bool handles_setup_;
+  bool forward_pass_called;
+  bool backward_pass_called;
 
   // algorithms for forward and backwards convolutions
   cudnnConvolutionFwdAlgo_t *fwd_algo_;
