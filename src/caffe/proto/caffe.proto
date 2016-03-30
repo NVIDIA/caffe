@@ -541,6 +541,33 @@ message ConvolutionParameter {
   // implementation; for input blobs with num_axes != 2, this option is
   // ignored and the ND implementation will be used.)
   optional bool force_nd_im2col = 17 [default = false];
+
+  //Enable explicit overrides for cuDNN algorithm choices
+  enum CuDNNFwdAlgorithm {
+    IMPLICIT_GEMM         = 0;
+    IMPLICIT_PRECOMP_GEMM = 1; 
+    GEMM                  = 2;
+    DIRECT                = 3;
+    FFT                   = 4;
+    FFT_TILING            = 5;
+    WINOGRAD              = 6;
+   }
+   optional CuDNNFwdAlgorithm CuDNNFwdAlgo = 18 [default = IMPLICIT_GEMM];
+   enum CuDNNBwdFilterAlgorithm {
+     BWD_FILTER_ALGO_0 = 0;
+     BWD_FILTER_ALGO_1 = 1;
+     BWD_FILTER_FFT    = 2;
+     BWD_FILTER_ALGO_3 = 3;
+   }
+   optional CuDNNBwdFilterAlgorithm CuDNNBwdFilterAlgo = 19 [default = BWD_FILTER_ALGO_0];
+   enum CuDNNBwdDataAlgorithm {
+     BWD_DATA_ALGO_0     = 0;
+     BWD_DATA_ALGO_1     = 1;
+     BWD_DATA_FFT        = 2;
+     BWD_DATA_FFT_TILING = 3;
+     BWD_DATA_WINOGRAD   = 4;
+   }
+   optional CuDNNBwdDataAlgorithm CuDNNBwdDataAlgo = 20 [default = BWD_DATA_ALGO_0];
 }
 
 message DataParameter {

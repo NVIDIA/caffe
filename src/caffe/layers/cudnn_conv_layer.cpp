@@ -12,6 +12,66 @@
 
 namespace caffe {
 
+cudnnConvolutionFwdAlgo_t
+GetCuDNNFwdAlgo(ConvolutionParameter_CuDNNFwdAlgorithm algo) {
+    switch (algo) {
+      case ConvolutionParameter_CuDNNFwdAlgorithm_IMPLICIT_GEMM:
+          return CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM;
+      case ConvolutionParameter_CuDNNFwdAlgorithm_IMPLICIT_PRECOMP_GEMM:
+          return CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_PRECOMP_GEMM;
+      case ConvolutionParameter_CuDNNFwdAlgorithm_GEMM:
+          return CUDNN_CONVOLUTION_FWD_ALGO_GEMM;
+      case ConvolutionParameter_CuDNNFwdAlgorithm_DIRECT:
+          return CUDNN_CONVOLUTION_FWD_ALGO_DIRECT;
+      case ConvolutionParameter_CuDNNFwdAlgorithm_FFT:
+          return CUDNN_CONVOLUTION_FWD_ALGO_FFT;
+      case ConvolutionParameter_CuDNNFwdAlgorithm_FFT_TILING:
+          return CUDNN_CONVOLUTION_FWD_ALGO_FFT_TILING;
+#if CUDNN_VERSION_MIN(5, 0, 0)
+      case ConvolutionParameter_CuDNNFwdAlgorithm_WINOGRAD:
+          return CUDNN_CONVOLUTION_FWD_ALGO_WINOGRAD;
+#endif
+      default:
+          return CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM;
+    }
+}
+
+cudnnConvolutionBwdDataAlgo_t
+GetCuDNNBwdDataAlgo(ConvolutionParameter_CuDNNBwdDataAlgorithm algo) {
+  switch (algo) {
+    case ConvolutionParameter_CuDNNBwdDataAlgorithm_BWD_DATA_ALGO_0:
+      return CUDNN_CONVOLUTION_BWD_DATA_ALGO_0;
+    case ConvolutionParameter_CuDNNBwdDataAlgorithm_BWD_DATA_ALGO_1:
+      return CUDNN_CONVOLUTION_BWD_DATA_ALGO_1;
+    case ConvolutionParameter_CuDNNBwdDataAlgorithm_BWD_DATA_FFT:
+      return CUDNN_CONVOLUTION_BWD_DATA_ALGO_FFT;
+    case ConvolutionParameter_CuDNNBwdDataAlgorithm_BWD_DATA_FFT_TILING:
+      return CUDNN_CONVOLUTION_BWD_DATA_ALGO_FFT_TILING;
+#if CUDNN_VERSION_MIN(5, 0, 0)
+    case ConvolutionParameter_CuDNNBwdDataAlgorithm_BWD_DATA_WINOGRAD:
+      return CUDNN_CONVOLUTION_BWD_DATA_ALGO_WINOGRAD;
+#endif
+    default:
+      return CUDNN_CONVOLUTION_BWD_DATA_ALGO_0;
+  }
+}
+
+cudnnConvolutionBwdFilterAlgo_t
+GetCuDNNBwdFilterAlgo(ConvolutionParameter_CuDNNBwdFilterAlgorithm algo) {
+  switch (algo) {
+    case ConvolutionParameter_CuDNNBwdFilterAlgorithm_BWD_FILTER_ALGO_0:
+      return CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0;
+    case ConvolutionParameter_CuDNNBwdFilterAlgorithm_BWD_FILTER_ALGO_1:
+      return CUDNN_CONVOLUTION_BWD_FILTER_ALGO_1;
+    case ConvolutionParameter_CuDNNBwdFilterAlgorithm_BWD_FILTER_FFT:
+      return CUDNN_CONVOLUTION_BWD_FILTER_ALGO_FFT;
+    case ConvolutionParameter_CuDNNBwdFilterAlgorithm_BWD_FILTER_ALGO_3:
+      return CUDNN_CONVOLUTION_BWD_FILTER_ALGO_3;
+    default:
+      return CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0;
+  }
+}
+
 /**
  * TODO(dox) explain cuDNN interface
  */
@@ -122,15 +182,20 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
       continue;
     }
 
-    // choose forward and backward algorithms + workspace(s)
-    CUDNN_CHECK(cudnnGetConvolutionForwardAlgorithm(Caffe::cudnn_handle(),
-      bottom_descs_[i],
-      filter_desc_,
-      conv_descs_[i],
-      top_descs_[i],
-      CUDNN_CONVOLUTION_FWD_SPECIFY_WORKSPACE_LIMIT,
-      workspace_limit_bytes,
-      &fwd_algo_[i]));
+    if (!this->layer_param_.convolution_param().has_cudnnfwdalgo()) {
+        // choose forward and backward algorithms + workspace(s)
+        CUDNN_CHECK(cudnnGetConvolutionForwardAlgorithm(Caffe::cudnn_handle(),
+             bottom_descs_[i],
+             filter_desc_,
+             conv_descs_[i],
+             top_descs_[i],
+             CUDNN_CONVOLUTION_FWD_SPECIFY_WORKSPACE_LIMIT,
+             workspace_limit_bytes,
+             &fwd_algo_[i]));
+    } else {
+        fwd_algo_[i] = GetCuDNNFwdAlgo(
+            this->layer_param_.convolution_param().cudnnfwdalgo());
+    }
 
     CUDNN_CHECK(cudnnGetConvolutionForwardWorkspaceSize(Caffe::cudnn_handle(),
       bottom_descs_[i],
@@ -142,11 +207,16 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
 
     //
     // choose backward algorithm for filter
-      CUDNN_CHECK(cudnnGetConvolutionBackwardFilterAlgorithm(
-            Caffe::cudnn_handle(),
-          bottom_descs_[i], top_descs_[i], conv_descs_[i], filter_desc_,
-          CUDNN_CONVOLUTION_BWD_FILTER_SPECIFY_WORKSPACE_LIMIT,
-          workspace_limit_bytes, &bwd_filter_algo_[i]) );
+    if (!this->layer_param_.convolution_param().has_cudnnbwdfilteralgo()) {
+        CUDNN_CHECK(cudnnGetConvolutionBackwardFilterAlgorithm(
+             Caffe::cudnn_handle(),
+             bottom_descs_[i], top_descs_[i], conv_descs_[i], filter_desc_,
+             CUDNN_CONVOLUTION_BWD_FILTER_SPECIFY_WORKSPACE_LIMIT,
+             workspace_limit_bytes, &bwd_filter_algo_[i]) );
+    } else {
+        bwd_filter_algo_[i] = GetCuDNNBwdFilterAlgo(
+            this->layer_param_.convolution_param().cudnnbwdfilteralgo());
+    }
 
     // get workspace for backwards filter algorithm
     CUDNN_CHECK(cudnnGetConvolutionBackwardFilterWorkspaceSize(
@@ -155,11 +225,16 @@ void CuDNNConvolutionLayer<Dtype>::Reshape(
           bwd_filter_algo_[i], &workspace_bwd_filter_sizes_[i]));
 
     // choose backward algo for data
-    CUDNN_CHECK(cudnnGetConvolutionBackwardDataAlgorithm(
+    if (!this->layer_param_.convolution_param().has_cudnnbwddataalgo()) {
+        CUDNN_CHECK(cudnnGetConvolutionBackwardDataAlgorithm(
             Caffe::cudnn_handle(),
-          filter_desc_, top_descs_[i], conv_descs_[i], bottom_descs_[i],
-          CUDNN_CONVOLUTION_BWD_DATA_SPECIFY_WORKSPACE_LIMIT,
-        workspace_limit_bytes, &bwd_data_algo_[i]));
+            filter_desc_, top_descs_[i], conv_descs_[i], bottom_descs_[i],
+            CUDNN_CONVOLUTION_BWD_DATA_SPECIFY_WORKSPACE_LIMIT,
+            workspace_limit_bytes, &bwd_data_algo_[i]));
+    } else {
+        bwd_data_algo_[i] = GetCuDNNBwdDataAlgo(
+            this->layer_param_.convolution_param().cudnnbwddataalgo());
+    }
 
     // get workspace size
     CUDNN_CHECK(cudnnGetConvolutionBackwardDataWorkspaceSize(
