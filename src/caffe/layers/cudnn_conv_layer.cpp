@@ -281,9 +281,20 @@ void CuDNNConvolutionLayer<Dtype>::FindExConvAlgo(
   cudnnConvolutionBwdDataAlgoPerf_t   bwd_data_results[kRequestAlgoCount];
 
   // Allocate temporary buffer for weights used for backward filter FindEx
-  void *tmp_weights;
-  const int tmp_weights_size = sizeof(Dtype) * weight_offset_;
-  GPUMemory::allocate(&tmp_weights, tmp_weights_size);
+  void *tmp_buffer;
+  size_t tmp_buffer_size = weight_offset_;
+  // Backward finders change destination blobs. Therefore,
+  // we shouldn't pass top and bottom out there. Passing a buffer instead.
+  for (int i = 0; i < bottom.size(); ++i) {
+    if (top[i]->count() > tmp_buffer_size) {
+      tmp_buffer_size = top[i]->count();
+    }
+    if (bottom[i]->count() > tmp_buffer_size) {
+      tmp_buffer_size = bottom[i]->count();
+    }
+  }
+  tmp_buffer_size *= sizeof(Dtype);
+  GPUMemory::allocate(&tmp_buffer, tmp_buffer_size);
 
   // TODO: Try reducing workspace_bytes if it fails.
   //      In case, workspace_bytes is 90% of available memory,
@@ -300,7 +311,7 @@ void CuDNNConvolutionLayer<Dtype>::FindExConvAlgo(
                   this->blobs_[0]->gpu_data(),
                   conv_descs_[i],
                   top_descs_[i],
-                  top[i]->mutable_gpu_data(),
+                  tmp_buffer,
                   kRequestAlgoCount,
                   &fwd_algo_count,
                   fwd_results,
@@ -318,7 +329,7 @@ void CuDNNConvolutionLayer<Dtype>::FindExConvAlgo(
                   top[i]->gpu_diff(),
                   conv_descs_[i],
                   filter_desc_,
-                  tmp_weights,
+                  tmp_buffer,
                   kRequestAlgoCount,
                   &filter_algo_count,
                   bwd_filter_results,
@@ -336,7 +347,7 @@ void CuDNNConvolutionLayer<Dtype>::FindExConvAlgo(
                   top[i]->gpu_diff(),
                   conv_descs_[i],
                   bottom_descs_[i],
-                  bottom[i]->mutable_gpu_diff(),
+                  tmp_buffer,
                   kRequestAlgoCount,
                   &data_algo_count,
                   bwd_data_results,
@@ -346,7 +357,7 @@ void CuDNNConvolutionLayer<Dtype>::FindExConvAlgo(
     bwd_data_algo_[i] = bwd_data_results[0].algo;
     workspace_bwd_data_sizes_[i] = bwd_data_results[0].memory;
   }
-  GPUMemory::deallocate(tmp_weights);
+  GPUMemory::deallocate(tmp_buffer);
   workspace.release();
 }
 
