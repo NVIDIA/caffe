@@ -95,6 +95,58 @@ class GaussianFiller : public Filler<Dtype> {
   shared_ptr<SyncedMemory> rand_vec_;
 };
 
+/// @brief Fills a Blob with Gaussian-distributed values @f$ x = a @f$.
+//         RNG is only called once, and its output is stored in
+//         GaussianStaticFillerdata. Followup calls to the Filler function
+//         will bypass RNG.
+template <typename Dtype>
+class GaussianStaticFiller : public Filler<Dtype> {
+ public:
+  explicit GaussianStaticFiller(const FillerParameter& param)
+      : Filler<Dtype>(param) {
+        GaussianStaticFillerFlag=false;
+      }
+  virtual void Fill(Blob<Dtype>* blob) {
+    Dtype* data = blob->mutable_cpu_data();
+    CHECK(blob->count());
+
+    if(GaussianStaticFillerFlag==false){
+      GaussianStaticFillerdata=(Dtype*) malloc(blob->count()*sizeof(Dtype));
+      caffe_rng_gaussian<Dtype>(blob->count(), Dtype(this->filler_param_.mean()),
+        Dtype(this->filler_param_.std()), GaussianStaticFillerdata);
+      GaussianStaticFillerFlag=true;
+
+    }
+    memcpy(blob->mutable_cpu_data(),GaussianStaticFillerdata,blob->count()*sizeof(Dtype));
+    int sparse = this->filler_param_.sparse();
+    CHECK_GE(sparse, -1);
+    if (sparse >= 0) {
+      // Sparse initialization is implemented for "weight" blobs; i.e. matrices.
+      // These have num == channels == 1; width is number of inputs; height is
+      // number of outputs.  The 'sparse' variable specifies the mean number
+      // of non-zero input weights for a given output.
+      CHECK_GE(blob->num_axes(), 1);
+      const int num_outputs = blob->shape(0);
+      Dtype non_zero_probability = Dtype(sparse) / Dtype(num_outputs);
+      rand_vec_.reset(new SyncedMemory(blob->count() * sizeof(int)));
+      int* mask = reinterpret_cast<int*>(rand_vec_->mutable_cpu_data());
+      caffe_rng_bernoulli(blob->count(), non_zero_probability, mask);
+      for (int i = 0; i < blob->count(); ++i) {
+        data[i] *= mask[i];
+      }
+    }
+  }
+
+  virtual ~GaussianStaticFiller(){
+    free(GaussianStaticFillerdata);
+  }
+ protected:
+  shared_ptr<SyncedMemory> rand_vec_;
+ private:
+  Dtype * GaussianStaticFillerdata;
+  bool GaussianStaticFillerFlag;
+};
+
 /** @brief Fills a Blob with values @f$ x \in [0, 1] @f$
  *         such that @f$ \forall i \sum_j x_{ij} = 1 @f$.
  */
@@ -275,6 +327,8 @@ Filler<Dtype>* GetFiller(const FillerParameter& param) {
     return new ConstantFiller<Dtype>(param);
   } else if (type == "gaussian") {
     return new GaussianFiller<Dtype>(param);
+  } else if (type == "gaussianstatic") {
+    return new GaussianStaticFiller<Dtype>(param);
   } else if (type == "positive_unitball") {
     return new PositiveUnitballFiller<Dtype>(param);
   } else if (type == "uniform") {
