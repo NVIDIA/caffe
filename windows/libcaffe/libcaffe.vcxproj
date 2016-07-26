@@ -110,6 +110,7 @@
     <ClCompile Include="..\..\src\caffe\layers\contrastive_loss_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\conv_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\crop_layer.cpp" />
+    <ClCompile Include="..\..\src\caffe\layers\cudnn_batch_norm_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\cudnn_conv_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\cudnn_lcn_layer.cpp" />
     <ClCompile Include="..\..\src\caffe\layers\cudnn_lrn_layer.cpp" />
@@ -184,6 +185,8 @@
     <ClCompile Include="..\..\src\caffe\util\db.cpp" />
     <ClCompile Include="..\..\src\caffe\util\db_leveldb.cpp" />
     <ClCompile Include="..\..\src\caffe\util\db_lmdb.cpp" />
+    <ClCompile Include="..\..\src\caffe\util\detectnet_coverage_rectangular.cpp" />
+    <ClCompile Include="..\..\src\caffe\util\gpu_memory.cpp" />
     <ClCompile Include="..\..\src\caffe\util\hdf5.cpp" />
     <ClCompile Include="..\..\src\caffe\util\im2col.cpp" />
     <ClCompile Include="..\..\src\caffe\util\insert_splits.cpp" />
@@ -214,6 +217,7 @@
     <ClInclude Include="..\..\include\caffe\layers\contrastive_loss_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\conv_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\crop_layer.hpp" />
+    <ClInclude Include="..\..\include\caffe\layers\cudnn_batch_norm_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\cudnn_conv_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\cudnn_lcn_layer.hpp" />
     <ClInclude Include="..\..\include\caffe\layers\cudnn_lrn_layer.hpp" />
@@ -287,14 +291,17 @@
     <ClInclude Include="..\..\include\caffe\util\db_lmdb.hpp" />
     <ClInclude Include="..\..\include\caffe\util\detectnet_coverage.hpp" />
     <ClInclude Include="..\..\include\caffe\util\device_alternate.hpp" />
+    <ClInclude Include="..\..\include\caffe\util\gpu_memory.hpp" />
     <ClInclude Include="..\..\include\caffe\util\hdf5.hpp" />
     <ClInclude Include="..\..\include\caffe\util\im2col.hpp" />
     <ClInclude Include="..\..\include\caffe\util\insert_splits.hpp" />
     <ClInclude Include="..\..\include\caffe\util\io.hpp" />
     <ClInclude Include="..\..\include\caffe\util\math_functions.hpp" />
     <ClInclude Include="..\..\include\caffe\util\mkl_alternate.hpp" />
+    <ClInclude Include="..\..\include\caffe\util\nccl.hpp" />
     <ClInclude Include="..\..\include\caffe\util\rng.hpp" />
     <ClInclude Include="..\..\include\caffe\util\signal_handler.h" />
+    <ClInclude Include="..\..\include\caffe\util\thread_pool.hpp" />
     <ClInclude Include="..\..\include\caffe\util\upgrade_proto.hpp" />
   </ItemGroup>
   <ItemGroup Condition="'$(CpuOnlyBuild)'=='false'">

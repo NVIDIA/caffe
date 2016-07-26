@@ -342,6 +342,15 @@
     <ClCompile Include="..\..\src\caffe\layers\detectnet_transform_layer.cpp">
       <Filter>src\layers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\caffe\util\detectnet_coverage_rectangular.cpp">
+      <Filter>src\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\caffe\layers\cudnn_batch_norm_layer.cpp">
+      <Filter>src\layers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\caffe\util\gpu_memory.cpp">
+      <Filter>src\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\caffe\proto\caffe.pb.h">
@@ -652,6 +661,18 @@
     </ClInclude>
     <ClInclude Include="..\..\include\caffe\util\detectnet_coverage.hpp">
       <Filter>include\util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\caffe\layers\cudnn_batch_norm_layer.hpp">
+      <Filter>include\layers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\caffe\util\gpu_memory.hpp">
+      <Filter>include\layers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\caffe\util\nccl.hpp">
+      <Filter>include\layers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\caffe\util\thread_pool.hpp">
+      <Filter>include\layers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
