@@ -96,3 +96,11 @@ MANIFEST-*
 
 # Third party source code
 3rdparty/cub/
+
+#Visual Studio files
+*.user
+*.suo
+*.sdf
+*.opensdf
+*.pdb
+*.props
