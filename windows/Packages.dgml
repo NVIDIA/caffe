@@ -1,0 +1,550 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DirectedGraph GraphDirection="LeftToRight" xmlns="http://schemas.microsoft.com/vs/2009/dgml">
+  <Nodes>
+    <Node Id="upgrade_solver_proto_text" Label="upgrade_solver_proto_text" Category="Project" />
+    <Node Id="boost 1.59.0.0" Label="boost 1.59.0.0" Category="Package" />
+    <Node Id="boost_chrono-vc120 1.59.0.0" Label="boost_chrono-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_date_time-vc120 1.59.0.0" Label="boost_date_time-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_filesystem-vc120 1.59.0.0" Label="boost_filesystem-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_python2.7-vc120 1.59.0.0" Label="boost_python2.7-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_system-vc120 1.59.0.0" Label="boost_system-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_thread-vc120 1.59.0.0" Label="boost_thread-vc120 1.59.0.0" Category="Package" />
+    <Node Id="gflags 2.1.2.1" Label="gflags 2.1.2.1" Category="Package" />
+    <Node Id="glog 0.3.3.0" Label="glog 0.3.3.0" Category="Package" />
+    <Node Id="hdf5-v120-complete 1.8.15.2" Label="hdf5-v120-complete 1.8.15.2" Category="Package" />
+    <Node Id="LevelDB-vc120 1.2.0.0" Label="LevelDB-vc120 1.2.0.0" Category="Package" />
+    <Node Id="lmdb-v120-clean 0.9.14.0" Label="lmdb-v120-clean 0.9.14.0" Category="Package" />
+    <Node Id="OpenBLAS 0.2.14.1" Label="OpenBLAS 0.2.14.1" Category="Package" />
+    <Node Id="OpenCV 2.4.10" Label="OpenCV 2.4.10" Category="Package" />
+    <Node Id="protobuf-v120 2.6.1" Label="protobuf-v120 2.6.1" Category="Package" />
+    <Node Id="upgrade_net_proto_text" Label="upgrade_net_proto_text" Category="Project" />
+    <Node Id="boost 1.59.0.0" Label="boost 1.59.0.0" Category="Package" />
+    <Node Id="boost_chrono-vc120 1.59.0.0" Label="boost_chrono-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_date_time-vc120 1.59.0.0" Label="boost_date_time-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_filesystem-vc120 1.59.0.0" Label="boost_filesystem-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_python2.7-vc120 1.59.0.0" Label="boost_python2.7-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_system-vc120 1.59.0.0" Label="boost_system-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_thread-vc120 1.59.0.0" Label="boost_thread-vc120 1.59.0.0" Category="Package" />
+    <Node Id="gflags 2.1.2.1" Label="gflags 2.1.2.1" Category="Package" />
+    <Node Id="glog 0.3.3.0" Label="glog 0.3.3.0" Category="Package" />
+    <Node Id="hdf5-v120-complete 1.8.15.2" Label="hdf5-v120-complete 1.8.15.2" Category="Package" />
+    <Node Id="LevelDB-vc120 1.2.0.0" Label="LevelDB-vc120 1.2.0.0" Category="Package" />
+    <Node Id="lmdb-v120-clean 0.9.14.0" Label="lmdb-v120-clean 0.9.14.0" Category="Package" />
+    <Node Id="OpenBLAS 0.2.14.1" Label="OpenBLAS 0.2.14.1" Category="Package" />
+    <Node Id="OpenCV 2.4.10" Label="OpenCV 2.4.10" Category="Package" />
+    <Node Id="protobuf-v120 2.6.1" Label="protobuf-v120 2.6.1" Category="Package" />
+    <Node Id="upgrade_net_proto_binary" Label="upgrade_net_proto_binary" Category="Project" />
+    <Node Id="boost 1.59.0.0" Label="boost 1.59.0.0" Category="Package" />
+    <Node Id="boost_chrono-vc120 1.59.0.0" Label="boost_chrono-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_date_time-vc120 1.59.0.0" Label="boost_date_time-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_filesystem-vc120 1.59.0.0" Label="boost_filesystem-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_python2.7-vc120 1.59.0.0" Label="boost_python2.7-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_system-vc120 1.59.0.0" Label="boost_system-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_thread-vc120 1.59.0.0" Label="boost_thread-vc120 1.59.0.0" Category="Package" />
+    <Node Id="gflags 2.1.2.1" Label="gflags 2.1.2.1" Category="Package" />
+    <Node Id="glog 0.3.3.0" Label="glog 0.3.3.0" Category="Package" />
+    <Node Id="hdf5-v120-complete 1.8.15.2" Label="hdf5-v120-complete 1.8.15.2" Category="Package" />
+    <Node Id="LevelDB-vc120 1.2.0.0" Label="LevelDB-vc120 1.2.0.0" Category="Package" />
+    <Node Id="lmdb-v120-clean 0.9.14.0" Label="lmdb-v120-clean 0.9.14.0" Category="Package" />
+    <Node Id="OpenBLAS 0.2.14.1" Label="OpenBLAS 0.2.14.1" Category="Package" />
+    <Node Id="OpenCV 2.4.10" Label="OpenCV 2.4.10" Category="Package" />
+    <Node Id="protobuf-v120 2.6.1" Label="protobuf-v120 2.6.1" Category="Package" />
+    <Node Id="convert_mnist_siamese_data" Label="convert_mnist_siamese_data" Category="Project" />
+    <Node Id="boost 1.59.0.0" Label="boost 1.59.0.0" Category="Package" />
+    <Node Id="boost_chrono-vc120 1.59.0.0" Label="boost_chrono-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_date_time-vc120 1.59.0.0" Label="boost_date_time-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_filesystem-vc120 1.59.0.0" Label="boost_filesystem-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_python2.7-vc120 1.59.0.0" Label="boost_python2.7-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_system-vc120 1.59.0.0" Label="boost_system-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_thread-vc120 1.59.0.0" Label="boost_thread-vc120 1.59.0.0" Category="Package" />
+    <Node Id="gflags 2.1.2.1" Label="gflags 2.1.2.1" Category="Package" />
+    <Node Id="glog 0.3.3.0" Label="glog 0.3.3.0" Category="Package" />
+    <Node Id="hdf5-v120-complete 1.8.15.2" Label="hdf5-v120-complete 1.8.15.2" Category="Package" />
+    <Node Id="LevelDB-vc120 1.2.0.0" Label="LevelDB-vc120 1.2.0.0" Category="Package" />
+    <Node Id="lmdb-v120-clean 0.9.14.0" Label="lmdb-v120-clean 0.9.14.0" Category="Package" />
+    <Node Id="OpenBLAS 0.2.14.1" Label="OpenBLAS 0.2.14.1" Category="Package" />
+    <Node Id="OpenCV 2.4.10" Label="OpenCV 2.4.10" Category="Package" />
+    <Node Id="protobuf-v120 2.6.1" Label="protobuf-v120 2.6.1" Category="Package" />
+    <Node Id="convert_mnist_data" Label="convert_mnist_data" Category="Project" />
+    <Node Id="boost 1.59.0.0" Label="boost 1.59.0.0" Category="Package" />
+    <Node Id="boost_chrono-vc120 1.59.0.0" Label="boost_chrono-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_date_time-vc120 1.59.0.0" Label="boost_date_time-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_filesystem-vc120 1.59.0.0" Label="boost_filesystem-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_python2.7-vc120 1.59.0.0" Label="boost_python2.7-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_system-vc120 1.59.0.0" Label="boost_system-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_thread-vc120 1.59.0.0" Label="boost_thread-vc120 1.59.0.0" Category="Package" />
+    <Node Id="gflags 2.1.2.1" Label="gflags 2.1.2.1" Category="Package" />
+    <Node Id="glog 0.3.3.0" Label="glog 0.3.3.0" Category="Package" />
+    <Node Id="hdf5-v120-complete 1.8.15.2" Label="hdf5-v120-complete 1.8.15.2" Category="Package" />
+    <Node Id="LevelDB-vc120 1.2.0.0" Label="LevelDB-vc120 1.2.0.0" Category="Package" />
+    <Node Id="lmdb-v120-clean 0.9.14.0" Label="lmdb-v120-clean 0.9.14.0" Category="Package" />
+    <Node Id="OpenBLAS 0.2.14.1" Label="OpenBLAS 0.2.14.1" Category="Package" />
+    <Node Id="OpenCV 2.4.10" Label="OpenCV 2.4.10" Category="Package" />
+    <Node Id="protobuf-v120 2.6.1" Label="protobuf-v120 2.6.1" Category="Package" />
+    <Node Id="classification" Label="classification" Category="Project" />
+    <Node Id="boost 1.59.0.0" Label="boost 1.59.0.0" Category="Package" />
+    <Node Id="boost_chrono-vc120 1.59.0.0" Label="boost_chrono-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_date_time-vc120 1.59.0.0" Label="boost_date_time-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_filesystem-vc120 1.59.0.0" Label="boost_filesystem-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_python2.7-vc120 1.59.0.0" Label="boost_python2.7-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_system-vc120 1.59.0.0" Label="boost_system-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_thread-vc120 1.59.0.0" Label="boost_thread-vc120 1.59.0.0" Category="Package" />
+    <Node Id="gflags 2.1.2.1" Label="gflags 2.1.2.1" Category="Package" />
+    <Node Id="glog 0.3.3.0" Label="glog 0.3.3.0" Category="Package" />
+    <Node Id="hdf5-v120-complete 1.8.15.2" Label="hdf5-v120-complete 1.8.15.2" Category="Package" />
+    <Node Id="LevelDB-vc120 1.2.0.0" Label="LevelDB-vc120 1.2.0.0" Category="Package" />
+    <Node Id="lmdb-v120-clean 0.9.14.0" Label="lmdb-v120-clean 0.9.14.0" Category="Package" />
+    <Node Id="OpenBLAS 0.2.14.1" Label="OpenBLAS 0.2.14.1" Category="Package" />
+    <Node Id="OpenCV 2.4.10" Label="OpenCV 2.4.10" Category="Package" />
+    <Node Id="protobuf-v120 2.6.1" Label="protobuf-v120 2.6.1" Category="Package" />
+    <Node Id="convert_cifar_data" Label="convert_cifar_data" Category="Project" />
+    <Node Id="boost 1.59.0.0" Label="boost 1.59.0.0" Category="Package" />
+    <Node Id="boost_chrono-vc120 1.59.0.0" Label="boost_chrono-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_date_time-vc120 1.59.0.0" Label="boost_date_time-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_filesystem-vc120 1.59.0.0" Label="boost_filesystem-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_python2.7-vc120 1.59.0.0" Label="boost_python2.7-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_system-vc120 1.59.0.0" Label="boost_system-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_thread-vc120 1.59.0.0" Label="boost_thread-vc120 1.59.0.0" Category="Package" />
+    <Node Id="gflags 2.1.2.1" Label="gflags 2.1.2.1" Category="Package" />
+    <Node Id="glog 0.3.3.0" Label="glog 0.3.3.0" Category="Package" />
+    <Node Id="hdf5-v120-complete 1.8.15.2" Label="hdf5-v120-complete 1.8.15.2" Category="Package" />
+    <Node Id="LevelDB-vc120 1.2.0.0" Label="LevelDB-vc120 1.2.0.0" Category="Package" />
+    <Node Id="lmdb-v120-clean 0.9.14.0" Label="lmdb-v120-clean 0.9.14.0" Category="Package" />
+    <Node Id="OpenBLAS 0.2.14.1" Label="OpenBLAS 0.2.14.1" Category="Package" />
+    <Node Id="OpenCV 2.4.10" Label="OpenCV 2.4.10" Category="Package" />
+    <Node Id="protobuf-v120 2.6.1" Label="protobuf-v120 2.6.1" Category="Package" />
+    <Node Id="matcaffe" Label="matcaffe" Category="Project" />
+    <Node Id="boost 1.59.0.0" Label="boost 1.59.0.0" Category="Package" />
+    <Node Id="boost_chrono-vc120 1.59.0.0" Label="boost_chrono-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_date_time-vc120 1.59.0.0" Label="boost_date_time-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_filesystem-vc120 1.59.0.0" Label="boost_filesystem-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_python2.7-vc120 1.59.0.0" Label="boost_python2.7-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_system-vc120 1.59.0.0" Label="boost_system-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_thread-vc120 1.59.0.0" Label="boost_thread-vc120 1.59.0.0" Category="Package" />
+    <Node Id="gflags 2.1.2.1" Label="gflags 2.1.2.1" Category="Package" />
+    <Node Id="glog 0.3.3.0" Label="glog 0.3.3.0" Category="Package" />
+    <Node Id="hdf5-v120-complete 1.8.15.2" Label="hdf5-v120-complete 1.8.15.2" Category="Package" />
+    <Node Id="LevelDB-vc120 1.2.0.0" Label="LevelDB-vc120 1.2.0.0" Category="Package" />
+    <Node Id="lmdb-v120-clean 0.9.14.0" Label="lmdb-v120-clean 0.9.14.0" Category="Package" />
+    <Node Id="OpenBLAS 0.2.14.1" Label="OpenBLAS 0.2.14.1" Category="Package" />
+    <Node Id="OpenCV 2.4.10" Label="OpenCV 2.4.10" Category="Package" />
+    <Node Id="protobuf-v120 2.6.1" Label="protobuf-v120 2.6.1" Category="Package" />
+    <Node Id="pycaffe" Label="pycaffe" Category="Project" />
+    <Node Id="boost 1.59.0.0" Label="boost 1.59.0.0" Category="Package" />
+    <Node Id="boost_chrono-vc120 1.59.0.0" Label="boost_chrono-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_date_time-vc120 1.59.0.0" Label="boost_date_time-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_filesystem-vc120 1.59.0.0" Label="boost_filesystem-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_python2.7-vc120 1.59.0.0" Label="boost_python2.7-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_system-vc120 1.59.0.0" Label="boost_system-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_thread-vc120 1.59.0.0" Label="boost_thread-vc120 1.59.0.0" Category="Package" />
+    <Node Id="gflags 2.1.2.1" Label="gflags 2.1.2.1" Category="Package" />
+    <Node Id="glog 0.3.3.0" Label="glog 0.3.3.0" Category="Package" />
+    <Node Id="hdf5-v120-complete 1.8.15.2" Label="hdf5-v120-complete 1.8.15.2" Category="Package" />
+    <Node Id="LevelDB-vc120 1.2.0.0" Label="LevelDB-vc120 1.2.0.0" Category="Package" />
+    <Node Id="lmdb-v120-clean 0.9.14.0" Label="lmdb-v120-clean 0.9.14.0" Category="Package" />
+    <Node Id="OpenBLAS 0.2.14.1" Label="OpenBLAS 0.2.14.1" Category="Package" />
+    <Node Id="OpenCV 2.4.10" Label="OpenCV 2.4.10" Category="Package" />
+    <Node Id="protobuf-v120 2.6.1" Label="protobuf-v120 2.6.1" Category="Package" />
+    <Node Id="protoc_x64 2.6.1" Label="protoc_x64 2.6.1" Category="Package" />
+    <Node Id="test_all" Label="test_all" Category="Project" />
+    <Node Id="boost 1.59.0.0" Label="boost 1.59.0.0" Category="Package" />
+    <Node Id="boost_chrono-vc120 1.59.0.0" Label="boost_chrono-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_date_time-vc120 1.59.0.0" Label="boost_date_time-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_filesystem-vc120 1.59.0.0" Label="boost_filesystem-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_python2.7-vc120 1.59.0.0" Label="boost_python2.7-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_system-vc120 1.59.0.0" Label="boost_system-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_thread-vc120 1.59.0.0" Label="boost_thread-vc120 1.59.0.0" Category="Package" />
+    <Node Id="gflags 2.1.2.1" Label="gflags 2.1.2.1" Category="Package" />
+    <Node Id="glog 0.3.3.0" Label="glog 0.3.3.0" Category="Package" />
+    <Node Id="hdf5-v120-complete 1.8.15.2" Label="hdf5-v120-complete 1.8.15.2" Category="Package" />
+    <Node Id="LevelDB-vc120 1.2.0.0" Label="LevelDB-vc120 1.2.0.0" Category="Package" />
+    <Node Id="lmdb-v120-clean 0.9.14.0" Label="lmdb-v120-clean 0.9.14.0" Category="Package" />
+    <Node Id="OpenBLAS 0.2.14.1" Label="OpenBLAS 0.2.14.1" Category="Package" />
+    <Node Id="OpenCV 2.4.10" Label="OpenCV 2.4.10" Category="Package" />
+    <Node Id="protobuf-v120 2.6.1" Label="protobuf-v120 2.6.1" Category="Package" />
+    <Node Id="extract_features" Label="extract_features" Category="Project" />
+    <Node Id="boost 1.59.0.0" Label="boost 1.59.0.0" Category="Package" />
+    <Node Id="boost_chrono-vc120 1.59.0.0" Label="boost_chrono-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_date_time-vc120 1.59.0.0" Label="boost_date_time-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_filesystem-vc120 1.59.0.0" Label="boost_filesystem-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_python2.7-vc120 1.59.0.0" Label="boost_python2.7-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_system-vc120 1.59.0.0" Label="boost_system-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_thread-vc120 1.59.0.0" Label="boost_thread-vc120 1.59.0.0" Category="Package" />
+    <Node Id="gflags 2.1.2.1" Label="gflags 2.1.2.1" Category="Package" />
+    <Node Id="glog 0.3.3.0" Label="glog 0.3.3.0" Category="Package" />
+    <Node Id="hdf5-v120-complete 1.8.15.2" Label="hdf5-v120-complete 1.8.15.2" Category="Package" />
+    <Node Id="LevelDB-vc120 1.2.0.0" Label="LevelDB-vc120 1.2.0.0" Category="Package" />
+    <Node Id="lmdb-v120-clean 0.9.14.0" Label="lmdb-v120-clean 0.9.14.0" Category="Package" />
+    <Node Id="OpenBLAS 0.2.14.1" Label="OpenBLAS 0.2.14.1" Category="Package" />
+    <Node Id="OpenCV 2.4.10" Label="OpenCV 2.4.10" Category="Package" />
+    <Node Id="protobuf-v120 2.6.1" Label="protobuf-v120 2.6.1" Category="Package" />
+    <Node Id="convert_imageset" Label="convert_imageset" Category="Project" />
+    <Node Id="boost 1.59.0.0" Label="boost 1.59.0.0" Category="Package" />
+    <Node Id="boost_chrono-vc120 1.59.0.0" Label="boost_chrono-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_date_time-vc120 1.59.0.0" Label="boost_date_time-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_filesystem-vc120 1.59.0.0" Label="boost_filesystem-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_python2.7-vc120 1.59.0.0" Label="boost_python2.7-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_system-vc120 1.59.0.0" Label="boost_system-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_thread-vc120 1.59.0.0" Label="boost_thread-vc120 1.59.0.0" Category="Package" />
+    <Node Id="gflags 2.1.2.1" Label="gflags 2.1.2.1" Category="Package" />
+    <Node Id="glog 0.3.3.0" Label="glog 0.3.3.0" Category="Package" />
+    <Node Id="hdf5-v120-complete 1.8.15.2" Label="hdf5-v120-complete 1.8.15.2" Category="Package" />
+    <Node Id="LevelDB-vc120 1.2.0.0" Label="LevelDB-vc120 1.2.0.0" Category="Package" />
+    <Node Id="lmdb-v120-clean 0.9.14.0" Label="lmdb-v120-clean 0.9.14.0" Category="Package" />
+    <Node Id="OpenBLAS 0.2.14.1" Label="OpenBLAS 0.2.14.1" Category="Package" />
+    <Node Id="OpenCV 2.4.10" Label="OpenCV 2.4.10" Category="Package" />
+    <Node Id="protobuf-v120 2.6.1" Label="protobuf-v120 2.6.1" Category="Package" />
+    <Node Id="compute_image_mean" Label="compute_image_mean" Category="Project" />
+    <Node Id="boost 1.59.0.0" Label="boost 1.59.0.0" Category="Package" />
+    <Node Id="boost_chrono-vc120 1.59.0.0" Label="boost_chrono-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_date_time-vc120 1.59.0.0" Label="boost_date_time-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_filesystem-vc120 1.59.0.0" Label="boost_filesystem-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_python2.7-vc120 1.59.0.0" Label="boost_python2.7-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_system-vc120 1.59.0.0" Label="boost_system-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_thread-vc120 1.59.0.0" Label="boost_thread-vc120 1.59.0.0" Category="Package" />
+    <Node Id="gflags 2.1.2.1" Label="gflags 2.1.2.1" Category="Package" />
+    <Node Id="glog 0.3.3.0" Label="glog 0.3.3.0" Category="Package" />
+    <Node Id="hdf5-v120-complete 1.8.15.2" Label="hdf5-v120-complete 1.8.15.2" Category="Package" />
+    <Node Id="LevelDB-vc120 1.2.0.0" Label="LevelDB-vc120 1.2.0.0" Category="Package" />
+    <Node Id="lmdb-v120-clean 0.9.14.0" Label="lmdb-v120-clean 0.9.14.0" Category="Package" />
+    <Node Id="OpenBLAS 0.2.14.1" Label="OpenBLAS 0.2.14.1" Category="Package" />
+    <Node Id="OpenCV 2.4.10" Label="OpenCV 2.4.10" Category="Package" />
+    <Node Id="protobuf-v120 2.6.1" Label="protobuf-v120 2.6.1" Category="Package" />
+    <Node Id="caffe" Label="caffe" Category="Project" />
+    <Node Id="boost 1.59.0.0" Label="boost 1.59.0.0" Category="Package" />
+    <Node Id="boost_chrono-vc120 1.59.0.0" Label="boost_chrono-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_date_time-vc120 1.59.0.0" Label="boost_date_time-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_filesystem-vc120 1.59.0.0" Label="boost_filesystem-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_python2.7-vc120 1.59.0.0" Label="boost_python2.7-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_system-vc120 1.59.0.0" Label="boost_system-vc120 1.59.0.0" Category="Package" />
+    <Node Id="boost_thread-vc120 1.59.0.0" Label="boost_thread-vc120 1.59.0.0" Category="Package" />
+    <Node Id="gflags 2.1.2.1" Label="gflags 2.1.2.1" Category="Package" />
+    <Node Id="glog 0.3.3.0" Label="glog 0.3.3.0" Category="Package" />
+    <Node Id="hdf5-v120-complete 1.8.15.2" Label="hdf5-v120-complete 1.8.15.2" Category="Package" />
+    <Node Id="LevelDB-vc120 1.2.0.0" Label="LevelDB-vc120 1.2.0.0" Category="Package" />
+    <Node Id="lmdb-v120-clean 0.9.14.0" Label="lmdb-v120-clean 0.9.14.0" Category="Package" />
+    <Node Id="OpenBLAS 0.2.14.1" Label="OpenBLAS 0.2.14.1" Category="Package" />
+    <Node Id="OpenCV 2.4.10" Label="OpenCV 2.4.10" Category="Package" />
+    <Node Id="protobuf-v120 2.6.1" Label="protobuf-v120 2.6.1" Category="Package" />
+    <Node Id="libcaffe" Label="libcaffe" Category="Project" />
+    <Node Id="boost 1.59.0.0" Label="boost 1.59.0.0" Category="Package" />
+    <Node Id="boost_date_time-vc120 1.59.0.0" Label="boost_date_time-vc120 1.59.0.0" Category="Package" />
+    <Node Id="gflags 2.1.2.1" Label="gflags 2.1.2.1" Category="Package" />
+    <Node Id="glog 0.3.3.0" Label="glog 0.3.3.0" Category="Package" />
+    <Node Id="hdf5-v120-complete 1.8.15.2" Label="hdf5-v120-complete 1.8.15.2" Category="Package" />
+    <Node Id="LevelDB-vc120 1.2.0.0" Label="LevelDB-vc120 1.2.0.0" Category="Package" />
+    <Node Id="lmdb-v120-clean 0.9.14.0" Label="lmdb-v120-clean 0.9.14.0" Category="Package" />
+    <Node Id="OpenBLAS 0.2.14.1" Label="OpenBLAS 0.2.14.1" Category="Package" />
+    <Node Id="OpenCV 2.4.10" Label="OpenCV 2.4.10" Category="Package" />
+    <Node Id="protobuf-v120 2.6.1" Label="protobuf-v120 2.6.1" Category="Package" />
+    <Node Id="protoc_x64 2.6.1" Label="protoc_x64 2.6.1" Category="Package" />
+  </Nodes>
+  <Links>
+    <Link Source="boost_chrono-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_date_time-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_filesystem-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_python2.7-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_system-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_thread-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="glog 0.3.3.0" Target="gflags 2.1.2.1" Category="Package Dependency" />
+    <Link Source="LevelDB-vc120 1.2.0.0" Target="boost_date_time-vc120 1.59.0.0" Category="Package Dependency" />
+    <Link Source="upgrade_solver_proto_text" Target="boost_chrono-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="upgrade_solver_proto_text" Target="boost_filesystem-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="upgrade_solver_proto_text" Target="boost_python2.7-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="upgrade_solver_proto_text" Target="boost_system-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="upgrade_solver_proto_text" Target="boost_thread-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="upgrade_solver_proto_text" Target="glog 0.3.3.0" Category="Installed Package" />
+    <Link Source="upgrade_solver_proto_text" Target="hdf5-v120-complete 1.8.15.2" Category="Installed Package" />
+    <Link Source="upgrade_solver_proto_text" Target="LevelDB-vc120 1.2.0.0" Category="Installed Package" />
+    <Link Source="upgrade_solver_proto_text" Target="lmdb-v120-clean 0.9.14.0" Category="Installed Package" />
+    <Link Source="upgrade_solver_proto_text" Target="OpenBLAS 0.2.14.1" Category="Installed Package" />
+    <Link Source="upgrade_solver_proto_text" Target="OpenCV 2.4.10" Category="Installed Package" />
+    <Link Source="upgrade_solver_proto_text" Target="protobuf-v120 2.6.1" Category="Installed Package" />
+    <Link Source="boost_chrono-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_date_time-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_filesystem-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_python2.7-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_system-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_thread-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="glog 0.3.3.0" Target="gflags 2.1.2.1" Category="Package Dependency" />
+    <Link Source="LevelDB-vc120 1.2.0.0" Target="boost_date_time-vc120 1.59.0.0" Category="Package Dependency" />
+    <Link Source="upgrade_net_proto_text" Target="boost_chrono-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_text" Target="boost_filesystem-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_text" Target="boost_python2.7-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_text" Target="boost_system-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_text" Target="boost_thread-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_text" Target="glog 0.3.3.0" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_text" Target="hdf5-v120-complete 1.8.15.2" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_text" Target="LevelDB-vc120 1.2.0.0" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_text" Target="lmdb-v120-clean 0.9.14.0" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_text" Target="OpenBLAS 0.2.14.1" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_text" Target="OpenCV 2.4.10" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_text" Target="protobuf-v120 2.6.1" Category="Installed Package" />
+    <Link Source="boost_chrono-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_date_time-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_filesystem-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_python2.7-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_system-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_thread-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="glog 0.3.3.0" Target="gflags 2.1.2.1" Category="Package Dependency" />
+    <Link Source="LevelDB-vc120 1.2.0.0" Target="boost_date_time-vc120 1.59.0.0" Category="Package Dependency" />
+    <Link Source="upgrade_net_proto_binary" Target="boost_chrono-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_binary" Target="boost_filesystem-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_binary" Target="boost_python2.7-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_binary" Target="boost_system-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_binary" Target="boost_thread-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_binary" Target="glog 0.3.3.0" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_binary" Target="hdf5-v120-complete 1.8.15.2" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_binary" Target="LevelDB-vc120 1.2.0.0" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_binary" Target="lmdb-v120-clean 0.9.14.0" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_binary" Target="OpenBLAS 0.2.14.1" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_binary" Target="OpenCV 2.4.10" Category="Installed Package" />
+    <Link Source="upgrade_net_proto_binary" Target="protobuf-v120 2.6.1" Category="Installed Package" />
+    <Link Source="boost_chrono-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_date_time-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_filesystem-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_python2.7-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_system-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_thread-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="glog 0.3.3.0" Target="gflags 2.1.2.1" Category="Package Dependency" />
+    <Link Source="LevelDB-vc120 1.2.0.0" Target="boost_date_time-vc120 1.59.0.0" Category="Package Dependency" />
+    <Link Source="convert_mnist_siamese_data" Target="boost_chrono-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_mnist_siamese_data" Target="boost_filesystem-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_mnist_siamese_data" Target="boost_python2.7-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_mnist_siamese_data" Target="boost_system-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_mnist_siamese_data" Target="boost_thread-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_mnist_siamese_data" Target="glog 0.3.3.0" Category="Installed Package" />
+    <Link Source="convert_mnist_siamese_data" Target="hdf5-v120-complete 1.8.15.2" Category="Installed Package" />
+    <Link Source="convert_mnist_siamese_data" Target="LevelDB-vc120 1.2.0.0" Category="Installed Package" />
+    <Link Source="convert_mnist_siamese_data" Target="lmdb-v120-clean 0.9.14.0" Category="Installed Package" />
+    <Link Source="convert_mnist_siamese_data" Target="OpenBLAS 0.2.14.1" Category="Installed Package" />
+    <Link Source="convert_mnist_siamese_data" Target="OpenCV 2.4.10" Category="Installed Package" />
+    <Link Source="convert_mnist_siamese_data" Target="protobuf-v120 2.6.1" Category="Installed Package" />
+    <Link Source="boost_chrono-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_date_time-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_filesystem-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_python2.7-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_system-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_thread-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="glog 0.3.3.0" Target="gflags 2.1.2.1" Category="Package Dependency" />
+    <Link Source="LevelDB-vc120 1.2.0.0" Target="boost_date_time-vc120 1.59.0.0" Category="Package Dependency" />
+    <Link Source="convert_mnist_data" Target="boost_chrono-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_mnist_data" Target="boost_filesystem-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_mnist_data" Target="boost_python2.7-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_mnist_data" Target="boost_system-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_mnist_data" Target="boost_thread-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_mnist_data" Target="glog 0.3.3.0" Category="Installed Package" />
+    <Link Source="convert_mnist_data" Target="hdf5-v120-complete 1.8.15.2" Category="Installed Package" />
+    <Link Source="convert_mnist_data" Target="LevelDB-vc120 1.2.0.0" Category="Installed Package" />
+    <Link Source="convert_mnist_data" Target="lmdb-v120-clean 0.9.14.0" Category="Installed Package" />
+    <Link Source="convert_mnist_data" Target="OpenBLAS 0.2.14.1" Category="Installed Package" />
+    <Link Source="convert_mnist_data" Target="OpenCV 2.4.10" Category="Installed Package" />
+    <Link Source="convert_mnist_data" Target="protobuf-v120 2.6.1" Category="Installed Package" />
+    <Link Source="boost_chrono-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_date_time-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_filesystem-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_python2.7-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_system-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_thread-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="glog 0.3.3.0" Target="gflags 2.1.2.1" Category="Package Dependency" />
+    <Link Source="LevelDB-vc120 1.2.0.0" Target="boost_date_time-vc120 1.59.0.0" Category="Package Dependency" />
+    <Link Source="classification" Target="boost_chrono-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="classification" Target="boost_filesystem-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="classification" Target="boost_python2.7-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="classification" Target="boost_system-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="classification" Target="boost_thread-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="classification" Target="glog 0.3.3.0" Category="Installed Package" />
+    <Link Source="classification" Target="hdf5-v120-complete 1.8.15.2" Category="Installed Package" />
+    <Link Source="classification" Target="LevelDB-vc120 1.2.0.0" Category="Installed Package" />
+    <Link Source="classification" Target="lmdb-v120-clean 0.9.14.0" Category="Installed Package" />
+    <Link Source="classification" Target="OpenBLAS 0.2.14.1" Category="Installed Package" />
+    <Link Source="classification" Target="OpenCV 2.4.10" Category="Installed Package" />
+    <Link Source="classification" Target="protobuf-v120 2.6.1" Category="Installed Package" />
+    <Link Source="boost_chrono-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_date_time-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_filesystem-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_python2.7-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_system-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_thread-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="glog 0.3.3.0" Target="gflags 2.1.2.1" Category="Package Dependency" />
+    <Link Source="LevelDB-vc120 1.2.0.0" Target="boost_date_time-vc120 1.59.0.0" Category="Package Dependency" />
+    <Link Source="convert_cifar_data" Target="boost_chrono-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_cifar_data" Target="boost_filesystem-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_cifar_data" Target="boost_python2.7-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_cifar_data" Target="boost_system-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_cifar_data" Target="boost_thread-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_cifar_data" Target="glog 0.3.3.0" Category="Installed Package" />
+    <Link Source="convert_cifar_data" Target="hdf5-v120-complete 1.8.15.2" Category="Installed Package" />
+    <Link Source="convert_cifar_data" Target="LevelDB-vc120 1.2.0.0" Category="Installed Package" />
+    <Link Source="convert_cifar_data" Target="lmdb-v120-clean 0.9.14.0" Category="Installed Package" />
+    <Link Source="convert_cifar_data" Target="OpenBLAS 0.2.14.1" Category="Installed Package" />
+    <Link Source="convert_cifar_data" Target="OpenCV 2.4.10" Category="Installed Package" />
+    <Link Source="convert_cifar_data" Target="protobuf-v120 2.6.1" Category="Installed Package" />
+    <Link Source="boost_chrono-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_date_time-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_filesystem-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_python2.7-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_system-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_thread-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="glog 0.3.3.0" Target="gflags 2.1.2.1" Category="Package Dependency" />
+    <Link Source="LevelDB-vc120 1.2.0.0" Target="boost_date_time-vc120 1.59.0.0" Category="Package Dependency" />
+    <Link Source="matcaffe" Target="boost_chrono-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="matcaffe" Target="boost_filesystem-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="matcaffe" Target="boost_python2.7-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="matcaffe" Target="boost_system-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="matcaffe" Target="boost_thread-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="matcaffe" Target="glog 0.3.3.0" Category="Installed Package" />
+    <Link Source="matcaffe" Target="hdf5-v120-complete 1.8.15.2" Category="Installed Package" />
+    <Link Source="matcaffe" Target="LevelDB-vc120 1.2.0.0" Category="Installed Package" />
+    <Link Source="matcaffe" Target="lmdb-v120-clean 0.9.14.0" Category="Installed Package" />
+    <Link Source="matcaffe" Target="OpenBLAS 0.2.14.1" Category="Installed Package" />
+    <Link Source="matcaffe" Target="OpenCV 2.4.10" Category="Installed Package" />
+    <Link Source="matcaffe" Target="protobuf-v120 2.6.1" Category="Installed Package" />
+    <Link Source="boost_chrono-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_date_time-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_filesystem-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_python2.7-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_system-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_thread-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="glog 0.3.3.0" Target="gflags 2.1.2.1" Category="Package Dependency" />
+    <Link Source="LevelDB-vc120 1.2.0.0" Target="boost_date_time-vc120 1.59.0.0" Category="Package Dependency" />
+    <Link Source="pycaffe" Target="boost_chrono-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="pycaffe" Target="boost_filesystem-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="pycaffe" Target="boost_python2.7-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="pycaffe" Target="boost_system-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="pycaffe" Target="boost_thread-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="pycaffe" Target="glog 0.3.3.0" Category="Installed Package" />
+    <Link Source="pycaffe" Target="hdf5-v120-complete 1.8.15.2" Category="Installed Package" />
+    <Link Source="pycaffe" Target="LevelDB-vc120 1.2.0.0" Category="Installed Package" />
+    <Link Source="pycaffe" Target="lmdb-v120-clean 0.9.14.0" Category="Installed Package" />
+    <Link Source="pycaffe" Target="OpenBLAS 0.2.14.1" Category="Installed Package" />
+    <Link Source="pycaffe" Target="OpenCV 2.4.10" Category="Installed Package" />
+    <Link Source="pycaffe" Target="protobuf-v120 2.6.1" Category="Installed Package" />
+    <Link Source="pycaffe" Target="protoc_x64 2.6.1" Category="Installed Package" />
+    <Link Source="boost_chrono-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_date_time-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_filesystem-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_python2.7-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_system-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_thread-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="glog 0.3.3.0" Target="gflags 2.1.2.1" Category="Package Dependency" />
+    <Link Source="LevelDB-vc120 1.2.0.0" Target="boost_date_time-vc120 1.59.0.0" Category="Package Dependency" />
+    <Link Source="test_all" Target="boost_chrono-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="test_all" Target="boost_filesystem-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="test_all" Target="boost_python2.7-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="test_all" Target="boost_system-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="test_all" Target="boost_thread-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="test_all" Target="glog 0.3.3.0" Category="Installed Package" />
+    <Link Source="test_all" Target="hdf5-v120-complete 1.8.15.2" Category="Installed Package" />
+    <Link Source="test_all" Target="LevelDB-vc120 1.2.0.0" Category="Installed Package" />
+    <Link Source="test_all" Target="lmdb-v120-clean 0.9.14.0" Category="Installed Package" />
+    <Link Source="test_all" Target="OpenBLAS 0.2.14.1" Category="Installed Package" />
+    <Link Source="test_all" Target="OpenCV 2.4.10" Category="Installed Package" />
+    <Link Source="test_all" Target="protobuf-v120 2.6.1" Category="Installed Package" />
+    <Link Source="boost_chrono-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_date_time-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_filesystem-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_python2.7-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_system-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_thread-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="glog 0.3.3.0" Target="gflags 2.1.2.1" Category="Package Dependency" />
+    <Link Source="LevelDB-vc120 1.2.0.0" Target="boost_date_time-vc120 1.59.0.0" Category="Package Dependency" />
+    <Link Source="extract_features" Target="boost_chrono-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="extract_features" Target="boost_filesystem-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="extract_features" Target="boost_python2.7-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="extract_features" Target="boost_system-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="extract_features" Target="boost_thread-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="extract_features" Target="glog 0.3.3.0" Category="Installed Package" />
+    <Link Source="extract_features" Target="hdf5-v120-complete 1.8.15.2" Category="Installed Package" />
+    <Link Source="extract_features" Target="LevelDB-vc120 1.2.0.0" Category="Installed Package" />
+    <Link Source="extract_features" Target="lmdb-v120-clean 0.9.14.0" Category="Installed Package" />
+    <Link Source="extract_features" Target="OpenBLAS 0.2.14.1" Category="Installed Package" />
+    <Link Source="extract_features" Target="OpenCV 2.4.10" Category="Installed Package" />
+    <Link Source="extract_features" Target="protobuf-v120 2.6.1" Category="Installed Package" />
+    <Link Source="boost_chrono-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_date_time-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_filesystem-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_python2.7-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_system-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_thread-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="glog 0.3.3.0" Target="gflags 2.1.2.1" Category="Package Dependency" />
+    <Link Source="LevelDB-vc120 1.2.0.0" Target="boost_date_time-vc120 1.59.0.0" Category="Package Dependency" />
+    <Link Source="convert_imageset" Target="boost_chrono-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_imageset" Target="boost_filesystem-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_imageset" Target="boost_python2.7-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_imageset" Target="boost_system-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_imageset" Target="boost_thread-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="convert_imageset" Target="glog 0.3.3.0" Category="Installed Package" />
+    <Link Source="convert_imageset" Target="hdf5-v120-complete 1.8.15.2" Category="Installed Package" />
+    <Link Source="convert_imageset" Target="LevelDB-vc120 1.2.0.0" Category="Installed Package" />
+    <Link Source="convert_imageset" Target="lmdb-v120-clean 0.9.14.0" Category="Installed Package" />
+    <Link Source="convert_imageset" Target="OpenBLAS 0.2.14.1" Category="Installed Package" />
+    <Link Source="convert_imageset" Target="OpenCV 2.4.10" Category="Installed Package" />
+    <Link Source="convert_imageset" Target="protobuf-v120 2.6.1" Category="Installed Package" />
+    <Link Source="boost_chrono-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_date_time-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_filesystem-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_python2.7-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_system-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_thread-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="glog 0.3.3.0" Target="gflags 2.1.2.1" Category="Package Dependency" />
+    <Link Source="LevelDB-vc120 1.2.0.0" Target="boost_date_time-vc120 1.59.0.0" Category="Package Dependency" />
+    <Link Source="compute_image_mean" Target="boost_chrono-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="compute_image_mean" Target="boost_filesystem-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="compute_image_mean" Target="boost_python2.7-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="compute_image_mean" Target="boost_system-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="compute_image_mean" Target="boost_thread-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="compute_image_mean" Target="glog 0.3.3.0" Category="Installed Package" />
+    <Link Source="compute_image_mean" Target="hdf5-v120-complete 1.8.15.2" Category="Installed Package" />
+    <Link Source="compute_image_mean" Target="LevelDB-vc120 1.2.0.0" Category="Installed Package" />
+    <Link Source="compute_image_mean" Target="lmdb-v120-clean 0.9.14.0" Category="Installed Package" />
+    <Link Source="compute_image_mean" Target="OpenBLAS 0.2.14.1" Category="Installed Package" />
+    <Link Source="compute_image_mean" Target="OpenCV 2.4.10" Category="Installed Package" />
+    <Link Source="compute_image_mean" Target="protobuf-v120 2.6.1" Category="Installed Package" />
+    <Link Source="boost_chrono-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_date_time-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_filesystem-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_python2.7-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_system-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="boost_thread-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="glog 0.3.3.0" Target="gflags 2.1.2.1" Category="Package Dependency" />
+    <Link Source="LevelDB-vc120 1.2.0.0" Target="boost_date_time-vc120 1.59.0.0" Category="Package Dependency" />
+    <Link Source="caffe" Target="boost_chrono-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="caffe" Target="boost_filesystem-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="caffe" Target="boost_python2.7-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="caffe" Target="boost_system-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="caffe" Target="boost_thread-vc120 1.59.0.0" Category="Installed Package" />
+    <Link Source="caffe" Target="glog 0.3.3.0" Category="Installed Package" />
+    <Link Source="caffe" Target="hdf5-v120-complete 1.8.15.2" Category="Installed Package" />
+    <Link Source="caffe" Target="LevelDB-vc120 1.2.0.0" Category="Installed Package" />
+    <Link Source="caffe" Target="lmdb-v120-clean 0.9.14.0" Category="Installed Package" />
+    <Link Source="caffe" Target="OpenBLAS 0.2.14.1" Category="Installed Package" />
+    <Link Source="caffe" Target="OpenCV 2.4.10" Category="Installed Package" />
+    <Link Source="caffe" Target="protobuf-v120 2.6.1" Category="Installed Package" />
+    <Link Source="boost_date_time-vc120 1.59.0.0" Target="boost 1.59.0.0" Category="Package Dependency" />
+    <Link Source="glog 0.3.3.0" Target="gflags 2.1.2.1" Category="Package Dependency" />
+    <Link Source="LevelDB-vc120 1.2.0.0" Target="boost_date_time-vc120 1.59.0.0" Category="Package Dependency" />
+    <Link Source="libcaffe" Target="glog 0.3.3.0" Category="Installed Package" />
+    <Link Source="libcaffe" Target="hdf5-v120-complete 1.8.15.2" Category="Installed Package" />
+    <Link Source="libcaffe" Target="LevelDB-vc120 1.2.0.0" Category="Installed Package" />
+    <Link Source="libcaffe" Target="lmdb-v120-clean 0.9.14.0" Category="Installed Package" />
+    <Link Source="libcaffe" Target="OpenBLAS 0.2.14.1" Category="Installed Package" />
+    <Link Source="libcaffe" Target="OpenCV 2.4.10" Category="Installed Package" />
+    <Link Source="libcaffe" Target="protobuf-v120 2.6.1" Category="Installed Package" />
+    <Link Source="libcaffe" Target="protoc_x64 2.6.1" Category="Installed Package" />
+  </Links>
+  <Categories>
+    <Category Id="Project" />
+    <Category Id="Package" />
+  </Categories>
+  <Styles>
+    <Style TargetType="Node" GroupLabel="Project" ValueLabel="True">
+      <Condition Expression="HasCategory('Project')" />
+      <Setter Property="Background" Value="Blue" />
+    </Style>
+    <Style TargetType="Link" GroupLabel="Package Dependency" ValueLabel="True">
+      <Condition Expression="HasCategory('Package Dependency')" />
+      <Setter Property="Background" Value="Yellow" />
+    </Style>
+  </Styles>
+</DirectedGraph>
