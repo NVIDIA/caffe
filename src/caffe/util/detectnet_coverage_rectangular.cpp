@@ -42,7 +42,7 @@ template<typename Dtype>
 CoverageGenerator<Dtype>::CoverageGenerator(
     const DetectNetGroundTruthParameter& param
 ) : param_(param),
-    imageROI_(0, 0, (Dtype) param.image_size_x(), (Dtype) param.image_size_y()),
+    imageROI_(0, 0, (Dtype) param.crop_size_x(), (Dtype) param.crop_size_y()),
     gridROI_(
       imageROI_.tl()   * (Dtype)(1.0 / param.stride()),
       imageROI_.size() * (Dtype)(1.0 / param.stride())),

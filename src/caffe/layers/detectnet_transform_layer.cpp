@@ -126,8 +126,8 @@ void DetectNetTransformationLayer<Dtype>::Reshape(
   top[0]->Reshape(
       bottom[0]->num(),
       bottom[0]->channels(),
-      g_param_.image_size_y(),
-      g_param_.image_size_x());
+      g_param_.crop_size_y(),
+      g_param_.crop_size_x());
   // resize tensor output layer: (never changes /wrt input blobs)
   Vec3i tensorDimensions = coverage_->dimensions();
   top[1]->Reshape(
@@ -337,8 +337,8 @@ void DetectNetTransformationLayer<Dtype>::transform(
     Mat3v* img_aug,
     Dtype* transformed_label
 ) {
-  uint32_t image_x = g_param_.image_size_x();
-  uint32_t image_y = g_param_.image_size_y();
+  uint32_t image_x = g_param_.crop_size_x();
+  uint32_t image_y = g_param_.crop_size_y();
 
   // Perform mean subtraction on un-augmented image:
   Mat3v img_temp = img.clone();  // size determined by scale
@@ -469,7 +469,7 @@ Point DetectNetTransformationLayer<Dtype>::augmentation_crop(
     vector<BboxLabel >* bboxList_aug
 ) {
   bool doCrop = randDouble() <= a_param_.crop_prob();
-  Size2i crop(g_param_.image_size_x(), g_param_.image_size_y());
+  Size2i crop(g_param_.crop_size_x(), g_param_.crop_size_y());
   Size2i shift(a_param_.shift_x(), a_param_.shift_y());
   Size2i imgSize(img_src.cols, img_src.rows);
   Point2i offset, inner, outer;

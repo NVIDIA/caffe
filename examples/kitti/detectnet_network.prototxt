@@ -76,8 +76,8 @@ layer {
     coverage_type: RECTANGULAR
     min_cvg_len: 20
     obj_norm: true
-    image_size_x: 1248
-    image_size_y: 384
+    crop_size_x: 1248
+    crop_size_y: 384
     crop_bboxes: true
     object_class: { src: 1 dst: 0} # obj class 1 -> cvg index 0
   }
@@ -115,8 +115,8 @@ layer {
     coverage_type: RECTANGULAR
     min_cvg_len: 20
     obj_norm: true
-    image_size_x: 1248
-    image_size_y: 384
+    crop_size_x: 1248
+    crop_size_y: 384
     crop_bboxes: false
     object_class: { src: 1 dst: 0} # obj class 1 -> cvg index 0
   }

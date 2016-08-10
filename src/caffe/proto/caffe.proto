@@ -466,8 +466,8 @@ message DetectNetGroundTruthParameter {
   optional CoverageType coverage_type = 7 [default = RECTANGULAR];
   // Size that incoming images are cropped / scaled to during training / test
   //  time. The network will only see images of this size.
-  optional uint32 image_size_x = 8 [default = 1248];
-  optional uint32 image_size_y = 9 [default = 384];
+  optional uint32 crop_size_x = 8 [default = 1248];
+  optional uint32 crop_size_y = 9 [default = 384];
   // coverage proportional to the size of the gridbox region overlapping the
   // normalize object coverage by the size of the object
   optional bool obj_norm = 11 [default = false];
