@@ -1,6 +1,10 @@
 #ifndef _CAFFE_UTIL_IM2COL_HPP_
 #define _CAFFE_UTIL_IM2COL_HPP_
 
+#include "caffe/common.hpp"
+#include "caffe/util/device_alternate.hpp"
+#include "caffe/util/mkl_alternate.hpp"
+
 namespace caffe {
 
 template <typename Dtype>
@@ -33,27 +37,29 @@ template <typename Dtype>
 void im2col_nd_gpu(const Dtype* data_im, const int num_spatial_axes,
     const int col_size, const int* im_shape, const int* col_shape,
     const int* kernel_shape, const int* pad, const int* stride,
-    const int* dilation, Dtype* data_col);
+    const int* dilation, Dtype* data_col,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
 void im2col_gpu(const Dtype* data_im, const int channels,
     const int height, const int width, const int kernel_h, const int kernel_w,
     const int pad_h, const int pad_w, const int stride_h,
     const int stride_w, const int dilation_h, const int dilation_w,
-    Dtype* data_col);
+    Dtype* data_col, cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
 void col2im_nd_gpu(const Dtype* data_col, const int num_spatial_axes,
     const int im_size, const int* im_shape, const int* col_shape,
     const int* kernel_shape, const int* pad, const int* stride,
-    const int* dilation, Dtype* data_im);
+    const int* dilation, Dtype* data_im,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
 void col2im_gpu(const Dtype* data_col, const int channels,
     const int height, const int width, const int kernel_h, const int kernel_w,
     const int pad_h, const int pad_w, const int stride_h,
     const int stride_w, const int dilation_h, const int dilation_w,
-    Dtype* data_im);
+    Dtype* data_im, cublasHandle_t handle = Caffe::cublas_handle());
 
 }  // namespace caffe
 

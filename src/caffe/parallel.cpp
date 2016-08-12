@@ -100,7 +100,7 @@ GPUParams<Dtype>::GPUParams(shared_ptr<Solver<Dtype> > root_solver, int device)
 
   GPUMemory::allocate(reinterpret_cast<void **>(&diff_),
       size_ * sizeof(Dtype));
-  caffe_gpu_set(size_, Dtype(0), diff_);
+  // caffe_gpu_set(size_, Dtype(0), diff_);
 
   CUDA_CHECK(cudaSetDevice(initial_device));
 #else
@@ -161,10 +161,10 @@ P2PSync<Dtype>::P2PSync(shared_ptr<Solver<Dtype> > root_solver,
 #endif
 
 #ifndef CPU_ONLY
-  int initial_device;
-  CUDA_CHECK(cudaGetDevice(&initial_device));
+//  int initial_device;
+//  CUDA_CHECK(cudaGetDevice(&initial_device));
   const int self = param.device_id();
-  CUDA_CHECK(cudaSetDevice(self));
+  Caffe::SetDevice(self);
 
   if (rank == 0) {
     solver_ = root_solver;
@@ -181,11 +181,10 @@ P2PSync<Dtype>::P2PSync(shared_ptr<Solver<Dtype> > root_solver,
   nccl_comms_.resize(1);
 #endif
   comm_streams_.resize(1);
-  CUDA_CHECK(cudaStreamCreateWithFlags(&comm_streams_[0],
-                                       cudaStreamNonBlocking));
+  CUDA_CHECK(cudaStreamCreate(&comm_streams_[0]));
 
   CHECK_GT(comm_streams_.size(), 0);
-  CUDA_CHECK(cudaSetDevice(initial_device));
+//  CUDA_CHECK(cudaSetDevice(initial_device));
 #else
   NO_GPU;
 #endif
@@ -254,7 +253,7 @@ template<typename Dtype>
 void P2PSync<Dtype>::on_start() {
 #ifndef CPU_ONLY
 #ifdef USE_NCCL
-  CUDA_CHECK(cudaStreamSynchronize(cudaStreamDefault));
+  CUDA_CHECK(cudaStreamSynchronize(Caffe::thread_stream()));
   NCCL_CHECK(ncclBcast(data_, size_, nccl::dataType<Dtype>::type, 0,
       getNCCLComm(), getCommStream()));
   CUDA_CHECK(cudaStreamSynchronize(getCommStream()));
@@ -269,7 +268,7 @@ void P2PSync<Dtype>::allreduce() {
   // only reduce if we haven't in the bwd pass
   if (!per_parameter_reduce_) {
     bar->wait();
-    CUDA_CHECK(cudaStreamSynchronize(cudaStreamDefault));
+    CUDA_CHECK(cudaStreamSynchronize(Caffe::thread_stream()));
     NCCL_CHECK(ncclAllReduce(diff_, diff_, size_, nccl::dataType<Dtype>::type,
         ncclSum, getNCCLComm(), getCommStream()));
     caffe_gpu_scal(size_, (Dtype)1.0 / Caffe::solver_count(), diff_,
@@ -316,6 +315,11 @@ void P2PSync<Dtype>::Run(const vector<int>& gpus) {
   for (int i = 1; i < gpus.size(); ++i) {
     param.set_device_id(gpus[i]);
     syncs[i].reset(new P2PSync<Dtype>(solver_, i, gpus.size(), param));
+  }
+  Caffe::SetDevice(gpus[0]);
+  // See if there is a defined seed and reset random state if so
+  if (solver_->param().random_seed() >= 0) {
+    Caffe::set_random_seed(param.random_seed());
   }
 #ifdef USE_NCCL
   ncclComm_t *comms = new ncclComm_t[nranks_];

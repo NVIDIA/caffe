@@ -44,7 +44,8 @@ void caffe_cpu_eltwise_min(const int N, const Dtype alpha, const Dtype* X,
     const Dtype beta, Dtype* Y);
 
 template <typename Dtype>
-void caffe_copy(const int N, const Dtype *X, Dtype *Y);
+void caffe_copy(const int N, const Dtype *X, Dtype *Y,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
 void caffe_set(const int N, const Dtype alpha, Dtype *X);
@@ -161,39 +162,46 @@ template <typename Dtype>
 void caffe_gpu_gemm(const CBLAS_TRANSPOSE TransA,
     const CBLAS_TRANSPOSE TransB, const int M, const int N, const int K,
     const Dtype alpha, const Dtype* A, const Dtype* B, const Dtype beta,
-    Dtype* C);
+    Dtype* C, cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
 void caffe_gpu_gemv(const CBLAS_TRANSPOSE TransA, const int M, const int N,
     const Dtype alpha, const Dtype* A, const Dtype* x, const Dtype beta,
-    Dtype* y);
+    Dtype* y, cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
 void caffe_gpu_axpy(const int N, const Dtype alpha, const Dtype* X,
-    Dtype* Y);
+    Dtype* Y, cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
 void caffe_gpu_axpby(const int N, const Dtype alpha, const Dtype* X,
-    const Dtype beta, Dtype* Y);
+    const Dtype beta, Dtype* Y, cublasHandle_t handle = Caffe::cublas_handle());
 
-void caffe_gpu_memcpy(const size_t N, const void *X, void *Y);
+void caffe_gpu_memcpy(const size_t N, const void *X, void *Y,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
-void caffe_gpu_set(const int N, const Dtype alpha, Dtype *X);
+void caffe_gpu_set(const int N, const Dtype alpha, Dtype *X,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
-inline void caffe_gpu_memset(const size_t N, const int alpha, void* X) {
+inline void caffe_gpu_memset(const size_t N, const int alpha, void* X,
+    cublasHandle_t handle = Caffe::cublas_handle()) {
 #ifndef CPU_ONLY
-  CUDA_CHECK(cudaMemset(X, alpha, N));  // NOLINT(caffe/alt_fn)
+  cudaStream_t stream;
+  CUBLAS_CHECK(cublasGetStream(handle, &stream));
+  CUDA_CHECK(cudaMemsetAsync(X, alpha, N, stream));  // NOLINT(caffe/alt_fn)
 #else
   NO_GPU;
 #endif
 }
 
 template <typename Dtype>
-void caffe_gpu_add_scalar(const int N, const Dtype alpha, Dtype *X);
+void caffe_gpu_add_scalar(const int N, const Dtype alpha, Dtype *X,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
-void caffe_gpu_scal(const int N, const Dtype alpha, Dtype* X);
+void caffe_gpu_scal(const int N, const Dtype alpha, Dtype* X,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 #ifndef CPU_ONLY
 template <typename Dtype>
@@ -201,32 +209,41 @@ void caffe_gpu_scal(const int N, const Dtype alpha, Dtype* X, cudaStream_t str);
 #endif
 
 template <typename Dtype>
-void caffe_gpu_add(const int N, const Dtype* a, const Dtype* b, Dtype* y);
+void caffe_gpu_add(const int N, const Dtype* a, const Dtype* b, Dtype* y,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
-void caffe_gpu_sub(const int N, const Dtype* a, const Dtype* b, Dtype* y);
+void caffe_gpu_sub(const int N, const Dtype* a, const Dtype* b, Dtype* y,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
-void caffe_gpu_mul(const int N, const Dtype* a, const Dtype* b, Dtype* y);
+void caffe_gpu_mul(const int N, const Dtype* a, const Dtype* b, Dtype* y,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
-void caffe_gpu_div(const int N, const Dtype* a, const Dtype* b, Dtype* y);
+void caffe_gpu_div(const int N, const Dtype* a, const Dtype* b, Dtype* y,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
-void caffe_gpu_abs(const int n, const Dtype* a, Dtype* y);
+void caffe_gpu_abs(const int n, const Dtype* a, Dtype* y,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
-void caffe_gpu_exp(const int n, const Dtype* a, Dtype* y);
+void caffe_gpu_exp(const int n, const Dtype* a, Dtype* y,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
-void caffe_gpu_log(const int n, const Dtype* a, Dtype* y);
+void caffe_gpu_log(const int n, const Dtype* a, Dtype* y,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
-void caffe_gpu_powx(const int n, const Dtype* a, const Dtype b, Dtype* y);
+void caffe_gpu_powx(const int n, const Dtype* a, const Dtype b, Dtype* y,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 // caffe_gpu_rng_uniform with two arguments generates integers in the range
 // [0, UINT_MAX].
-void caffe_gpu_rng_uniform(const int n, unsigned int* r);
+void caffe_gpu_rng_uniform(const int n, unsigned int* r,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 // caffe_gpu_rng_uniform with four arguments generates floats in the range
 // (a, b] (strictly greater than a, less than or equal to b) due to the
@@ -234,42 +251,50 @@ void caffe_gpu_rng_uniform(const int n, unsigned int* r);
 // curandGenerateUniform; with other limits will shift and scale the outputs
 // appropriately after calling curandGenerateUniform.
 template <typename Dtype>
-void caffe_gpu_rng_uniform(const int n, const Dtype a, const Dtype b, Dtype* r);
+void caffe_gpu_rng_uniform(const int n, const Dtype a, const Dtype b, Dtype* r,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
 void caffe_gpu_rng_gaussian(const int n, const Dtype mu, const Dtype sigma,
-                            Dtype* r);
+    Dtype* r, cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
-void caffe_gpu_rng_bernoulli(const int n, const Dtype p, int* r);
+void caffe_gpu_rng_bernoulli(const int n, const Dtype p, int* r,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
-void caffe_gpu_dot(const int n, const Dtype* x, const Dtype* y, Dtype* out);
+void caffe_gpu_dot(const int n, const Dtype* x, const Dtype* y, Dtype* out,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
-void caffe_gpu_asum(const int n, const Dtype* x, Dtype* y);
+void caffe_gpu_asum(const int n, const Dtype* x, Dtype* y,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template<typename Dtype>
-void caffe_gpu_sign(const int n, const Dtype* x, Dtype* y);
+void caffe_gpu_sign(const int n, const Dtype* x, Dtype* y,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template<typename Dtype>
-void caffe_gpu_sgnbit(const int n, const Dtype* x, Dtype* y);
+void caffe_gpu_sgnbit(const int n, const Dtype* x, Dtype* y,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
-void caffe_gpu_fabs(const int n, const Dtype* x, Dtype* y);
+void caffe_gpu_fabs(const int n, const Dtype* x, Dtype* y,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 template <typename Dtype>
-void caffe_gpu_scale(const int n, const Dtype alpha, const Dtype *x, Dtype* y);
+void caffe_gpu_scale(const int n, const Dtype alpha, const Dtype *x, Dtype* y,
+    cublasHandle_t handle = Caffe::cublas_handle());
 
 // y[i] = max(a * x[i], b * y[i])
 template <typename Dtype>
 void caffe_gpu_eltwise_max(const int n, const Dtype alpha, const Dtype* x,
-    const Dtype beta, Dtype* y);
+    const Dtype beta, Dtype* y, cublasHandle_t handle = Caffe::cublas_handle());
 
 // y[i] = min(a * x[i], b * y[i])
 template <typename Dtype>
 void caffe_gpu_eltwise_min(const int n, const Dtype alpha, const Dtype* x,
-    const Dtype beta, Dtype* y);
+    const Dtype beta, Dtype* y, cublasHandle_t handle = Caffe::cublas_handle());
 
 
 #define DEFINE_AND_INSTANTIATE_GPU_UNARY_FUNC(name, operation) \
@@ -280,16 +305,22 @@ __global__ void name##_kernel(const int n, const Dtype* x, Dtype* y) { \
   } \
 } \
 template <> \
-void caffe_gpu_##name<float>(const int n, const float* x, float* y) { \
+void caffe_gpu_##name<float>(const int n, const float* x, float* y, \
+                             cublasHandle_t handle) { \
+  cudaStream_t stream; \
+  CUBLAS_CHECK(cublasGetStream(handle, &stream)); \
   /* NOLINT_NEXT_LINE(whitespace/operators) */ \
-  name##_kernel<float><<<CAFFE_GET_BLOCKS(n), CAFFE_CUDA_NUM_THREADS>>>( \
-      n, x, y); \
+  name##_kernel<float><<<CAFFE_GET_BLOCKS(n), CAFFE_CUDA_NUM_THREADS, 0, \
+      stream>>>(n, x, y); \
 } \
 template <> \
-void caffe_gpu_##name<double>(const int n, const double* x, double* y) { \
+void caffe_gpu_##name<double>(const int n, const double* x, double* y, \
+                              cublasHandle_t handle) { \
+  cudaStream_t stream; \
+  CUBLAS_CHECK(cublasGetStream(handle, &stream)); \
   /* NOLINT_NEXT_LINE(whitespace/operators) */ \
-  name##_kernel<double><<<CAFFE_GET_BLOCKS(n), CAFFE_CUDA_NUM_THREADS>>>( \
-      n, x, y); \
+  name##_kernel<double><<<CAFFE_GET_BLOCKS(n), CAFFE_CUDA_NUM_THREADS, 0, \
+      stream>>>(n, x, y); \
 }
 
 #endif  // !CPU_ONLY

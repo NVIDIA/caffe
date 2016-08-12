@@ -38,7 +38,8 @@ void ConcatLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
     const int bottom_concat_size = bottom_concat_axis * concat_input_size_;
     const int nthreads = bottom_concat_size * num_concats_;
     Concat<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS>>>(
+        <<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS, 0,
+        Caffe::thread_stream()>>>(
         nthreads, bottom_data, kForward, num_concats_, concat_input_size_,
         top_concat_axis, bottom_concat_axis, offset_concat_axis, top_data);
     offset_concat_axis += bottom_concat_axis;
@@ -60,7 +61,8 @@ void ConcatLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
       const int bottom_concat_size = bottom_concat_axis * concat_input_size_;
       const int nthreads = bottom_concat_size * num_concats_;
       Concat<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-          <<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS>>>(
+          <<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS, 0,
+          Caffe::thread_stream()>>>(
           nthreads, top_diff, kForward, num_concats_, concat_input_size_,
           top_concat_axis, bottom_concat_axis, offset_concat_axis, bottom_diff);
     }

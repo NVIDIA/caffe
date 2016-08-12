@@ -111,11 +111,16 @@ Caffe::Caffe()
 #endif
     random_generator_(),
     mode_(Caffe::CPU), solver_count_(1), root_solver_(true) {
+  // Try to create a cuda stream.
+  if (cudaStreamCreate(&thread_stream_) != cudaSuccess) {
+    LOG(ERROR) << "Cannot create cuda stream. Cuda stream won't be available.";
+  }
   // Try to create a cublas handler, and report an error if failed (but we will
   // keep the program running as one might just want to run CPU code).
   if (cublasCreate(&cublas_handle_) != CUBLAS_STATUS_SUCCESS) {
     LOG(ERROR) << "Cannot create Cublas handle. Cublas won't be available.";
   }
+  CUBLAS_CHECK(cublasSetStream(cublas_handle_, thread_stream_));
   // Try to create a curand handler.
   if (curandCreateGenerator(&curand_generator_, CURAND_RNG_PSEUDO_DEFAULT)
       != CURAND_STATUS_SUCCESS ||
@@ -123,10 +128,12 @@ Caffe::Caffe()
       != CURAND_STATUS_SUCCESS) {
     LOG(ERROR) << "Cannot create Curand generator. Curand won't be available.";
   }
+  curandSetStream(curand_generator_, thread_stream_);
 #ifdef USE_CUDNN
   if (cudnnCreate(&cudnn_handle_) != CUDNN_STATUS_SUCCESS) {
     LOG(ERROR) << "Cannot create cuDNN handle. cuDNN won't be available.";
   }
+  CUDNN_CHECK(cudnnSetStream(cudnn_handle_, thread_stream_));
 #endif
 }
 
@@ -167,18 +174,23 @@ void Caffe::SetDevice(const int device_id) {
   // The call to cudaSetDevice must come before any calls to Get, which
   // may perform initialization using the GPU.
   CUDA_CHECK(cudaSetDevice(device_id));
+  if (Get().thread_stream_) CUDA_CHECK(cudaStreamDestroy(Get().thread_stream_));
   if (Get().cublas_handle_) CUBLAS_CHECK(cublasDestroy(Get().cublas_handle_));
   if (Get().curand_generator_) {
     CURAND_CHECK(curandDestroyGenerator(Get().curand_generator_));
   }
+  CUDA_CHECK(cudaStreamCreate(&Get().thread_stream_));
   CUBLAS_CHECK(cublasCreate(&Get().cublas_handle_));
+  CUBLAS_CHECK(cublasSetStream(Get().cublas_handle_, Get().thread_stream_));
   CURAND_CHECK(curandCreateGenerator(&Get().curand_generator_,
       CURAND_RNG_PSEUDO_DEFAULT));
   CURAND_CHECK(curandSetPseudoRandomGeneratorSeed(Get().curand_generator_,
       cluster_seedgen()));
+  curandSetStream(Get().curand_generator_, Get().thread_stream_);
 #ifdef USE_CUDNN
   if (Get().cudnn_handle_) CUDNN_CHECK(cudnnDestroy(Get().cudnn_handle_));
   CUDNN_CHECK(cudnnCreate(&Get().cudnn_handle_));
+  CUDNN_CHECK(cudnnSetStream(Get().cudnn_handle_, Get().thread_stream_));
 #endif
 }
 

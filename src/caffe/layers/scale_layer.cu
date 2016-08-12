@@ -45,12 +45,14 @@ void ScaleLayer<Dtype>::Forward_gpu(
   if (bias_layer_) {
     const Dtype* bias_data = this->blobs_[bias_param_id_]->gpu_data();
     ScaleBiasForward<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+        <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS, 0,
+        Caffe::thread_stream()>>>(
         count, bottom_data, scale_data, bias_data, scale_dim_, inner_dim_,
         top_data);
   } else {
     ScaleForward<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+        <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS, 0,
+        Caffe::thread_stream()>>>(
         count, bottom_data, scale_data, scale_dim_, inner_dim_, top_data);
   }
 }
@@ -125,7 +127,8 @@ void ScaleLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const Dtype* scale_data = scale->gpu_data();
     Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
     ScaleForward<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+        <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS, 0,
+        Caffe::thread_stream()>>>(
         count, top_diff, scale_data, scale_dim_, inner_dim_, bottom_diff);
   }
 }

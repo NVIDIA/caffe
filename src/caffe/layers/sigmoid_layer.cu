@@ -19,8 +19,8 @@ void SigmoidLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   Dtype* top_data = top[0]->mutable_gpu_data();
   const int count = bottom[0]->count();
   // NOLINT_NEXT_LINE(whitespace/operators)
-  SigmoidForward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
-      count, bottom_data, top_data);
+  SigmoidForward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS, 0,
+      Caffe::thread_stream()>>>(count, bottom_data, top_data);
   CUDA_POST_KERNEL_CHECK;
   // << " count: " << count << " bottom_data: "
   //     << (unsigned long)bottom_data
@@ -48,8 +48,8 @@ void SigmoidLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     Dtype* bottom_diff = bottom[0]->mutable_gpu_diff();
     const int count = bottom[0]->count();
     // NOLINT_NEXT_LINE(whitespace/operators)
-    SigmoidBackward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
-        count, top_diff, top_data, bottom_diff);
+    SigmoidBackward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS,
+        0, Caffe::thread_stream()>>>(count, top_diff, top_data, bottom_diff);
     CUDA_POST_KERNEL_CHECK;
   }
 }

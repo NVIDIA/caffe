@@ -14,15 +14,17 @@ __global__ void RMSPropUpdate(int N, Dtype* g, Dtype* h,
 }
 template <typename Dtype>
 void rmsprop_update_gpu(int N, Dtype* g, Dtype* h, Dtype rms_decay,
-    Dtype delta, Dtype local_rate) {
+    Dtype delta, Dtype local_rate, cublasHandle_t handle) {
+  cudaStream_t stream;
+  CUBLAS_CHECK(cublasGetStream(handle, &stream));
   RMSPropUpdate<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-      <<<CAFFE_GET_BLOCKS(N), CAFFE_CUDA_NUM_THREADS>>>(
+      <<<CAFFE_GET_BLOCKS(N), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
       N, g, h, rms_decay, delta, local_rate);
   CUDA_POST_KERNEL_CHECK;
 }
 template void rmsprop_update_gpu<float>(int, float*, float*, float, float,
-    float);
+    float, cublasHandle_t);
 template void rmsprop_update_gpu<double>(int, double*, double*, double, double,
-    double);
+    double, cublasHandle_t);
 
 }  // namespace caffe

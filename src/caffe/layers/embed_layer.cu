@@ -46,7 +46,8 @@ void EmbedLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   const Dtype* weight = this->blobs_[0]->gpu_data();
   const int count = top[0]->count();
   EmbedForward<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-      <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+      <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS, 0,
+      Caffe::thread_stream()>>>(
       count, bottom_data, weight, M_, N_, K_, top_data);
   if (bias_term_) {
     caffe_gpu_gemm<Dtype>(CblasNoTrans, CblasNoTrans, M_, N_, 1, Dtype(1),
@@ -65,7 +66,8 @@ void EmbedLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     const Dtype* bottom_data = bottom[0]->gpu_data();
     Dtype* weight_diff = this->blobs_[0]->mutable_gpu_diff();
     EmbedBackward<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(top_count), CAFFE_CUDA_NUM_THREADS>>>(
+        <<<CAFFE_GET_BLOCKS(top_count), CAFFE_CUDA_NUM_THREADS, 0,
+        Caffe::thread_stream()>>>(
         top_count, bottom_data, top_diff, M_, N_, K_, weight_diff);
   }
   if (bias_term_ && this->param_propagate_down_[1]) {

@@ -56,7 +56,7 @@ void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
     // Synchronize the work across groups, each of which went into its own
     // stream, by launching an empty kernel into the default (null) stream.
     // NOLINT_NEXT_LINE(whitespace/operators)
-    CUDA_CHECK(cudaStreamSynchronize(cudaStreamLegacy));
+    CUDA_CHECK(cudaStreamSynchronize(Caffe::thread_stream()));
   }
   // Possibly use faster algorithms by allowing larger workspace.
   use_modest_workspace_ = false;
@@ -130,7 +130,7 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     // Synchronize the work across groups, each of which went into its own
     // stream, by launching an empty kernel into the default (null) stream.
     // NOLINT_NEXT_LINE(whitespace/operators)
-    CUDA_CHECK(cudaStreamSynchronize(cudaStreamLegacy));
+    CUDA_CHECK(cudaStreamSynchronize(Caffe::thread_stream()));
   }
 }
 

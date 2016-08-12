@@ -108,15 +108,15 @@ void SGDSolver<Dtype>::ApplyUpdate() {
   ClipGradients();
   for (int param_id = 0; param_id < this->net_->learnable_params().size();
        ++param_id) {
-    Normalize(param_id);
-    Regularize(param_id);
-    ComputeUpdateValue(param_id, rate);
+    Normalize(param_id, Caffe::cublas_handle());
+    Regularize(param_id, Caffe::cublas_handle());
+    ComputeUpdateValue(param_id, rate, Caffe::cublas_handle());
   }
   this->net_->Update();
 }
 
 template <typename Dtype>
-void SGDSolver<Dtype>::Normalize(int param_id) {
+void SGDSolver<Dtype>::Normalize(int param_id, cublasHandle_t handle) {
   if (this->param_.iter_size() == 1) { return; }
   // Scale gradient to counterbalance accumulation.
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
@@ -130,7 +130,7 @@ void SGDSolver<Dtype>::Normalize(int param_id) {
   case Caffe::GPU: {
 #ifndef CPU_ONLY
     caffe_gpu_scal(net_params[param_id]->count(), accum_normalization,
-        net_params[param_id]->mutable_gpu_diff());
+        net_params[param_id]->mutable_gpu_diff(), handle);
 #else
     NO_GPU;
 #endif
@@ -142,7 +142,7 @@ void SGDSolver<Dtype>::Normalize(int param_id) {
 }
 
 template <typename Dtype>
-void SGDSolver<Dtype>::Regularize(int param_id) {
+void SGDSolver<Dtype>::Regularize(int param_id, cublasHandle_t handle) {
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
   const vector<float>& net_params_weight_decay =
       this->net_->params_weight_decay();
@@ -180,15 +180,15 @@ void SGDSolver<Dtype>::Regularize(int param_id) {
         caffe_gpu_axpy(net_params[param_id]->count(),
             local_decay,
             net_params[param_id]->gpu_data(),
-            net_params[param_id]->mutable_gpu_diff());
+            net_params[param_id]->mutable_gpu_diff(), handle);
       } else if (regularization_type == "L1") {
         caffe_gpu_sign(net_params[param_id]->count(),
             net_params[param_id]->gpu_data(),
-            temp_[param_id]->mutable_gpu_data());
+            temp_[param_id]->mutable_gpu_data(), handle);
         caffe_gpu_axpy(net_params[param_id]->count(),
             local_decay,
             temp_[param_id]->gpu_data(),
-            net_params[param_id]->mutable_gpu_diff());
+            net_params[param_id]->mutable_gpu_diff(), handle);
       } else {
         LOG(FATAL) << "Unknown regularization type: " << regularization_type;
       }
@@ -206,11 +206,12 @@ void SGDSolver<Dtype>::Regularize(int param_id) {
 #ifndef CPU_ONLY
 template <typename Dtype>
 void sgd_update_gpu(int N, Dtype* g, Dtype* h, Dtype momentum,
-    Dtype local_rate);
+    Dtype local_rate, cublasHandle_t handle);
 #endif
 
 template <typename Dtype>
-void SGDSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
+void SGDSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate,
+                                          cublasHandle_t handle) {
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
   const vector<float>& net_params_lr = this->net_->params_lr();
   Dtype momentum = this->param_.momentum();
@@ -231,7 +232,7 @@ void SGDSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
     sgd_update_gpu(net_params[param_id]->count(),
         net_params[param_id]->mutable_gpu_diff(),
         history_[param_id]->mutable_gpu_data(),
-        momentum, local_rate);
+        momentum, local_rate, handle);
 #else
     NO_GPU;
 #endif

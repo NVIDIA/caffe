@@ -26,7 +26,8 @@ void TileLayer<Dtype>::Forward_gpu(
   const int bottom_tile_axis = bottom[0]->shape(axis_);
   const int nthreads = top[0]->count();
   Tile<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-      <<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS>>>(
+      <<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS, 0,
+      Caffe::thread_stream()>>>(
       nthreads, bottom_data, inner_dim_, tiles_, bottom_tile_axis, top_data);
 }
 
@@ -57,7 +58,8 @@ void TileLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   const int tile_size = inner_dim_ / bottom_tile_axis;
   const int nthreads = bottom[0]->count();
   TileBackward<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-      <<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS>>>(
+      <<<CAFFE_GET_BLOCKS(nthreads), CAFFE_CUDA_NUM_THREADS, 0,
+      Caffe::thread_stream()>>>(
       nthreads, top_diff, tile_size, tiles_, bottom_tile_axis, bottom_diff);
 }
 

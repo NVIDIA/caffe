@@ -25,7 +25,8 @@ void BiasLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
       ((bottom.size() > 1) ? bottom[1] : this->blobs_[0].get())->gpu_data();
   Dtype* top_data = top[0]->mutable_gpu_data();
   BiasForward<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-      <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+      <<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS, 0,
+      Caffe::thread_stream()>>>(
       count, bottom_data, bias_data, bias_dim_, inner_dim_, top_data);
 }
 

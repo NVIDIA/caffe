@@ -7,11 +7,12 @@ namespace caffe {
 #ifndef CPU_ONLY
 template <typename Dtype>
 void nesterov_update_gpu(int N, Dtype* g, Dtype* h, Dtype momentum,
-    Dtype local_rate);
+    Dtype local_rate, cublasHandle_t handle);
 #endif
 
 template <typename Dtype>
-void NesterovSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
+void NesterovSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate,
+                                               cublasHandle_t handle) {
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
   const vector<float>& net_params_lr = this->net_->params_lr();
   Dtype momentum = this->param_.momentum();
@@ -44,7 +45,7 @@ void NesterovSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
     nesterov_update_gpu(net_params[param_id]->count(),
         net_params[param_id]->mutable_gpu_diff(),
         this->history_[param_id]->mutable_gpu_data(),
-        momentum, local_rate);
+        momentum, local_rate, handle);
 #else
     NO_GPU;
 #endif

@@ -7,11 +7,12 @@ namespace caffe {
 #ifndef CPU_ONLY
 template <typename Dtype>
 void rmsprop_update_gpu(int N, Dtype* g, Dtype* h, Dtype rms_decay,
-    Dtype delta, Dtype local_rate);
+    Dtype delta, Dtype local_rate, cublasHandle_t handle);
 #endif
 
 template <typename Dtype>
-void RMSPropSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
+void RMSPropSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate,
+                                              cublasHandle_t handle) {
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
   const vector<float>& net_params_lr = this->net_->params_lr();
 
@@ -54,7 +55,7 @@ void RMSPropSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
     rmsprop_update_gpu(net_params[param_id]->count(),
         net_params[param_id]->mutable_gpu_diff(),
         this->history_[param_id]->mutable_gpu_data(),
-        rms_decay, delta, local_rate);
+        rms_decay, delta, local_rate, handle);
 #else
     NO_GPU;
 #endif

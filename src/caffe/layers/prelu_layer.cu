@@ -60,7 +60,8 @@ void PReLULayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   }
 
   // NOLINT_NEXT_LINE(whitespace/operators)
-  PReLUForward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
+  PReLUForward<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS, 0,
+      Caffe::thread_stream()>>>(
       count, channels, dim, bottom_data, top_data, slope_data, div_factor);
   CUDA_POST_KERNEL_CHECK;
 }
@@ -91,7 +92,7 @@ void PReLULayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     // compute element-wise diff
     // NOLINT_NEXT_LINE(whitespace/operators)
     PReLUParamBackward<Dtype><<<CAFFE_GET_BLOCKS(cdim),
-      CAFFE_CUDA_NUM_THREADS>>>(
+      CAFFE_CUDA_NUM_THREADS, 0, Caffe::thread_stream()>>>(
       cdim, bottom[0]->num(), top[0]->offset(1), top_diff ,
       bottom_data ,
       backward_buff_.mutable_gpu_diff());
@@ -114,7 +115,7 @@ void PReLULayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     int div_factor = channel_shared_ ? channels : 1;
     // NOLINT_NEXT_LINE(whitespace/operators)
     PReLUBackward<Dtype><<<CAFFE_GET_BLOCKS(count),
-        CAFFE_CUDA_NUM_THREADS>>>(
+        CAFFE_CUDA_NUM_THREADS, 0, Caffe::thread_stream()>>>(
         count, channels, dim, top_diff, bottom_data, bottom_diff, slope_data,
         div_factor);
     CUDA_POST_KERNEL_CHECK;

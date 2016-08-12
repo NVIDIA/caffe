@@ -38,6 +38,7 @@ inline void SyncedMemory::to_cpu() {
       own_cpu_data_ = true;
     }
     caffe_gpu_memcpy(size_, gpu_ptr_, cpu_ptr_);
+    CUDA_CHECK(cudaStreamSynchronize(Caffe::thread_stream()));
     head_ = SYNCED;
 #else
     NO_GPU;
@@ -66,6 +67,7 @@ inline void SyncedMemory::to_gpu() {
       own_gpu_data_ = true;
     }
     caffe_gpu_memcpy(size_, cpu_ptr_, gpu_ptr_);
+    CUDA_CHECK(cudaStreamSynchronize(Caffe::thread_stream()));
     head_ = SYNCED;
     break;
   case HEAD_AT_GPU:

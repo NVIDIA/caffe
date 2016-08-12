@@ -44,7 +44,9 @@ void im2col_gpu(const Dtype* data_im, const int channels,
     const int pad_h, const int pad_w,
     const int stride_h, const int stride_w,
     const int dilation_h, const int dilation_w,
-    Dtype* data_col) {
+    Dtype* data_col, cublasHandle_t handle) {
+  cudaStream_t stream;
+  CUBLAS_CHECK(cublasGetStream(handle, &stream));
   // We are going to launch channels * height_col * width_col kernels, each
   // kernel responsible for copying a single-channel grid.
   int height_col = (height + 2 * pad_h -
@@ -54,7 +56,7 @@ void im2col_gpu(const Dtype* data_im, const int channels,
   int num_kernels = channels * height_col * width_col;
   // NOLINT_NEXT_LINE(whitespace/operators)
   im2col_gpu_kernel<Dtype><<<CAFFE_GET_BLOCKS(num_kernels),
-                             CAFFE_CUDA_NUM_THREADS>>>(
+                             CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
       num_kernels, data_im, height, width, kernel_h, kernel_w, pad_h,
       pad_w, stride_h, stride_w, dilation_h, dilation_w, height_col,
       width_col, data_col);
@@ -65,11 +67,13 @@ void im2col_gpu(const Dtype* data_im, const int channels,
 template void im2col_gpu<float>(const float* data_im, const int channels,
     const int height, const int width, const int kernel_h, const int kernel_w,
     const int pad_h, const int pad_w, const int stride_h, const int stride_w,
-    const int dilation_h, const int dilation_w, float* data_col);
+    const int dilation_h, const int dilation_w, float* data_col,
+    cublasHandle_t);
 template void im2col_gpu<double>(const double* data_im, const int channels,
     const int height, const int width, const int kernel_h, const int kernel_w,
     const int pad_h, const int pad_w, const int stride_h, const int stride_w,
-    const int dilation_h, const int dilation_w, double* data_col);
+    const int dilation_h, const int dilation_w, double* data_col,
+    cublasHandle_t handle);
 
 template <typename Dtype, int num_axes>
 __global__ void im2col_nd_gpu_kernel(const int n, const Dtype* data_im,
@@ -160,67 +164,69 @@ template <typename Dtype>
 void im2col_nd_gpu(const Dtype* data_im, const int num_spatial_axes,
     const int num_kernels, const int* im_shape, const int* col_shape,
     const int* kernel_shape, const int* pad, const int* stride,
-    const int* dilation, Dtype* data_col) {
+    const int* dilation, Dtype* data_col, cublasHandle_t handle) {
+  cudaStream_t stream;
+  CUBLAS_CHECK(cublasGetStream(handle, &stream));
   // num_axes should be smaller than block size
   DCHECK_LT(num_spatial_axes, CAFFE_CUDA_NUM_THREADS);
   switch (num_spatial_axes) {
   case 1:
     im2col_nd_gpu_kernel<Dtype, 1>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS>>>(
+        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
         num_kernels, data_im, im_shape, col_shape,
         kernel_shape, pad, stride, dilation, data_col);
     break;
   case 2:
     im2col_nd_gpu_kernel<Dtype, 2>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS>>>(
+        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
         num_kernels, data_im, im_shape, col_shape,
         kernel_shape, pad, stride, dilation, data_col);
     break;
   case 3:
     im2col_nd_gpu_kernel<Dtype, 3>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS>>>(
+        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
         num_kernels, data_im, im_shape, col_shape,
         kernel_shape, pad, stride, dilation, data_col);
     break;
   case 4:
     im2col_nd_gpu_kernel<Dtype, 4>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS>>>(
+        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
         num_kernels, data_im, im_shape, col_shape,
         kernel_shape, pad, stride, dilation, data_col);
     break;
   case 5:
     im2col_nd_gpu_kernel<Dtype, 5>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS>>>(
+        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
         num_kernels, data_im, im_shape, col_shape,
         kernel_shape, pad, stride, dilation, data_col);
     break;
   case 6:
     im2col_nd_gpu_kernel<Dtype, 6>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS>>>(
+        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
         num_kernels, data_im, im_shape, col_shape,
         kernel_shape, pad, stride, dilation, data_col);
     break;
   case 7:
     im2col_nd_gpu_kernel<Dtype, 7>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS>>>(
+        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
         num_kernels, data_im, im_shape, col_shape,
         kernel_shape, pad, stride, dilation, data_col);
     break;
   case 8:
     im2col_nd_gpu_kernel<Dtype, 8>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS>>>(
+        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
         num_kernels, data_im, im_shape, col_shape,
         kernel_shape, pad, stride, dilation, data_col);
     break;
   case 9:
     im2col_nd_gpu_kernel<Dtype, 9>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS>>>(
+        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
         num_kernels, data_im, im_shape, col_shape,
         kernel_shape, pad, stride, dilation, data_col);
     break;
   case 10:
     im2col_nd_gpu_kernel<Dtype, 10>  // NOLINT_NEXT_LINE(whitespace/operators)
-        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS>>>(
+        <<<CAFFE_GET_BLOCKS(num_kernels), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
         num_kernels, data_im, im_shape, col_shape,
         kernel_shape, pad, stride, dilation, data_col);
     break;
@@ -236,12 +242,12 @@ template void im2col_nd_gpu<float>(const float* data_im,
     const int num_spatial_axes, const int col_size,
     const int* im_shape, const int* col_shape,
     const int* kernel_shape, const int* pad, const int* stride,
-    const int* dilation, float* data_col);
+    const int* dilation, float* data_col, cublasHandle_t handle);
 template void im2col_nd_gpu<double>(const double* data_im,
     const int num_spatial_axes, const int col_size,
     const int* im_shape, const int* col_shape,
     const int* kernel_shape, const int* pad, const int* stride,
-    const int* dilation, double* data_col);
+    const int* dilation, double* data_col, cublasHandle_t handle);
 
 template <typename Dtype>
 __global__ void col2im_gpu_kernel(const int n, const Dtype* data_col,
@@ -289,7 +295,9 @@ void col2im_gpu(const Dtype* data_col, const int channels,
     const int height, const int width, const int kernel_h, const int kernel_w,
     const int pad_h, const int pad_w, const int stride_h,
     const int stride_w, const int dilation_h, const int dilation_w,
-    Dtype* data_im) {
+    Dtype* data_im, cublasHandle_t handle) {
+  cudaStream_t stream;
+  CUBLAS_CHECK(cublasGetStream(handle, &stream));
   int height_col = (height + 2 * pad_h - (dilation_h * (kernel_h - 1) + 1)) /
       stride_h + 1;
   int width_col = (width + 2 * pad_w - (dilation_w * (kernel_w - 1) + 1)) /
@@ -299,7 +307,7 @@ void col2im_gpu(const Dtype* data_col, const int channels,
   // bottom dimension, and then in the kernel add up the top dimensions.
   // NOLINT_NEXT_LINE(whitespace/operators)
   col2im_gpu_kernel<Dtype><<<CAFFE_GET_BLOCKS(num_kernels),
-                             CAFFE_CUDA_NUM_THREADS>>>(
+                             CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
       num_kernels, data_col, height, width, channels, kernel_h, kernel_w,
       pad_h, pad_w, stride_h, stride_w, dilation_h, dilation_w,
       height_col, width_col, data_im);
@@ -311,12 +319,12 @@ template void col2im_gpu<float>(const float* data_col, const int channels,
     const int height, const int width, const int kernel_h, const int kernel_w,
     const int pad_h, const int pad_w, const int stride_h,
     const int stride_w, const int dilation_h, const int dilation_w,
-    float* data_im);
+    float* data_im, cublasHandle_t handle);
 template void col2im_gpu<double>(const double* data_col, const int channels,
     const int height, const int width, const int kernel_h, const int kernel_w,
     const int pad_h, const int pad_w, const int stride_h,
     const int stride_w, const int dilation_h, const int dilation_w,
-    double* data_im);
+    double* data_im, cublasHandle_t handle);
 
 template <typename Dtype, int num_axes>
 __global__ void col2im_nd_gpu_kernel(const int n, const Dtype* data_col,
@@ -426,67 +434,69 @@ template <typename Dtype>
 void col2im_nd_gpu(const Dtype* data_col, const int num_spatial_axes,
     const int im_size, const int* im_shape, const int* col_shape,
     const int* kernel_shape, const int* pad, const int* stride,
-    const int* dilation, Dtype* data_im) {
+    const int* dilation, Dtype* data_im, cublasHandle_t handle) {
+  cudaStream_t stream;
+  CUBLAS_CHECK(cublasGetStream(handle, &stream));
   // num_axes should be smaller than block size
   DCHECK_LT(num_spatial_axes, CAFFE_CUDA_NUM_THREADS);
   switch (num_spatial_axes) {
   case 1:
     col2im_nd_gpu_kernel<Dtype, 1>  // NOLINT_NEXT_LINE(whitespace/operators)
-          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS>>>(
+          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
           im_size, data_col, im_shape, col_shape,
           kernel_shape, pad, stride, dilation, data_im);
     break;
   case 2:
     col2im_nd_gpu_kernel<Dtype, 2>  // NOLINT_NEXT_LINE(whitespace/operators)
-          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS>>>(
+          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
           im_size, data_col, im_shape, col_shape,
           kernel_shape, pad, stride, dilation, data_im);
     break;
   case 3:
     col2im_nd_gpu_kernel<Dtype, 3>  // NOLINT_NEXT_LINE(whitespace/operators)
-          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS>>>(
+          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
           im_size, data_col, im_shape, col_shape,
           kernel_shape, pad, stride, dilation, data_im);
     break;
   case 4:
     col2im_nd_gpu_kernel<Dtype, 4>  // NOLINT_NEXT_LINE(whitespace/operators)
-          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS>>>(
+          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
           im_size, data_col, im_shape, col_shape,
           kernel_shape, pad, stride, dilation, data_im);
     break;
   case 5:
     col2im_nd_gpu_kernel<Dtype, 5>  // NOLINT_NEXT_LINE(whitespace/operators)
-          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS>>>(
+          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
           im_size, data_col, im_shape, col_shape,
           kernel_shape, pad, stride, dilation, data_im);
     break;
   case 6:
     col2im_nd_gpu_kernel<Dtype, 6>  // NOLINT_NEXT_LINE(whitespace/operators)
-          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS>>>(
+          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
           im_size, data_col, im_shape, col_shape,
           kernel_shape, pad, stride, dilation, data_im);
     break;
   case 7:
     col2im_nd_gpu_kernel<Dtype, 7>  // NOLINT_NEXT_LINE(whitespace/operators)
-          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS>>>(
+          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
           im_size, data_col, im_shape, col_shape,
           kernel_shape, pad, stride, dilation, data_im);
     break;
   case 8:
     col2im_nd_gpu_kernel<Dtype, 8>  // NOLINT_NEXT_LINE(whitespace/operators)
-          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS>>>(
+          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
           im_size, data_col, im_shape, col_shape,
           kernel_shape, pad, stride, dilation, data_im);
     break;
   case 9:
     col2im_nd_gpu_kernel<Dtype, 9>  // NOLINT_NEXT_LINE(whitespace/operators)
-          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS>>>(
+          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
           im_size, data_col, im_shape, col_shape,
           kernel_shape, pad, stride, dilation, data_im);
     break;
   case 10:
     col2im_nd_gpu_kernel<Dtype, 10>  // NOLINT_NEXT_LINE(whitespace/operators)
-          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS>>>(
+          <<<CAFFE_GET_BLOCKS(im_size), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
           im_size, data_col, im_shape, col_shape,
           kernel_shape, pad, stride, dilation, data_im);
     break;
@@ -502,11 +512,11 @@ template void col2im_nd_gpu<float>(const float* data_col,
     const int num_spatial_axes, const int im_size,
     const int* im_shape, const int* col_shape,
     const int* kernel_shape, const int* pad, const int* stride,
-    const int* dilation, float* data_im);
+    const int* dilation, float* data_im, cublasHandle_t handle);
 template void col2im_nd_gpu<double>(const double* data_col,
     const int num_spatial_axes, const int im_size,
     const int* im_shape, const int* col_shape,
     const int* kernel_shape, const int* pad, const int* stride,
-    const int* dilation, double* data_im);
+    const int* dilation, double* data_im, cublasHandle_t handle);
 
 }  // namespace caffe
