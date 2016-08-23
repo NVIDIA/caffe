@@ -29,10 +29,24 @@ class SGDSolver : public Solver<Dtype> {
   void PreSolve();
   Dtype GetLearningRate();
   virtual void ApplyUpdate();
-  virtual void Normalize(int param_id, cublasHandle_t handle);
-  virtual void Regularize(int param_id, cublasHandle_t handle);
-  virtual void ComputeUpdateValue(int param_id, Dtype rate,
-      cublasHandle_t handle);
+  virtual void Normalize(int param_id
+#ifndef CPU_ONLY
+      , cublasHandle_t handle
+#endif
+  // NOLINT_NEXT_LINE(whitespace/parens)
+  );
+  virtual void Regularize(int param_id
+#ifndef CPU_ONLY
+      , cublasHandle_t handle
+#endif
+      // NOLINT_NEXT_LINE(whitespace/parens)
+  );
+  virtual void ComputeUpdateValue(int param_id, Dtype rate
+#ifndef CPU_ONLY
+      , cublasHandle_t handle
+#endif
+      // NOLINT_NEXT_LINE(whitespace/parens)
+  );
   virtual void ClipGradients();
   virtual void SnapshotSolverState(const string& model_filename);
   virtual void SnapshotSolverStateToBinaryProto(const string& model_filename);
@@ -60,8 +74,12 @@ class NesterovSolver : public SGDSolver<Dtype> {
   virtual inline const char* type() const { return "Nesterov"; }
 
  protected:
-  virtual void ComputeUpdateValue(int param_id, Dtype rate,
-      cublasHandle_t handle = Caffe::cublas_handle());
+  virtual void ComputeUpdateValue(int param_id, Dtype rate
+#ifndef CPU_ONLY
+      , cublasHandle_t handle = Caffe::cublas_handle()
+#endif
+  // NOLINT_NEXT_LINE(whitespace/parens)
+  );
 
   DISABLE_COPY_AND_ASSIGN(NesterovSolver);
 };
@@ -80,8 +98,12 @@ class AdaGradSolver : public SGDSolver<Dtype> {
   virtual inline const char* type() const { return "AdaGrad"; }
 
  protected:
-  virtual void ComputeUpdateValue(int param_id, Dtype rate,
-      cublasHandle_t handle = Caffe::cublas_handle());
+  virtual void ComputeUpdateValue(int param_id, Dtype rate
+#ifndef CPU_ONLY
+      , cublasHandle_t handle = Caffe::cublas_handle()
+#endif
+  // NOLINT_NEXT_LINE(whitespace/parens)
+  );
   void constructor_sanity_check() {
     CHECK_EQ(0, this->param_.momentum())
         << "Momentum cannot be used with AdaGrad.";
@@ -105,8 +127,12 @@ class RMSPropSolver : public SGDSolver<Dtype> {
   virtual inline const char* type() const { return "RMSProp"; }
 
  protected:
-  virtual void ComputeUpdateValue(int param_id, Dtype rate,
-      cublasHandle_t handle = Caffe::cublas_handle());
+  virtual void ComputeUpdateValue(int param_id, Dtype rate
+#ifndef CPU_ONLY
+      , cublasHandle_t handle = Caffe::cublas_handle()
+#endif
+  // NOLINT_NEXT_LINE(whitespace/parens)
+  );
   void constructor_sanity_check() {
     CHECK_EQ(0, this->param_.momentum())
         << "Momentum cannot be used with RMSProp.";
@@ -132,8 +158,12 @@ class AdaDeltaSolver : public SGDSolver<Dtype> {
 
  protected:
   void AdaDeltaPreSolve();
-  virtual void ComputeUpdateValue(int param_id, Dtype rate,
-      cublasHandle_t handle = Caffe::cublas_handle());
+  virtual void ComputeUpdateValue(int param_id, Dtype rate
+#ifndef CPU_ONLY
+      , cublasHandle_t handle = Caffe::cublas_handle()
+#endif
+  // NOLINT_NEXT_LINE(whitespace/parens)
+  );
 
   DISABLE_COPY_AND_ASSIGN(AdaDeltaSolver);
 };
@@ -159,8 +189,12 @@ class AdamSolver : public SGDSolver<Dtype> {
 
  protected:
   void AdamPreSolve();
-  virtual void ComputeUpdateValue(int param_id, Dtype rate,
-      cublasHandle_t handle = Caffe::cublas_handle());
+  virtual void ComputeUpdateValue(int param_id, Dtype rate
+#ifndef CPU_ONLY
+      , cublasHandle_t handle = Caffe::cublas_handle()
+#endif
+  // NOLINT_NEXT_LINE(whitespace/parens)
+  );
 
   DISABLE_COPY_AND_ASSIGN(AdamSolver);
 };

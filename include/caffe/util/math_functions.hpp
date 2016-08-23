@@ -44,8 +44,11 @@ void caffe_cpu_eltwise_min(const int N, const Dtype alpha, const Dtype* X,
     const Dtype beta, Dtype* Y);
 
 template <typename Dtype>
-void caffe_copy(const int N, const Dtype *X, Dtype *Y,
-    cublasHandle_t handle = Caffe::cublas_handle());
+void caffe_copy(const int N, const Dtype *X, Dtype *Y
+#ifndef CPU_ONLY
+    , cublasHandle_t handle = Caffe::cublas_handle()
+#endif
+);
 
 template <typename Dtype>
 void caffe_set(const int N, const Dtype alpha, Dtype *X);

@@ -24,8 +24,11 @@ void adam_update_gpu(int N, Dtype* g, Dtype* m, Dtype* v, Dtype beta1,
 #endif
 
 template <typename Dtype>
-void AdamSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate,
-                                           cublasHandle_t handle) {
+void AdamSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate
+#ifndef CPU_ONLY
+    , cublasHandle_t handle
+#endif
+  ) {
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
   const vector<float>& net_params_lr = this->net_->params_lr();
   Dtype local_rate = rate * net_params_lr[param_id];

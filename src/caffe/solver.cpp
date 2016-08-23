@@ -234,7 +234,9 @@ void Solver<Dtype>::Step(int iters) {
       loss += net_->ForwardBackward();
     }
     // make sure all computation is finished
+#ifndef CPU_ONLY
     CUDA_CHECK(cudaStreamSynchronize(Caffe::thread_stream()));
+#endif
 
     loss /= param_.iter_size();
     // average the loss across iterations for smoothed reporting
@@ -389,7 +391,9 @@ void Solver<Dtype>::Test(const int test_net_id) {
     Dtype iter_loss;
     const vector<Blob<Dtype>*>& result =
         test_net->Forward(&iter_loss);
+#ifndef CPU_ONLY
     CUDA_CHECK(cudaStreamSynchronize(Caffe::thread_stream()));
+#endif
     if (param_.test_compute_loss()) {
       loss += iter_loss;
     }

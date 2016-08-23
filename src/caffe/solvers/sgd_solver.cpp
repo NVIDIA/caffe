@@ -108,15 +108,34 @@ void SGDSolver<Dtype>::ApplyUpdate() {
   ClipGradients();
   for (int param_id = 0; param_id < this->net_->learnable_params().size();
        ++param_id) {
-    Normalize(param_id, Caffe::cublas_handle());
-    Regularize(param_id, Caffe::cublas_handle());
-    ComputeUpdateValue(param_id, rate, Caffe::cublas_handle());
+    Normalize(param_id
+#ifndef CPU_ONLY
+        , Caffe::cublas_handle()
+#endif
+    // NOLINT_NEXT_LINE(whitespace/parens)
+    );
+    Regularize(param_id
+#ifndef CPU_ONLY
+        , Caffe::cublas_handle()
+#endif
+    // NOLINT_NEXT_LINE(whitespace/parens)
+    );
+    ComputeUpdateValue(param_id, rate
+#ifndef CPU_ONLY
+        , Caffe::cublas_handle()
+#endif
+    // NOLINT_NEXT_LINE(whitespace/parens)
+    );
   }
   this->net_->Update();
 }
 
 template <typename Dtype>
-void SGDSolver<Dtype>::Normalize(int param_id, cublasHandle_t handle) {
+void SGDSolver<Dtype>::Normalize(int param_id
+#ifndef CPU_ONLY
+    , cublasHandle_t handle
+#endif
+    ) {
   if (this->param_.iter_size() == 1) { return; }
   // Scale gradient to counterbalance accumulation.
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
@@ -142,7 +161,11 @@ void SGDSolver<Dtype>::Normalize(int param_id, cublasHandle_t handle) {
 }
 
 template <typename Dtype>
-void SGDSolver<Dtype>::Regularize(int param_id, cublasHandle_t handle) {
+void SGDSolver<Dtype>::Regularize(int param_id
+#ifndef CPU_ONLY
+    , cublasHandle_t handle
+#endif
+    ) {
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
   const vector<float>& net_params_weight_decay =
       this->net_->params_weight_decay();
@@ -210,8 +233,11 @@ void sgd_update_gpu(int N, Dtype* g, Dtype* h, Dtype momentum,
 #endif
 
 template <typename Dtype>
-void SGDSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate,
-                                          cublasHandle_t handle) {
+void SGDSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate
+#ifndef CPU_ONLY
+    , cublasHandle_t handle
+#endif
+  ) {
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
   const vector<float>& net_params_lr = this->net_->params_lr();
   Dtype momentum = this->param_.momentum();

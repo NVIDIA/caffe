@@ -23,8 +23,11 @@ void adadelta_update_gpu(int N, Dtype* g, Dtype* h, Dtype* h2, Dtype momentum,
 #endif
 
 template <typename Dtype>
-void AdaDeltaSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate,
-                                               cublasHandle_t handle) {
+void AdaDeltaSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate
+#ifndef CPU_ONLY
+    , cublasHandle_t handle
+#endif
+  ) {
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
   const vector<float>& net_params_lr = this->net_->params_lr();
   Dtype delta = this->param_.delta();

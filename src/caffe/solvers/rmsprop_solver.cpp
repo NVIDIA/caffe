@@ -11,8 +11,11 @@ void rmsprop_update_gpu(int N, Dtype* g, Dtype* h, Dtype rms_decay,
 #endif
 
 template <typename Dtype>
-void RMSPropSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate,
-                                              cublasHandle_t handle) {
+void RMSPropSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate
+#ifndef CPU_ONLY
+    , cublasHandle_t handle
+#endif
+  ) {
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
   const vector<float>& net_params_lr = this->net_->params_lr();
 
