@@ -92,6 +92,7 @@ void caffe_copy(const int N, const Dtype* X, Dtype* Y, cublasHandle_t handle) {
       CUBLAS_CHECK(cublasGetStream(handle, &stream));
       // NOLINT_NEXT_LINE(caffe/alt_fn)
       CUDA_CHECK(cudaMemcpyAsync(Y, X, sizeof(Dtype) * N, cudaMemcpyDefault,
+          stream));
       CUDA_CHECK(cudaStreamSynchronize(stream));
 #else
       NO_GPU;
