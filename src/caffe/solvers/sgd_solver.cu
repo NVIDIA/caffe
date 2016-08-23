@@ -12,13 +12,17 @@ __global__ void SGDUpdate(int N, Dtype* g, Dtype* h,
 }
 template <typename Dtype>
 void sgd_update_gpu(int N, Dtype* g, Dtype* h, Dtype momentum,
-    Dtype local_rate) {
+    Dtype local_rate, cublasHandle_t handle) {
+  cudaStream_t stream;
+  CUBLAS_CHECK(cublasGetStream(handle, &stream));
   SGDUpdate<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-      <<<CAFFE_GET_BLOCKS(N), CAFFE_CUDA_NUM_THREADS>>>(
+      <<<CAFFE_GET_BLOCKS(N), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
       N, g, h, momentum, local_rate);
   CUDA_POST_KERNEL_CHECK;
 }
-template void sgd_update_gpu<float>(int, float*, float*, float, float);
-template void sgd_update_gpu<double>(int, double*, double*, double, double);
+template void sgd_update_gpu<float>(int, float*, float*, float,
+    float, cublasHandle_t);
+template void sgd_update_gpu<double>(int, double*, double*, double,
+    double, cublasHandle_t);
 
 }  // namespace caffe

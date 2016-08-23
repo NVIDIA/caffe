@@ -7,11 +7,15 @@ namespace caffe {
 #ifndef CPU_ONLY
 template <typename Dtype>
 void adagrad_update_gpu(int N, Dtype* g, Dtype* h, Dtype delta,
-    Dtype local_rate);
+    Dtype local_rate, cublasHandle_t handle);
 #endif
 
 template <typename Dtype>
-void AdaGradSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
+void AdaGradSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate
+#ifndef CPU_ONLY
+    , cublasHandle_t handle
+#endif
+  ) {
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
   const vector<float>& net_params_lr = this->net_->params_lr();
   Dtype delta = this->param_.delta();
@@ -52,7 +56,8 @@ void AdaGradSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
 #ifndef CPU_ONLY
     adagrad_update_gpu(net_params[param_id]->count(),
         net_params[param_id]->mutable_gpu_diff(),
-        this->history_[param_id]->mutable_gpu_data(), delta, local_rate);
+        this->history_[param_id]->mutable_gpu_data(),
+        delta, local_rate, handle);
 #else
     NO_GPU;
 #endif

@@ -19,11 +19,16 @@ void AdamSolver<Dtype>::AdamPreSolve() {
 #ifndef CPU_ONLY
 template <typename Dtype>
 void adam_update_gpu(int N, Dtype* g, Dtype* m, Dtype* v, Dtype beta1,
-    Dtype beta2, Dtype eps_hat, Dtype corrected_local_rate);
+    Dtype beta2, Dtype eps_hat, Dtype corrected_local_rate,
+    cublasHandle_t handle);
 #endif
 
 template <typename Dtype>
-void AdamSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
+void AdamSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate
+#ifndef CPU_ONLY
+    , cublasHandle_t handle
+#endif
+  ) {
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
   const vector<float>& net_params_lr = this->net_->params_lr();
   Dtype local_rate = rate * net_params_lr[param_id];
@@ -77,7 +82,7 @@ void AdamSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
 #ifndef CPU_ONLY
     adam_update_gpu(N, net_params[param_id]->mutable_gpu_diff(),
         val_m->mutable_gpu_data(), val_v->mutable_gpu_data(), beta1, beta2,
-        eps_hat, local_rate*correction);
+        eps_hat, local_rate*correction, handle);
 #else
     NO_GPU;
 #endif

@@ -600,7 +600,7 @@ void Net<Dtype>::BackwardFromTo(int start, int end) {
       // reduce gradients as soon as they are ready
       if (Caffe::solver_count() > 1) {
 #ifndef CPU_ONLY
-        CUDA_CHECK(cudaStreamSynchronize(cudaStreamDefault));
+        CUDA_CHECK(cudaStreamSynchronize(Caffe::thread_stream()));
 #endif
         for (int j = 0; j < layers_[i]->blobs().size(); ++j) {
           int param_id = layer_index_params_[make_pair(i, j)];

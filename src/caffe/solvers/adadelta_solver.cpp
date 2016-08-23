@@ -19,11 +19,15 @@ void AdaDeltaSolver<Dtype>::AdaDeltaPreSolve() {
 #ifndef CPU_ONLY
 template <typename Dtype>
 void adadelta_update_gpu(int N, Dtype* g, Dtype* h, Dtype* h2, Dtype momentum,
-    Dtype delta, Dtype local_rate);
+    Dtype delta, Dtype local_rate, cublasHandle_t handle);
 #endif
 
 template <typename Dtype>
-void AdaDeltaSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
+void AdaDeltaSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate
+#ifndef CPU_ONLY
+    , cublasHandle_t handle
+#endif
+  ) {
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
   const vector<float>& net_params_lr = this->net_->params_lr();
   Dtype delta = this->param_.delta();
@@ -95,7 +99,7 @@ void AdaDeltaSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
         net_params[param_id]->mutable_gpu_diff(),
         this->history_[param_id]->mutable_gpu_data(),
         this->history_[update_history_offset + param_id]->mutable_gpu_data(),
-        momentum, delta, local_rate);
+        momentum, delta, local_rate, handle);
 #else
     NO_GPU;
 #endif

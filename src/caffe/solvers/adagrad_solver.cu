@@ -14,13 +14,17 @@ __global__ void AdaGradUpdate(int N, Dtype* g, Dtype* h, Dtype delta,
 }
 template <typename Dtype>
 void adagrad_update_gpu(int N, Dtype* g, Dtype* h, Dtype delta,
-    Dtype local_rate) {
+    Dtype local_rate, cublasHandle_t handle) {
+  cudaStream_t stream;
+  CUBLAS_CHECK(cublasGetStream(handle, &stream));
   AdaGradUpdate<Dtype>  // NOLINT_NEXT_LINE(whitespace/operators)
-      <<<CAFFE_GET_BLOCKS(N), CAFFE_CUDA_NUM_THREADS>>>(
+      <<<CAFFE_GET_BLOCKS(N), CAFFE_CUDA_NUM_THREADS, 0, stream>>>(
       N, g, h, delta, local_rate);
   CUDA_POST_KERNEL_CHECK;
 }
-template void adagrad_update_gpu<float>(int, float*, float*, float, float);
-template void adagrad_update_gpu<double>(int, double*, double*, double, double);
+template void adagrad_update_gpu<float>(int, float*, float*, float,
+    float, cublasHandle_t);
+template void adagrad_update_gpu<double>(int, double*, double*, double,
+    double, cublasHandle_t);
 
 }  // namespace caffe

@@ -15,6 +15,9 @@ __global__ void sync_conv_groups() {}
 template<typename Dtype>
 void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
     const vector<Blob<Dtype>*>& bottom, const vector<Blob<Dtype>*>& top) {
+  int device;
+  CUDA_CHECK(cudaGetDevice(&device));
+  size_t& WORKSPACE_SIZE = workspace_size(device);
   const Dtype* weight = this->blobs_[0]->gpu_data();
   for (int i = 0; i < bottom.size(); ++i) {
     const Dtype* bottom_data = bottom[i]->gpu_data();
@@ -56,7 +59,7 @@ void CuDNNConvolutionLayer<Dtype>::Forward_gpu(
     // Synchronize the work across groups, each of which went into its own
     // stream, by launching an empty kernel into the default (null) stream.
     // NOLINT_NEXT_LINE(whitespace/operators)
-    CUDA_CHECK(cudaStreamSynchronize(cudaStreamLegacy));
+    CUDA_CHECK(cudaStreamSynchronize(Caffe::thread_stream()));
   }
   // Possibly use faster algorithms by allowing larger workspace.
   use_modest_workspace_ = false;
@@ -75,6 +78,9 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   if (this->bias_term_ && this->param_propagate_down_[1]) {
     bias_diff = this->blobs_[1]->mutable_gpu_diff();
   }
+  int device;
+  CUDA_CHECK(cudaGetDevice(&device));
+  size_t& WORKSPACE_SIZE = workspace_size(device);
   for (int i = 0; i < top.size(); ++i) {
     const Dtype* top_diff = top[i]->gpu_diff();
 
@@ -130,7 +136,7 @@ void CuDNNConvolutionLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
     // Synchronize the work across groups, each of which went into its own
     // stream, by launching an empty kernel into the default (null) stream.
     // NOLINT_NEXT_LINE(whitespace/operators)
-    CUDA_CHECK(cudaStreamSynchronize(cudaStreamLegacy));
+    CUDA_CHECK(cudaStreamSynchronize(Caffe::thread_stream()));
   }
 }
 

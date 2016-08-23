@@ -96,27 +96,27 @@ void SoftmaxLayer<Dtype>::Forward_gpu(const vector<Blob<Dtype>*>& bottom,
   // compute max
   // NOLINT_NEXT_LINE(whitespace/operators)
   kernel_channel_max<Dtype><<<CAFFE_GET_BLOCKS(outer_num_ * inner_num_),
-      CAFFE_CUDA_NUM_THREADS>>>(outer_num_, channels, inner_num_, top_data,
-      scale_data);
+      CAFFE_CUDA_NUM_THREADS, 0, Caffe::thread_stream()>>>(outer_num_,
+      channels, inner_num_, top_data, scale_data);
   // subtract
   // NOLINT_NEXT_LINE(whitespace/operators)
   kernel_channel_subtract<Dtype><<<CAFFE_GET_BLOCKS(count),
-      CAFFE_CUDA_NUM_THREADS>>>(count, outer_num_, channels, inner_num_,
-      scale_data, top_data);
+      CAFFE_CUDA_NUM_THREADS, 0, Caffe::thread_stream()>>>(count, outer_num_,
+      channels, inner_num_, scale_data, top_data);
   // exponentiate
   // NOLINT_NEXT_LINE(whitespace/operators)
-  kernel_exp<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS>>>(
-      count, top_data, top_data);
+  kernel_exp<Dtype><<<CAFFE_GET_BLOCKS(count), CAFFE_CUDA_NUM_THREADS, 0,
+      Caffe::thread_stream()>>>(count, top_data, top_data);
   // sum after exp
   // NOLINT_NEXT_LINE(whitespace/operators)
   kernel_channel_sum<Dtype><<<CAFFE_GET_BLOCKS(outer_num_ * inner_num_),
-      CAFFE_CUDA_NUM_THREADS>>>(outer_num_, channels, inner_num_, top_data,
-      scale_data);
+      CAFFE_CUDA_NUM_THREADS, 0, Caffe::thread_stream()>>>(outer_num_,
+      channels, inner_num_, top_data, scale_data);
   // divide
   // NOLINT_NEXT_LINE(whitespace/operators)
   kernel_channel_div<Dtype><<<CAFFE_GET_BLOCKS(count),
-      CAFFE_CUDA_NUM_THREADS>>>(count, outer_num_, channels, inner_num_,
-      scale_data, top_data);
+      CAFFE_CUDA_NUM_THREADS, 0, Caffe::thread_stream()>>>(count, outer_num_,
+      channels, inner_num_, scale_data, top_data);
 }
 
 template <typename Dtype>
@@ -132,12 +132,12 @@ void SoftmaxLayer<Dtype>::Backward_gpu(const vector<Blob<Dtype>*>& top,
   // Compute inner1d(top_diff, top_data) and subtract them from the bottom diff.
   // NOLINT_NEXT_LINE(whitespace/operators)
   kernel_channel_dot<Dtype><<<CAFFE_GET_BLOCKS(outer_num_ * inner_num_),
-      CAFFE_CUDA_NUM_THREADS>>>(outer_num_, channels, inner_num_,
-      top_diff, top_data, scale_data);
+      CAFFE_CUDA_NUM_THREADS, 0, Caffe::thread_stream()>>>(outer_num_,
+      channels, inner_num_, top_diff, top_data, scale_data);
   // NOLINT_NEXT_LINE(whitespace/operators)
   kernel_channel_subtract<Dtype><<<CAFFE_GET_BLOCKS(count),
-      CAFFE_CUDA_NUM_THREADS>>>(count, outer_num_, channels, inner_num_,
-      scale_data, bottom_diff);
+      CAFFE_CUDA_NUM_THREADS, 0, Caffe::thread_stream()>>>(count, outer_num_,
+      channels, inner_num_, scale_data, bottom_diff);
   // elementwise multiplication
   caffe_gpu_mul<Dtype>(top[0]->count(), bottom_diff, top_data, bottom_diff);
 }
