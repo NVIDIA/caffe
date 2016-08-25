@@ -74,6 +74,14 @@ class Solver {
     return test_nets_;
   }
   int iter() { return iter_; }
+  unsigned get_train_net_batch_size();
+  unsigned get_test_net_batch_size(int test_net_id);
+  unsigned get_num_entries_db_core(const DataParameter& data_param);
+  unsigned get_num_entries_train_net_db();
+  unsigned get_num_entries_test_net_db(int test_net_id);
+  void compute_max_iter();
+  void compute_test_iter(int num_test_net_instances);
+  void compute_test_interval();
 
   // Invoked at specific points during an iteration
   class Callback {
