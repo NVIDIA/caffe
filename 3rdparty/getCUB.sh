@@ -4,6 +4,7 @@ GITHUBURL="https://raw.githubusercontent.com/NVlabs/cub"
 TARGETDIR=3rdparty
 mkdir -p $TARGETDIR/cub
 mkdir -p $TARGETDIR/cub/host
+echo -n "-- Downloading CUB headers... "
 for CUH in \
   cub/util_allocator.cuh \
   cub/util_arch.cuh \
@@ -13,5 +14,6 @@ for CUH in \
 do
   wget -q -N -O $TARGETDIR/$CUH $GITHUBURL/$VERSION/$CUH || exit 1
 done
+echo "done!"
 exit 0
 
