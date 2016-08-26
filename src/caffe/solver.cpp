@@ -1,15 +1,14 @@
 #include <cstdio>
-
-#include <string>
 #include <cstring>
+#include <string>
 #include <vector>
 
+#include "caffe/layers/memory_data_layer.hpp"
 #include "caffe/solver.hpp"
 #include "caffe/util/format.hpp"
 #include "caffe/util/hdf5.hpp"
 #include "caffe/util/io.hpp"
 #include "caffe/util/upgrade_proto.hpp"
-#include "caffe/layers/memory_data_layer.hpp"
 
 #include "leveldb/db.h"
 #include "leveldb/write_batch.h"
@@ -75,10 +74,10 @@ template <typename Dtype>
 unsigned Solver<Dtype>::get_train_net_batch_size() {
   const vector<shared_ptr<Layer<Dtype> > >& layers = this->net()->layers();
   for (int ind = 0; ind < layers.size(); ++ind) {
-    if (strcmp(layers[ind]->type(),"Data") == 0) {
+    if (strcmp(layers[ind]->type(), "Data") == 0) {
       const LayerParameter& layer_param = layers[ind]->layer_param();
       const DataParameter& data_param = layer_param.data_param();
-      return data_param.batch_size(); 
+      return data_param.batch_size();
     }
   }
   LOG(INFO) << "Failed to find the batch_size of train network.\n";
@@ -89,26 +88,29 @@ unsigned Solver<Dtype>::get_train_net_batch_size() {
 template <typename Dtype>
 unsigned Solver<Dtype>::get_test_net_batch_size(int test_net_id) {
   const vector<shared_ptr<Net<Dtype> > >& test_nets_ = this->test_nets();
-  assert(test_net_id < this->test_nets_.size()); 
-  const vector<shared_ptr<Layer<Dtype> > >& layers = test_nets_[test_net_id]->layers();
+  assert(test_net_id < this->test_nets_.size());
+  const vector<shared_ptr<Layer<Dtype> > >& layers
+    = test_nets_[test_net_id]->layers();
   for (int ind = 0; ind < layers.size(); ++ind) {
-    if (strcmp(layers[ind]->type(),"Data") == 0) {
+    if (strcmp(layers[ind]->type(), "Data") == 0) {
       const LayerParameter& layer_param = layers[ind]->layer_param();
       const DataParameter& data_param = layer_param.data_param();
-      return data_param.batch_size(); 
+      return data_param.batch_size();
     }
   }
-  LOG(INFO) << "Failed to find the batch_size of test network #" << test_net_id << ".\n";
+  LOG(INFO) << "Failed to find the batch_size of test network #"
+            << test_net_id << ".\n";
   return 0;
 }
 
 template <typename Dtype>
-unsigned Solver<Dtype>::get_num_entries_db_core(const DataParameter& data_param) {
+unsigned Solver<Dtype>::get_num_entries_db_core(
+  const DataParameter& data_param) {
 #ifdef USE_LEVELDB
-  if(data_param.backend() == DataParameter_DB_LEVELDB) {
+  if (data_param.backend() == DataParameter_DB_LEVELDB) {
       string level_db_name = data_param.source();
       LOG(INFO)
-        << "Reading leveldb <" << level_db_name 
+        << "Reading leveldb <" << level_db_name
         << "> to find the number of entries...\n";
       leveldb::DB* db_ = NULL;
       leveldb::Options options;
@@ -124,18 +126,18 @@ unsigned Solver<Dtype>::get_num_entries_db_core(const DataParameter& data_param)
       // needs to be fixed to allow multiple read-only Open()'s in the same
       // process.)
       leveldb::Status status = leveldb::DB::Open(options, level_db_name, &db_);
-      CHECK(status.ok()) << "Failed to open leveldb " << level_db_name 
+      CHECK(status.ok()) << "Failed to open leveldb " << level_db_name
                          << std::endl << status.ToString();
-      // level db does not provide an API function to determine the number of 
+      // level db does not provide an API function to determine the number of
       // records.  Hence, we have to iterate through the db to count the
       // the number of records!
       leveldb::Iterator* iter_ = db_->NewIterator(leveldb::ReadOptions());
       iter_->SeekToFirst();
       unsigned num_level_db_entries = 0;
-      while(iter_->Valid()) {
+      while (iter_->Valid()) {
         ++num_level_db_entries;
         iter_->Next();
-      } 
+      }
       if (iter_ != NULL) {
           delete iter_;
       }
@@ -148,21 +150,23 @@ unsigned Solver<Dtype>::get_num_entries_db_core(const DataParameter& data_param)
   }
 #endif  // USE_LEVELDB
 #ifdef USE_LMDB
-  if(data_param.backend() == DataParameter_DB_LMDB ) {
+  if (data_param.backend() == DataParameter_DB_LMDB) {
       LOG(INFO)
         << "Reading lmdb <" << data_param.source()
         << "> to find the number of entries...\n";
       // open the source lmdb, get the number of entries and close it.
       MDB_env* mdb_env_;
-      CHECK_EQ(mdb_env_create(&mdb_env_),MDB_SUCCESS);
+      CHECK_EQ(mdb_env_create(&mdb_env_), MDB_SUCCESS);
       int flags = MDB_RDONLY | MDB_NOTLS;
-      CHECK_EQ(mdb_env_open(mdb_env_, data_param.source().c_str(), flags, 0664), MDB_SUCCESS);
+      CHECK_EQ(
+        mdb_env_open(mdb_env_, data_param.source().c_str(), flags, 0664),
+        MDB_SUCCESS);
       MDB_stat stat;
-      CHECK_EQ(mdb_env_stat(mdb_env_,&stat),MDB_SUCCESS);
+      CHECK_EQ(mdb_env_stat(mdb_env_, &stat), MDB_SUCCESS);
       unsigned num_lmdb_entries = stat.ms_entries;
       mdb_env_close(mdb_env_);
-      LOG(INFO) << "lmdb <" << data_param.source() 
-                << "> has " << num_lmdb_entries << " entries.\n";  
+      LOG(INFO) << "lmdb <" << data_param.source()
+                << "> has " << num_lmdb_entries << " entries.\n";
       return(num_lmdb_entries);
   }
 #endif  // USE_LMDB
@@ -175,7 +179,7 @@ template <typename Dtype>
 unsigned Solver<Dtype>::get_num_entries_train_net_db() {
   const vector<shared_ptr<Layer<Dtype> > >& layers = this->net()->layers();
   for (int ind = 0; ind < layers.size(); ++ind) {
-    if (strcmp(layers[ind]->type(),"Data") == 0) {
+    if (strcmp(layers[ind]->type(), "Data") == 0) {
       const LayerParameter& layer_param = layers[ind]->layer_param();
       const DataParameter& data_param = layer_param.data_param();
       return(this->get_num_entries_db_core(data_param));
@@ -189,58 +193,67 @@ unsigned Solver<Dtype>::get_num_entries_train_net_db() {
 template <typename Dtype>
 unsigned Solver<Dtype>::get_num_entries_test_net_db(int test_net_id) {
   const vector<shared_ptr<Net<Dtype> > > test_nets_ = this->test_nets();
-  assert(test_net_id < this->test_nets_.size()); 
-  const vector<shared_ptr<Layer<Dtype> > >& layers = test_nets_[test_net_id]->layers();
+  assert(test_net_id < this->test_nets_.size());
+  const vector<shared_ptr<Layer<Dtype> > >& layers
+    = test_nets_[test_net_id]->layers();
   for (int ind = 0; ind < layers.size(); ++ind) {
-    if (strcmp(layers[ind]->type(),"Data") == 0) {
+    if (strcmp(layers[ind]->type(), "Data") == 0) {
       const LayerParameter& layer_param = layers[ind]->layer_param();
       const DataParameter& data_param = layer_param.data_param();
       return(this->get_num_entries_db_core(data_param));
     }
   }
-  LOG(INFO) << "Failed to find the batch_size of test network #" << test_net_id << ".\n";
+  LOG(INFO)
+    << "Failed to find the batch_size of test network #"
+    << test_net_id << ".\n";
   return 0;
 }
 
 
-// If max_iter parameter is not specified but max_iter_epoch parameter is specified,
-// then compute the max_iter parameter from the max_epoch parameter.
-// max_iter parameter specifies the number of batches to train.  Alternatively, one can 
-// specify the number of training iterations in terms of epochs to train (max_epoc).  
-// max_iter = (max_epoch*epoch_size)/batch_size 
-// where max_epoch is the number of epochs to train, epoch_size is the number of records
-// in the train database and batch size is the batch size of the train network. 
-// if epoch_size is not specified, then get the number of records by looking up the database.
+// If max_iter parameter is not specified but max_iter_epoch parameter is
+// specified, then compute the max_iter parameter from the max_epoch parameter.
+// max_iter parameter specifies the number of batches to train.  Alternatively,
+// one can specify the number of training iterations in terms of epochs to
+// train (max_epoc).  max_iter = (max_epoch*epoch_size)/batch_size where
+// max_epoch is the number of epochs to train, epoch_size is the number of
+// records in the train database and batch size is the batch size of the train
+// network.  if epoch_size is not specified, then get the number of records by
+// looking up the database.
 template <typename Dtype>
 void Solver<Dtype>::compute_max_iter() {
   if (!param_.has_max_iter() && param_.has_max_epoch()) {
-    LOG(INFO) << "max_iter parameter is not specified. Computing max_iter parameter...\n";
+    LOG(INFO)
+      << "max_iter parameter is not specified."
+      << " Computing max_iter parameter...\n";
     CHECK(param_.has_max_epoch());
     if (!param_.has_epoch_size()) {
-      LOG(INFO) << "epoch_size parameter is not specified. Reading it from db...\n";
+      LOG(INFO)
+        << "epoch_size parameter is not specified. "
+        << "Reading it from db...\n";
       unsigned rec_count = this->get_num_entries_train_net_db();
-      LOG(INFO) << "Setting epoch_size to " << rec_count << "\n";
+      LOG(INFO)
+        << "Setting epoch_size to " << rec_count << "\n";
       param_.set_epoch_size(rec_count);
     }
     CHECK(param_.has_epoch_size());
     int train_net_batch_size = this->get_train_net_batch_size();
     CHECK_GT(train_net_batch_size, 0);
-    unsigned my_max_iter = 
+    unsigned my_max_iter =
         (param_.max_epoch() * param_.epoch_size()) / train_net_batch_size;
-    LOG(INFO) 
+    LOG(INFO)
       << "max_epoch = " << param_.max_epoch()
       << ", epoch_size = " << param_.epoch_size()
       << ", batch_size = " << train_net_batch_size
-      << ". Setting max_iter to " << my_max_iter  << "\n";  
+      << ". Setting max_iter to " << my_max_iter  << "\n";
     param_.set_max_iter(my_max_iter);
-  } 
+  }
 }
 
 
 // If test_iter parameter is not specified, then compute it from the
 // test_epoch_size parameter and the test net's batch size parameter.
 // If test_epoch_size parameter of the test net is not specified,
-// read the db to get it. 
+// read the db to get it.
 template <typename Dtype>
 void Solver<Dtype>::compute_test_iter(int num_test_net_instances) {
   for (int i = 0; i < num_test_net_instances; ++i) {
@@ -250,20 +263,23 @@ void Solver<Dtype>::compute_test_iter(int num_test_net_instances) {
         << "Computing it using other parameters...\n";
       int test_net_batch_size = get_test_net_batch_size(i);
       LOG(INFO)
-        << "batch_size of test net #" << i << " is " << test_net_batch_size << "\n";
+        << "batch_size of test net #"
+        << i << " is " << test_net_batch_size << "\n";
       CHECK_GT(test_net_batch_size, 0);
       if (param_.test_epoch_size(i) == 0) {
         LOG(INFO)
-            << "test_epoch_size of test net #" << i << " is 0. "
-            << "Reading it from db...\n"; 
+          << "test_epoch_size of test net #" << i << " is 0. "
+          << "Reading it from db...\n";
         unsigned rec_count = this->get_num_entries_test_net_db(i);
         LOG(INFO)
-            << "Setting test_epoch_size of test net #" << i << " to " << rec_count << "\n";
-        param_.set_test_epoch_size(i,rec_count);
+          << "Setting test_epoch_size of test net #"
+          << i << " to " << rec_count << "\n";
+        param_.set_test_epoch_size(i, rec_count);
       }
       int test_iter_val = param_.test_epoch_size(i) / test_net_batch_size;
       LOG(INFO)
-        << "Setting test_iter of test net #" << i << " to " << test_iter_val << "\n";
+        << "Setting test_iter of test net #"
+        << i << " to " << test_iter_val << "\n";
       param_.set_test_iter(i, test_iter_val);
     }
   }
@@ -280,18 +296,20 @@ void Solver<Dtype>::compute_test_interval() {
     CHECK(param_.has_test_interval_epoch());
     int train_net_batch_size = this->get_train_net_batch_size();
     CHECK_GT(train_net_batch_size, 0);
+
     // at this point we should have epoch_size either specified or computed.
     CHECK(param_.has_epoch_size());
     unsigned my_test_interval
-       = (param_.test_interval_epoch() * param_.epoch_size()) / train_net_batch_size;
+       = (param_.test_interval_epoch() * param_.epoch_size());
+    my_test_interval /= train_net_batch_size;
     LOG(INFO)
       << "test_interval_epoch = " << param_.test_interval_epoch()
       << ", epoch_size = " << param_.epoch_size()
       << ", batch_size = " << train_net_batch_size
-      << ". Setting test_interval to " << my_test_interval << "\n";  
+      << ". Setting test_interval to " << my_test_interval << "\n";
     param_.set_test_interval(my_test_interval);
     CHECK(param_.has_test_interval());
-  } 
+  }
 }
 
 template <typename Dtype>
@@ -299,10 +317,14 @@ void Solver<Dtype>::InitTrainNet() {
   const int num_train_nets = param_.has_net() + param_.has_net_param() +
       param_.has_train_net() + param_.has_train_net_param();
   const string& field_names = "net, net_param, train_net, train_net_param";
-  CHECK_GE(num_train_nets, 1) << "SolverParameter must specify a train net "
-      << "using one of these fields: " << field_names;
-  CHECK_LE(num_train_nets, 1) << "SolverParameter must not contain more than "
-      << "one of these fields specifying a train_net: " << field_names;
+  CHECK_GE(num_train_nets, 1)
+    << "SolverParameter must specify a train net "
+    << "using one of these fields: "
+    << field_names;
+  CHECK_LE(num_train_nets, 1)
+    << "SolverParameter must not contain more than "
+    << "one of these fields specifying a train_net: "
+    << field_names;
   NetParameter net_param;
   if (param_.has_train_net_param()) {
     LOG_IF(INFO, Caffe::root_solver())
@@ -345,8 +367,6 @@ void Solver<Dtype>::InitTrainNet() {
 
 template <typename Dtype>
 void Solver<Dtype>::InitTestNets() {
-
-
   CHECK(Caffe::root_solver());
   const bool has_net_param = param_.has_net_param();
   const bool has_net_file = param_.has_net();
@@ -368,7 +388,6 @@ void Solver<Dtype>::InitTestNets() {
     CHECK_EQ(param_.test_state_size(), num_test_net_instances)
         << "test_state must be unspecified or specified once per test net.";
   }
-
 
   int test_net_id = 0;
   vector<string> sources(num_test_net_instances);
@@ -420,7 +439,7 @@ void Solver<Dtype>::InitTestNets() {
   }
 
   // If test_iter parameters are not specified, then compute them from
-  // alternate parameters.  See compute_test_iter() function for details. 
+  // alternate parameters.  See compute_test_iter() function for details.
   compute_test_iter(num_test_net_instances);
   if (num_generic_nets) {
       CHECK_GE(param_.test_iter_size(), num_test_nets)
