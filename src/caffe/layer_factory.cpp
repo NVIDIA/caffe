@@ -54,7 +54,7 @@ shared_ptr<Layer<Dtype> > GetConvolutionLayer(
   if (engine == ConvolutionParameter_Engine_DEFAULT) {
     engine = ConvolutionParameter_Engine_CAFFE;
 #ifdef USE_CUDNN
-    if (!use_dilation) {
+    if (!use_dilation && Caffe::mode() != Caffe::CPU) {
       engine = ConvolutionParameter_Engine_CUDNN;
     }
 #endif
@@ -66,6 +66,11 @@ shared_ptr<Layer<Dtype> > GetConvolutionLayer(
     if (use_dilation) {
       LOG(FATAL) << "CuDNN doesn't support the dilated convolution at Layer "
                  << param.name();
+    }
+    if (Caffe::mode() == Caffe::CPU) {
+      LOG(INFO) << "CuDNN doesn't support CPU mode at Layer "
+                << param.name() << ". Using Caffe's implementation";
+      return shared_ptr<Layer<Dtype> >(new ConvolutionLayer<Dtype>(param));
     }
     return shared_ptr<Layer<Dtype> >(new CuDNNConvolutionLayer<Dtype>(param));
 #endif
@@ -83,13 +88,20 @@ shared_ptr<Layer<Dtype> > GetBatchNormLayer(const LayerParameter& param) {
   if (engine == BatchNormParameter_Engine_DEFAULT) {
     engine = BatchNormParameter_Engine_CAFFE;
 #ifdef USE_CUDNN
-    engine = BatchNormParameter_Engine_CUDNN;
+    if (Caffe::mode() != Caffe::CPU) {
+      engine = BatchNormParameter_Engine_CUDNN;
+    }
 #endif
   }
   if (engine == BatchNormParameter_Engine_CAFFE) {
     return shared_ptr<Layer<Dtype> >(new BatchNormLayer<Dtype>(param));
 #ifdef USE_CUDNN
   } else if (engine == BatchNormParameter_Engine_CUDNN) {
+    if (Caffe::mode() == Caffe::CPU) {
+      LOG(INFO) << "CuDNN doesn't support CPU mode at Layer "
+                << param.name() << ". Using Caffe's implementation";
+      return shared_ptr<Layer<Dtype> >(new BatchNormLayer<Dtype>(param));
+    }
     return shared_ptr<Layer<Dtype> >(new CuDNNBatchNormLayer<Dtype>(param));
 #endif
   } else {
@@ -106,7 +118,9 @@ shared_ptr<Layer<Dtype> > GetPoolingLayer(const LayerParameter& param) {
   if (engine == PoolingParameter_Engine_DEFAULT) {
     engine = PoolingParameter_Engine_CAFFE;
 #ifdef USE_CUDNN
-    engine = PoolingParameter_Engine_CUDNN;
+    if (Caffe::mode() == Caffe::CPU) {
+      engine = PoolingParameter_Engine_CUDNN;
+    }
 #endif
   }
   if (engine == PoolingParameter_Engine_CAFFE) {
@@ -116,6 +130,12 @@ shared_ptr<Layer<Dtype> > GetPoolingLayer(const LayerParameter& param) {
     if (param.top_size() > 1) {
       LOG(INFO) << "cuDNN does not support multiple tops. "
                 << "Using Caffe's own pooling layer.";
+      return shared_ptr<Layer<Dtype> >(new PoolingLayer<Dtype>(param));
+    }
+
+    if (Caffe::mode() == Caffe::CPU){
+      LOG(INFO) << "CuDNN doesn't support CPU mode at Layer "
+                << param.name() << ". Using Caffe's implementation.";
       return shared_ptr<Layer<Dtype> >(new PoolingLayer<Dtype>(param));
     }
     // CuDNN assumes layers are not being modified in place, thus
@@ -143,7 +163,9 @@ shared_ptr<Layer<Dtype> > GetLRNLayer(const LayerParameter& param) {
 
   if (engine == LRNParameter_Engine_DEFAULT) {
 #ifdef USE_CUDNN
-    engine = LRNParameter_Engine_CUDNN;
+    if (Caffe::mode() == Caffe::CPU) {
+      engine = LRNParameter_Engine_CUDNN;
+    }
 #else
     engine = LRNParameter_Engine_CAFFE;
 #endif
@@ -154,6 +176,12 @@ shared_ptr<Layer<Dtype> > GetLRNLayer(const LayerParameter& param) {
 #ifdef USE_CUDNN
   } else if (engine == LRNParameter_Engine_CUDNN) {
     LRNParameter lrn_param = param.lrn_param();
+
+    if (Caffe::mode() == Caffe::CPU){
+      LOG(INFO) << "CuDNN doesn't support CPU mode for Layer "
+                << param.name() << ". Using Caffe's implementation. ";
+      return shared_ptr<Layer<Dtype> >(new LRNLayer<Dtype>(param));
+    }
 
     if (lrn_param.norm_region() ==LRNParameter_NormRegion_WITHIN_CHANNEL) {
       return shared_ptr<Layer<Dtype> >(new CuDNNLCNLayer<Dtype>(param));
@@ -180,13 +208,20 @@ shared_ptr<Layer<Dtype> > GetReLULayer(const LayerParameter& param) {
   if (engine == ReLUParameter_Engine_DEFAULT) {
     engine = ReLUParameter_Engine_CAFFE;
 #ifdef USE_CUDNN
-    engine = ReLUParameter_Engine_CUDNN;
+    if (Caffe::mode() == Caffe::CPU) {
+      engine = ReLUParameter_Engine_CUDNN;
+    }
 #endif
   }
   if (engine == ReLUParameter_Engine_CAFFE) {
     return shared_ptr<Layer<Dtype> >(new ReLULayer<Dtype>(param));
 #ifdef USE_CUDNN
   } else if (engine == ReLUParameter_Engine_CUDNN) {
+    if (Caffe::mode() == Caffe::CPU){
+      LOG(INFO) << "CuDNN doesn't support CPU mode at Layer "
+                << param.name() << ". using Caffe's implementation.";
+      return shared_ptr<Layer<Dtype> >(new ReLULayer<Dtype>(param));
+    }
     return shared_ptr<Layer<Dtype> >(new CuDNNReLULayer<Dtype>(param));
 #endif
   } else {
@@ -203,13 +238,21 @@ shared_ptr<Layer<Dtype> > GetSigmoidLayer(const LayerParameter& param) {
   if (engine == SigmoidParameter_Engine_DEFAULT) {
     engine = SigmoidParameter_Engine_CAFFE;
 #ifdef USE_CUDNN
-    engine = SigmoidParameter_Engine_CUDNN;
+    if (Caffe::mode() == Caffe::CPU) {
+      engine = SigmoidParameter_Engine_CUDNN;
+    }
 #endif
   }
   if (engine == SigmoidParameter_Engine_CAFFE) {
     return shared_ptr<Layer<Dtype> >(new SigmoidLayer<Dtype>(param));
 #ifdef USE_CUDNN
   } else if (engine == SigmoidParameter_Engine_CUDNN) {
+    if (Caffe::mode() == Caffe::CPU){
+      LOG(INFO) << "CuDNN doesn't support CPU mode at Layer "
+                << param.name() << ". Using Caffe's implementation.";
+      return shared_ptr<Layer<Dtype> >(new SigmoidLayer<Dtype>(param));
+    }
+
     return shared_ptr<Layer<Dtype> >(new CuDNNSigmoidLayer<Dtype>(param));
 #endif
   } else {
@@ -226,13 +269,20 @@ shared_ptr<Layer<Dtype> > GetSoftmaxLayer(const LayerParameter& param) {
   if (engine == SoftmaxParameter_Engine_DEFAULT) {
     engine = SoftmaxParameter_Engine_CAFFE;
 #ifdef USE_CUDNN
-    engine = SoftmaxParameter_Engine_CUDNN;
+    if (Caffe::mode() == Caffe::CPU){
+      engine = SoftmaxParameter_Engine_CUDNN;
+    }
 #endif
   }
   if (engine == SoftmaxParameter_Engine_CAFFE) {
     return shared_ptr<Layer<Dtype> >(new SoftmaxLayer<Dtype>(param));
 #ifdef USE_CUDNN
   } else if (engine == SoftmaxParameter_Engine_CUDNN) {
+    if (Caffe::mode() == Caffe::CPU){
+      LOG(INFO) << "CuDNN doesn't support CPU mode at Layer "
+                << param.name() << ". Using Caffe's implementation.";
+      return shared_ptr<Layer<Dtype> >(new SoftmaxLayer<Dtype>(param));
+    }
     return shared_ptr<Layer<Dtype> >(new CuDNNSoftmaxLayer<Dtype>(param));
 #endif
   } else {
@@ -249,13 +299,20 @@ shared_ptr<Layer<Dtype> > GetTanHLayer(const LayerParameter& param) {
   if (engine == TanHParameter_Engine_DEFAULT) {
     engine = TanHParameter_Engine_CAFFE;
 #ifdef USE_CUDNN
-    engine = TanHParameter_Engine_CUDNN;
+    if (Caffe::mode() == Caffe::CPU) {
+      engine = TanHParameter_Engine_CUDNN;
+    }
 #endif
   }
   if (engine == TanHParameter_Engine_CAFFE) {
     return shared_ptr<Layer<Dtype> >(new TanHLayer<Dtype>(param));
 #ifdef USE_CUDNN
   } else if (engine == TanHParameter_Engine_CUDNN) {
+    if (Caffe::mode() == Caffe::CPU){
+      LOG(INFO) << "CuDNN doesn't support CPU mode at Layer "
+                << param.name() << ". Using Caffe's implementation.";
+      return shared_ptr<Layer<Dtype> >(new TanHLayer<Dtype>(param));
+    }
     return shared_ptr<Layer<Dtype> >(new CuDNNTanHLayer<Dtype>(param));
 #endif
   } else {
