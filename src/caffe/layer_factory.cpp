@@ -54,6 +54,7 @@ shared_ptr<Layer<Dtype> > GetConvolutionLayer(
   if (engine == ConvolutionParameter_Engine_DEFAULT) {
     engine = ConvolutionParameter_Engine_CAFFE;
 #ifdef USE_CUDNN
+    //Add check for CPU mode, since CuDNN is a compile time thing, while mode is runtime
     if (!use_dilation && Caffe::mode() != Caffe::CPU) {
       engine = ConvolutionParameter_Engine_CUDNN;
     }
