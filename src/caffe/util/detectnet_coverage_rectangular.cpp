@@ -111,8 +111,8 @@ CoverageGenerator<Dtype>::pruneBboxes(
   foreach_(BboxLabel cLabel, bboxList) {
     // crop bounding boxes to the dimensions of the screen:
     if (this->param_.crop_bboxes()) {
-      // truncated bbox is the union of bounding box and screen rectangle, and
-      //  is always smaller than cLabel.bbox:
+      // truncated bbox is the intersection of bounding box and screen rectangle
+      //  , and is always smaller than cLabel.bbox:
       Rectv croppedBbox = cLabel.bbox & this->imageROI_;
       // truncation is the area of the intersection over the whole:
       Dtype truncation = 1.0 - std::max(cLabel.truncated, (Dtype)0.0);
