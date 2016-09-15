@@ -2,8 +2,6 @@ import numpy as np
 
 import caffe
 
-MAX_BOXES = 50
-
 
 class ScoreDetections(caffe.Layer):
     """
@@ -46,8 +44,9 @@ class ScoreDetections(caffe.Layer):
 
     def reshape(self, bottom, top):
         n_images = bottom[0].data.shape[0]
-        # Assuming that max booxes per image are MAX_BOXES
-        top[0].reshape(n_images, MAX_BOXES, 5)
+        max_boxes = bottom[0].data.shape[1]
+        # Assuming that max boxes per image are MAX_BOXES
+        top[0].reshape(n_images, max_boxes, 5)
         assert(bottom[0].data.shape[0] == bottom[1].data.shape[0]), "# of images not matching!"
 
     def forward(self, bottom, top):
@@ -125,6 +124,7 @@ def divide_zero_is_zero(a, b):
 
 
 def score_det(gt_bbox_list, det_bbox_list, threshold):
+    MAX_BOXES = gt_bbox_list.shape[1]
     matched_bbox = np.zeros([gt_bbox_list.shape[0], MAX_BOXES, 5])
 
     for k in range(gt_bbox_list.shape[0]):
