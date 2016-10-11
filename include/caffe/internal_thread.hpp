@@ -18,7 +18,7 @@ namespace caffe {
  */
 class InternalThread {
  public:
-  InternalThread() : thread_() {}
+  InternalThread() : device_(0), thread_() {}
   virtual ~InternalThread();
 
   /**
@@ -34,6 +34,8 @@ class InternalThread {
   bool is_started() const;
 
  protected:
+  int device_;
+
   /* Implement this method in your subclass
       with the code you want your thread to run. */
   virtual void InternalThreadEntry() {}

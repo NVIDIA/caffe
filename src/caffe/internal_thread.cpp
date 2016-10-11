@@ -20,18 +20,14 @@ bool InternalThread::must_stop() {
 
 void InternalThread::StartInternalThread() {
   CHECK(!is_started()) << "Threads should persist and not be restarted.";
-
-  int device = 0;
-#ifndef CPU_ONLY
-  CUDA_CHECK(cudaGetDevice(&device));
-#endif
+  DLOG(INFO) << "Starting internal thread on device " << device_;
   Caffe::Brew mode = Caffe::mode();
   int rand_seed = caffe_rng_rand();
   int solver_count = Caffe::solver_count();
   bool root_solver = Caffe::root_solver();
 
   try {
-    thread_.reset(new boost::thread(&InternalThread::entry, this, device, mode,
+    thread_.reset(new boost::thread(&InternalThread::entry, this, device_, mode,
           rand_seed, solver_count, root_solver));
   } catch (std::exception& e) {
     LOG(FATAL) << "Thread exception: " << e.what();
@@ -40,6 +36,7 @@ void InternalThread::StartInternalThread() {
 
 void InternalThread::entry(int device, Caffe::Brew mode, int rand_seed,
     int solver_count, bool root_solver) {
+  DLOG(INFO) << "Started internal thread on device " << device;
 #ifndef CPU_ONLY
   CUDA_CHECK(cudaSetDevice(device));
 #endif

@@ -90,8 +90,9 @@ GPUParams<Dtype>::GPUParams(shared_ptr<Solver<Dtype> > root_solver, int device)
   // Allocate device buffers
   CUDA_CHECK(cudaSetDevice(device));
   buffer_device_ = device;
+  stream_ = GPUMemory::device_stream(buffer_device_);
   GPUMemory::allocate(reinterpret_cast<void **>(&data_),
-      size_ * sizeof(Dtype));
+      size_ * sizeof(Dtype), device, stream_);
 
   // Copy blob values
   const vector<Blob<Dtype>*>& net =
@@ -99,7 +100,7 @@ GPUParams<Dtype>::GPUParams(shared_ptr<Solver<Dtype> > root_solver, int device)
   apply_buffers(net, data_, size_, copy);
 
   GPUMemory::allocate(reinterpret_cast<void **>(&diff_),
-      size_ * sizeof(Dtype));
+      size_ * sizeof(Dtype), device, stream_);
   caffe_gpu_set(size_, Dtype(0), diff_);
 
   CUDA_CHECK(cudaSetDevice(initial_device));
@@ -111,14 +112,8 @@ GPUParams<Dtype>::GPUParams(shared_ptr<Solver<Dtype> > root_solver, int device)
 template<typename Dtype>
 GPUParams<Dtype>::~GPUParams() {
 #ifndef CPU_ONLY
-  int initial_device;
-  CUDA_CHECK(cudaGetDevice(&initial_device));
-  CUDA_CHECK(cudaSetDevice(buffer_device_));
-  GPUMemory::deallocate(data_);
-  GPUMemory::deallocate(diff_);
-  data_ = NULL;
-  diff_ = NULL;
-  CUDA_CHECK(cudaSetDevice(initial_device));
+  GPUMemory::deallocate(data_, buffer_device_, stream_);
+  GPUMemory::deallocate(diff_, buffer_device_, stream_);
 #endif
 }
 
@@ -163,8 +158,8 @@ P2PSync<Dtype>::P2PSync(shared_ptr<Solver<Dtype> > root_solver,
 #ifndef CPU_ONLY
   int initial_device;
   CUDA_CHECK(cudaGetDevice(&initial_device));
-  const int self = param.device_id();
-  CUDA_CHECK(cudaSetDevice(self));
+  this->device_ = param.device_id();
+  CUDA_CHECK(cudaSetDevice(this->device_));
 
   if (rank == 0) {
     solver_ = root_solver;
@@ -181,9 +176,7 @@ P2PSync<Dtype>::P2PSync(shared_ptr<Solver<Dtype> > root_solver,
   nccl_comms_.resize(1);
 #endif
   comm_streams_.resize(1);
-  CUDA_CHECK(cudaStreamCreateWithFlags(&comm_streams_[0],
-                                       cudaStreamNonBlocking));
-
+  CUDA_CHECK(cudaStreamCreate(&comm_streams_[0]));
   CHECK_GT(comm_streams_.size(), 0);
   CUDA_CHECK(cudaSetDevice(initial_device));
 #else
