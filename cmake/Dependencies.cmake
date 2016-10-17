@@ -2,6 +2,7 @@
 set(Caffe_LINKER_LIBS "")
 
 # ---[ Boost
+set(Boost_USE_STATIC_LIBS   ON)
 find_package(Boost 1.46 REQUIRED COMPONENTS system thread filesystem)
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 list(APPEND Caffe_LINKER_LIBS ${Boost_LIBRARIES})
@@ -91,7 +92,7 @@ if(NOT APPLE)
   elseif(BLAS STREQUAL "Open" OR BLAS STREQUAL "open")
     find_package(OpenBLAS REQUIRED)
     include_directories(SYSTEM ${OpenBLAS_INCLUDE_DIR})
-    list(APPEND Caffe_LINKER_LIBS ${OpenBLAS_LIB})
+    list(APPEND Caffe_LINKER_LIBS ${OpenBLAS_LIB} pthread)
   elseif(BLAS STREQUAL "MKL" OR BLAS STREQUAL "mkl")
     find_package(MKL REQUIRED)
     include_directories(SYSTEM ${MKL_INCLUDE_DIR})
