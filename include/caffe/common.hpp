@@ -166,6 +166,8 @@ class Caffe {
   inline static void set_solver_count(int val) { Get().solver_count_ = val; }
   inline static bool root_solver() { return Get().root_solver_; }
   inline static void set_root_solver(bool val) { Get().root_solver_ = val; }
+  inline static int restored_iter() { return restored_iter_; }
+  inline static void set_restored_iter(int val) { restored_iter_ = val; }
 
  protected:
 #ifndef CPU_ONLY
@@ -180,6 +182,7 @@ class Caffe {
   Brew mode_;
   int solver_count_;
   bool root_solver_;
+  static int restored_iter_;
 
  private:
   // The private constructor to avoid duplicate instantiation.
