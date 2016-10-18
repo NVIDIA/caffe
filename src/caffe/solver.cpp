@@ -192,10 +192,10 @@ void Solver<Dtype>::InitTestNets() {
 
 template <typename Dtype>
 void Solver<Dtype>::Step(int iters) {
-  if(!Caffe::root_solver()) {
-    // fix the start iter_ for slave solver when the 
-    // root solver restore state from binary file 
-    // this will cause deadlock when using NCCL 
+  if (!Caffe::root_solver()) {
+    // fix the start iter_ for slave solver when the
+    // root solver restore state from binary file
+    // this will cause deadlock when using NCCL
     iter_ = Caffe::restored_iter();
   }
   const int start_iter = iter_;

@@ -12,7 +12,7 @@ namespace caffe {
 // Make sure each thread can have different values.
 static boost::thread_specific_ptr<Caffe> thread_instance_;
 int  Caffe::restored_iter_;
-  
+
 Caffe& Caffe::Get() {
   if (!thread_instance_.get()) {
     thread_instance_.reset(new Caffe());
