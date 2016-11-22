@@ -36,7 +36,6 @@ class GradientBasedSolverTest : public MultiDeviceTest<TypeParam> {
 
   string snapshot_prefix_;
   shared_ptr<SGDSolver<Dtype> > solver_;
-  shared_ptr<P2PSync<Dtype> > sync_;
   int seed_;
   // Dimensions are determined by generate_sample_data.py
   // TODO this is brittle and the hdf5 file should be checked instead.
@@ -204,9 +203,11 @@ class GradientBasedSolverTest : public MultiDeviceTest<TypeParam> {
           gpus.push_back(i);
       }
       Caffe::set_solver_count(gpus.size());
-      this->sync_.reset(new P2PSync<Dtype>(
-          this->solver_, NULL, this->solver_->param()));
-      this->sync_->run(gpus);
+      SolverParameter param_with_type = this->solver_->param();
+      param_with_type.set_solver_type(solver_type());
+
+      P2PSync<Dtype> sync(this->solver_, 0, gpus.size(), param_with_type);
+      sync.run(this->solver_, gpus);
       Caffe::set_solver_count(1);
     }
     if (snapshot) {

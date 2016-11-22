@@ -72,7 +72,8 @@ class Solver {
   class Callback {
    protected:
     virtual void on_start() = 0;
-    virtual void on_gradients_ready() = 0;
+    virtual void allreduce() = 0;
+    virtual void soft_barrier() = 0;
 
     template <typename T>
     friend class Solver;
@@ -157,6 +158,9 @@ class SGDSolver : public Solver<Dtype> {
  public:
   explicit SGDSolver(const SolverParameter& param)
       : Solver<Dtype>(param) { PreSolve(); }
+  explicit SGDSolver(const SolverParameter& param,
+                     const Solver<Dtype>* root_solver)
+      : Solver<Dtype>(param, root_solver) { PreSolve(); }
   explicit SGDSolver(const string& param_file)
       : Solver<Dtype>(param_file) { PreSolve(); }
 
@@ -189,6 +193,9 @@ class NesterovSolver : public SGDSolver<Dtype> {
  public:
   explicit NesterovSolver(const SolverParameter& param)
       : SGDSolver<Dtype>(param) {}
+  explicit NesterovSolver(const SolverParameter& param,
+                          const Solver<Dtype>* root_solver)
+      : SGDSolver<Dtype>(param, root_solver) {}
   explicit NesterovSolver(const string& param_file)
       : SGDSolver<Dtype>(param_file) {}
 
@@ -203,6 +210,9 @@ class AdaGradSolver : public SGDSolver<Dtype> {
  public:
   explicit AdaGradSolver(const SolverParameter& param)
       : SGDSolver<Dtype>(param) { constructor_sanity_check(); }
+  explicit AdaGradSolver(const SolverParameter& param,
+                         const Solver<Dtype>* root_solver)
+      : SGDSolver<Dtype>(param, root_solver) { constructor_sanity_check(); }
   explicit AdaGradSolver(const string& param_file)
       : SGDSolver<Dtype>(param_file) { constructor_sanity_check(); }
 
@@ -222,6 +232,9 @@ class RMSPropSolver : public SGDSolver<Dtype> {
  public:
   explicit RMSPropSolver(const SolverParameter& param)
       : SGDSolver<Dtype>(param) { constructor_sanity_check(); }
+  explicit RMSPropSolver(const SolverParameter& param,
+                         const Solver<Dtype>* root_solver)
+      : SGDSolver<Dtype>(param, root_solver) { constructor_sanity_check(); }
   explicit RMSPropSolver(const string& param_file)
       : SGDSolver<Dtype>(param_file) { constructor_sanity_check(); }
 
@@ -244,6 +257,9 @@ class AdaDeltaSolver : public SGDSolver<Dtype> {
  public:
   explicit AdaDeltaSolver(const SolverParameter& param)
       : SGDSolver<Dtype>(param) { AdaDeltaPreSolve(); }
+  explicit AdaDeltaSolver(const SolverParameter& param,
+                          const Solver<Dtype>* root_solver)
+      : SGDSolver<Dtype>(param, root_solver) { AdaDeltaPreSolve(); }
   explicit AdaDeltaSolver(const string& param_file)
       : SGDSolver<Dtype>(param_file) { AdaDeltaPreSolve(); }
 
@@ -267,6 +283,9 @@ class AdamSolver : public SGDSolver<Dtype> {
  public:
   explicit AdamSolver(const SolverParameter& param)
       : SGDSolver<Dtype>(param) { AdamPreSolve();}
+  explicit AdamSolver(const SolverParameter& param,
+                      const Solver<Dtype>* root_solver)
+      : SGDSolver<Dtype>(param, root_solver) { AdamPreSolve();}
   explicit AdamSolver(const string& param_file)
       : SGDSolver<Dtype>(param_file) { AdamPreSolve(); }
 
@@ -277,6 +296,7 @@ class AdamSolver : public SGDSolver<Dtype> {
   DISABLE_COPY_AND_ASSIGN(AdamSolver);
 };
 
+#if 0
 template <typename Dtype>
 Solver<Dtype>* GetSolver(const SolverParameter& param) {
   SolverParameter_SolverType type = param.solver_type();
@@ -294,6 +314,31 @@ Solver<Dtype>* GetSolver(const SolverParameter& param) {
     return new AdaDeltaSolver<Dtype>(param);
   case SolverParameter_SolverType_ADAM:
     return new AdamSolver<Dtype>(param);
+  default:
+    LOG(FATAL) << "Unknown SolverType: " << type;
+  }
+  return (Solver<Dtype>*) NULL;
+}
+#endif
+
+template <typename Dtype>
+Solver<Dtype>* GetSolver(const SolverParameter& param,
+                         const Solver<Dtype>* root_solver = NULL) {
+  SolverParameter_SolverType type = param.solver_type();
+
+  switch (type) {
+  case SolverParameter_SolverType_SGD:
+    return new SGDSolver<Dtype>(param, root_solver);
+  case SolverParameter_SolverType_NESTEROV:
+    return new NesterovSolver<Dtype>(param, root_solver);
+  case SolverParameter_SolverType_ADAGRAD:
+    return new AdaGradSolver<Dtype>(param, root_solver);
+  case SolverParameter_SolverType_RMSPROP:
+    return new RMSPropSolver<Dtype>(param, root_solver);
+  case SolverParameter_SolverType_ADADELTA:
+    return new AdaDeltaSolver<Dtype>(param, root_solver);
+  case SolverParameter_SolverType_ADAM:
+    return new AdamSolver<Dtype>(param, root_solver);
   default:
     LOG(FATAL) << "Unknown SolverType: " << type;
   }

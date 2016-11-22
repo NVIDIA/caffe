@@ -205,22 +205,31 @@ void Solver<Dtype>::Step(int iters) {
   vector<Dtype> losses;
   Dtype smoothed_loss = 0;
 
+  for (int i = 0; i < callbacks_.size(); ++i) {
+    // we need to sync all threads before starting, otherwise some cuda init,
+    // malloc or other cuda stuff could interlock with in-loop cuda GPU sync
+    // called in on_start.
+    callbacks_[i]->soft_barrier();
+
+    // Initial bcast of parameters
+    callbacks_[i]->on_start();
+  }
+
   while (iter_ < stop_iter) {
     // zero-init the params
     net_->ClearParamDiffs();
     if (param_.test_interval() && iter_ % param_.test_interval() == 0
-        && (iter_ > 0 || param_.test_initialization())
-        && Caffe::root_solver()) {
-      TestAll();
+        && (iter_ > 0 || param_.test_initialization())) {
+      if (Caffe::root_solver()) TestAll();
       if (requested_early_exit_) {
         // Break out of the while loop because stop was requested while testing.
         break;
       }
+      for (int i = 0; i < callbacks_.size(); ++i) {
+        callbacks_[i]->soft_barrier();
+      }
     }
 
-    for (int i = 0; i < callbacks_.size(); ++i) {
-      callbacks_[i]->on_start();
-    }
     const bool display = param_.display() && iter_ % param_.display() == 0;
     net_->set_debug_info(display && param_.debug_info());
     // accumulate the loss and gradient
@@ -263,7 +272,7 @@ void Solver<Dtype>::Step(int iters) {
       }
     }
     for (int i = 0; i < callbacks_.size(); ++i) {
-      callbacks_[i]->on_gradients_ready();
+      callbacks_[i]->allreduce();
     }
     ApplyUpdate();
 
@@ -584,12 +593,14 @@ void SGDSolver<Dtype>::ClipGradients() {
 
 template <typename Dtype>
 void SGDSolver<Dtype>::ApplyUpdate() {
-  CHECK(Caffe::root_solver());
   Dtype rate = GetLearningRate();
-  if (this->param_.display() && this->iter_ % this->param_.display() == 0) {
-    LOG(INFO) << "Iteration " << this->iter_ << ", lr = " << rate;
+  if (Caffe::root_solver()) {
+    if (this->param_.display() && this->iter_ % this->param_.display() == 0) {
+      LOG(INFO) << "Iteration " << this->iter_ << ", lr = " << rate;
+    }
   }
   ClipGradients();
+
   for (int param_id = 0; param_id < this->net_->learnable_params().size();
        ++param_id) {
     Normalize(param_id);
@@ -828,7 +839,6 @@ void SGDSolver<Dtype>::RestoreSolverStateFromHDF5(const string& state_file) {
 
 template <typename Dtype>
 void NesterovSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
-  CHECK(Caffe::root_solver());
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
   const vector<float>& net_params_lr = this->net_->params_lr();
   Dtype momentum = this->param_.momentum();
@@ -889,7 +899,6 @@ void NesterovSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
 
 template <typename Dtype>
 void AdaGradSolver<Dtype>::ComputeUpdateValue(int param_id, Dtype rate) {
-  CHECK(Caffe::root_solver());
   const vector<Blob<Dtype>*>& net_params = this->net_->learnable_params();
   const vector<float>& net_params_lr = this->net_->params_lr();
   Dtype delta = this->param_.delta();
