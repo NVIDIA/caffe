@@ -42,6 +42,7 @@ void InternalThread::entry(int device, Caffe::Brew mode, int rand_seed,
     int solver_count, bool root_solver) {
 #ifndef CPU_ONLY
   CUDA_CHECK(cudaSetDevice(device));
+  nvml::setCpuAffinity();
 #endif
   Caffe::set_mode(mode);
   Caffe::set_random_seed(rand_seed);

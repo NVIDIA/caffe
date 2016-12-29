@@ -161,6 +161,8 @@ P2PSync<Dtype>::P2PSync(shared_ptr<Solver<Dtype> > root_solver,
   const int self = param.device_id();
   CUDA_CHECK(cudaSetDevice(self));
 
+  nvml::setCpuAffinity();
+
   if (rank == 0) {
     solver_ = root_solver;
   } else {
@@ -226,6 +228,9 @@ void P2PSync<Dtype>::InternalThreadEntry() {
   Caffe::SetDevice(solver_->param().device_id());
   CHECK(Caffe::root_solver());
   Caffe::set_root_solver(false);
+#ifndef CPU_ONLY
+  nvml::setCpuAffinity();
+#endif
   // See if there is a defined seed and reset random state if so
   if (solver_->param().random_seed() >= 0) {
     // Fetch random seed and modulate by device ID to make sure
@@ -337,6 +342,9 @@ void P2PSync<Dtype>::Run(const vector<int>& gpus) {
     syncs[i]->StartInternalThread();
   }
 
+#ifndef CPU_ONLY
+  nvml::setCpuAffinity();
+#endif
   // Run root solver on current thread
   this->solver_->Solve();
 

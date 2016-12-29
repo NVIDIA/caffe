@@ -39,6 +39,8 @@ void classname<Dtype>::funcname##_##gpu(const vector<Blob<Dtype>*>& top, \
 #ifdef USE_CUDNN  // cuDNN acceleration library.
 #include "caffe/util/cudnn.hpp"
 #endif
+#include <nvml.h>
+#include <sched.h>
 
 //
 // CUDA macros
@@ -88,6 +90,20 @@ const int CAFFE_CUDA_NUM_THREADS = 512;
 inline int CAFFE_GET_BLOCKS(const int N) {
   return (N + CAFFE_CUDA_NUM_THREADS - 1) / CAFFE_CUDA_NUM_THREADS;
 }
+
+namespace nvml {
+// set the CPU affinity for this GPU
+inline void setCpuAffinity() {
+  int index;
+  CUDA_CHECK(cudaGetDevice(&index));
+
+  nvmlDevice_t device;
+  nvmlDeviceGetHandleByIndex(index, &device);
+
+  nvmlDeviceSetCpuAffinity(device);
+}
+
+}  // namespace nvml
 
 }  // namespace caffe
 
