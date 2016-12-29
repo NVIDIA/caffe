@@ -27,6 +27,29 @@ int main(int argc, char** argv) {
 //  return feature_extraction_pipeline<double>(argc, argv);
 }
 
+// Parse GPU ids or use all available devices
+static void get_gpus(std::vector<int>* gpus) {
+  if (FLAGS_gpu == "all") {
+    int count = 0;
+#ifndef CPU_ONLY
+    CUDA_CHECK(cudaGetDeviceCount(&count));
+#else
+    NO_GPU;
+#endif
+    for (int i = 0; i < count; ++i) {
+      gpus->push_back(i);
+    }
+  } else if (FLAGS_gpu.size()) {
+    std::vector<string> strings;
+    boost::split(strings, FLAGS_gpu, boost::is_any_of(","));
+    for (int i = 0; i < strings.size(); ++i) {
+      gpus->push_back(boost::lexical_cast<int>(strings[i]));
+    }
+  } else {
+    CHECK_EQ(gpus->size(), 0);
+  }
+}
+
 template<typename Dtype>
 int feature_extraction_pipeline(int argc, char** argv) {
   ::google::InitGoogleLogging(argv[0]);
@@ -46,6 +69,12 @@ int feature_extraction_pipeline(int argc, char** argv) {
     return 1;
   }
   int arg_pos = num_required_args;
+
+  std::vector<int> gpus;
+  get_gpus(&gpus);
+#ifndef CPU_ONLY
+  caffe::GPUMemory::Scope gpu_memory_scope(gpus);
+#endif
 
   arg_pos = num_required_args;
   if (argc > arg_pos && strcmp(argv[arg_pos], "GPU") == 0) {
