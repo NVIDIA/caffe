@@ -251,32 +251,32 @@ TYPED_TEST(LRNLayerTest, TestGradientWithinChannel) {
 }
 
 #ifdef USE_CUDNN
-template <typename Dtype>
-class CuDNNLRNLayerTest : public GPUDeviceTest<Dtype> {
+template <typename TypeParam>
+class CuDNNLRNLayerTest : public GPUDeviceTest<TypeParam> {
  protected:
   CuDNNLRNLayerTest()
-      : epsilon_(Dtype(1e-5)),
-        blob_bottom_(new Blob<Dtype>()),
-        blob_top_(new Blob<Dtype>()) {}
+      : epsilon_(TypeParam(1e-5)),
+        blob_bottom_(new Blob<TypeParam>()),
+        blob_top_(new Blob<TypeParam>()) {}
   virtual void SetUp() {
     Caffe::set_random_seed(1701);
     blob_bottom_->Reshape(2, 7, 3, 3);
     // fill the values
     FillerParameter filler_param;
-    GaussianFiller<Dtype> filler(filler_param);
+    GaussianFiller<TypeParam> filler(filler_param);
     filler.Fill(this->blob_bottom_);
     blob_bottom_vec_.push_back(blob_bottom_);
     blob_top_vec_.push_back(blob_top_);
   }
   virtual ~CuDNNLRNLayerTest() { delete blob_bottom_; delete blob_top_; }
-  void ReferenceLRNForward(const Blob<Dtype>& blob_bottom,
-      const LayerParameter& layer_param, Blob<Dtype>* blob_top);
+  void ReferenceLRNForward(const Blob<TypeParam>& blob_bottom,
+      const LayerParameter& layer_param, Blob<TypeParam>* blob_top);
 
-  Dtype epsilon_;
-  Blob<Dtype>* const blob_bottom_;
-  Blob<Dtype>* const blob_top_;
-  vector<Blob<Dtype>*> blob_bottom_vec_;
-  vector<Blob<Dtype>*> blob_top_vec_;
+  TypeParam epsilon_;
+  Blob<TypeParam>* const blob_bottom_;
+  Blob<TypeParam>* const blob_top_;
+  vector<Blob<TypeParam>*> blob_bottom_vec_;
+  vector<Blob<TypeParam>*> blob_top_vec_;
 };
 
 template <typename TypeParam>

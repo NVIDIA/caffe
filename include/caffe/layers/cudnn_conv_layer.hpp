@@ -30,7 +30,7 @@ namespace caffe {
  * faster as long as it fits in memory.
 */
 template <typename Dtype>
-class CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
+class CAFFE_EXPORT CuDNNConvolutionLayer : public ConvolutionLayer<Dtype> {
   // In iteration 0, use a small amount of memory in order to leave
   // most of memory for allocating layer blobs.
   // NOLINT_NEXT_LINE(build/storage_class)

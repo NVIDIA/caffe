@@ -18,7 +18,7 @@ namespace caffe {
  */
 
 template <typename Dtype>
-class CropLayer : public Layer<Dtype> {
+class CAFFE_EXPORT CropLayer : public Layer<Dtype> {
  public:
   explicit CropLayer(const LayerParameter& param)
       : Layer<Dtype>(param) {}

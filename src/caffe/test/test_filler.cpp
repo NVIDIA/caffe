@@ -83,7 +83,7 @@ class UniformStaticFillerTest : public ::testing::Test {
 TYPED_TEST_CASE(UniformStaticFillerTest, TestDtypes);
 
 TYPED_TEST(UniformStaticFillerTest, TestFill) {
-  EXPECT_TRUE(this->blob_);
+  EXPECT_TRUE(static_cast<bool>(this->blob_));
   const int count = this->blob_->count();
   const TypeParam* data = this->blob_->cpu_data();
   // We want to check that repeated calls to the static filler returns the same
@@ -162,7 +162,7 @@ class PositiveUnitballStaticFillerTest : public ::testing::Test {
 TYPED_TEST_CASE(PositiveUnitballStaticFillerTest, TestDtypes);
 
 TYPED_TEST(PositiveUnitballStaticFillerTest, TestFill) {
-  EXPECT_TRUE(this->blob_);
+  EXPECT_TRUE(static_cast<bool>(this->blob_));
   const int num = this->blob_->num();
   const int count = this->blob_->count();
   const int dim = count / num;
@@ -256,7 +256,7 @@ class GaussianStaticFillerTest : public ::testing::Test {
 TYPED_TEST_CASE(GaussianStaticFillerTest, TestDtypes);
 
 TYPED_TEST(GaussianStaticFillerTest, TestFill) {
-  EXPECT_TRUE(this->blob_);
+  EXPECT_TRUE(static_cast<bool>(this->blob_));
   const int count = this->blob_->count();
   const TypeParam* data = this->blob_->cpu_data();
   TypeParam mean = 0.;
@@ -353,7 +353,7 @@ class XavierStaticFillerTest : public ::testing::Test {
     this->filler_param_.set_variance_norm(variance_norm);
     this->filler_.reset(new XavierStaticFiller<Dtype>(this->filler_param_));
     this->filler_->Fill(blob_.get());
-    EXPECT_TRUE(this->blob_);
+    EXPECT_TRUE(static_cast<bool>(this->blob_));
     const int count = this->blob_->count();
     const Dtype* data = this->blob_->cpu_data();
     Dtype mean = 0.;

@@ -24,7 +24,7 @@ namespace caffe {
 // be replaced by ones from Params, to allow parallelization. Params ensures
 // parameters are allocated in one consecutive array.
 template<typename Dtype>
-class Params {
+class CAFFE_EXPORT  Params {
  public:
   explicit Params(shared_ptr<Solver<Dtype> > root_solver);
   virtual ~Params() {
@@ -50,7 +50,7 @@ DISABLE_COPY_AND_ASSIGN(Params);
 
 // Params stored in GPU memory.
 template<typename Dtype>
-class GPUParams : public Params<Dtype> {
+class CAFFE_EXPORT GPUParams : public Params<Dtype> {
  public:
   GPUParams(shared_ptr<Solver<Dtype> > root_solver, int device);
   virtual ~GPUParams();
@@ -69,7 +69,7 @@ class GPUParams : public Params<Dtype> {
 #endif
 };
 
-class DevicePair {
+class CAFFE_EXPORT DevicePair {
  public:
   DevicePair(int parent, int device)
       : parent_(parent),
@@ -92,7 +92,8 @@ class DevicePair {
 
 // Synchronous data parallelism using map-reduce between local GPUs.
 template<typename Dtype>
-class P2PSync : public GPUParams<Dtype>, public Solver<Dtype>::Callback,
+class CAFFE_EXPORT P2PSync : public GPUParams<Dtype>,
+    public Solver<Dtype>::Callback,
     public InternalThread {
  public:
   explicit P2PSync(shared_ptr<Solver<Dtype> > root_solver,

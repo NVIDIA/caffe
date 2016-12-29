@@ -17,7 +17,7 @@ namespace caffe {
  *        and base @f$ \gamma @f$.
  */
 template <typename Dtype>
-class LogLayer : public NeuronLayer<Dtype> {
+class CAFFE_EXPORT LogLayer : public NeuronLayer<Dtype> {
  public:
   /**
    * @param param provides LogParameter log_param,

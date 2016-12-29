@@ -8,6 +8,11 @@
 #include <opencv2/highgui/highgui_c.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #endif  // USE_OPENCV
+
+#ifdef _MSC_VER
+#include <io.h>
+#endif  // _MSC_VER
+
 #include <stdint.h>
 
 #include <algorithm>

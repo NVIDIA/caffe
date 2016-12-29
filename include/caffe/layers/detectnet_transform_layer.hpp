@@ -48,7 +48,7 @@ struct AugmentSelection {
  * scaling, mirroring, substracting the image mean...
  */
 template <typename Dtype>
-class DetectNetTransformationLayer : public Layer<Dtype> {
+class CAFFE_EXPORT DetectNetTransformationLayer : public Layer<Dtype> {
  public:
   typedef cv::Size2i Size2i;
   typedef cv::Size_<Dtype> Size2v;

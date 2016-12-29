@@ -24,7 +24,7 @@ inline void MDB_CHECK(int mdb_status) {
   CHECK_EQ(mdb_status, MDB_SUCCESS) << mdb_strerror(mdb_status);
 }
 
-class LMDBCursor : public Cursor {
+class CAFFE_EXPORT LMDBCursor : public Cursor {
  public:
   explicit LMDBCursor(MDB_txn* mdb_txn, MDB_cursor* mdb_cursor)
     : mdb_txn_(mdb_txn), mdb_cursor_(mdb_cursor), valid_(false) {
@@ -62,7 +62,7 @@ class LMDBCursor : public Cursor {
   bool valid_;
 };
 
-class LMDBTransaction : public Transaction {
+class CAFFE_EXPORT LMDBTransaction : public Transaction {
  public:
   explicit LMDBTransaction(MDB_env* mdb_env)
     : mdb_env_(mdb_env) { }
@@ -78,7 +78,7 @@ class LMDBTransaction : public Transaction {
   DISABLE_COPY_AND_ASSIGN(LMDBTransaction);
 };
 
-class LMDB : public DB {
+class CAFFE_EXPORT LMDB : public DB {
  public:
   LMDB() : mdb_env_(NULL) { }
   virtual ~LMDB() { Close(); }

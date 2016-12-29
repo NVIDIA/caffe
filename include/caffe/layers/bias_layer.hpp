@@ -19,7 +19,7 @@ namespace caffe {
  * of the layer.
  */
 template <typename Dtype>
-class BiasLayer : public Layer<Dtype> {
+class CAFFE_EXPORT BiasLayer : public Layer<Dtype> {
  public:
   explicit BiasLayer(const LayerParameter& param)
       : Layer<Dtype>(param) {}

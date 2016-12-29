@@ -2,9 +2,17 @@
 set(Caffe_LINKER_LIBS "")
 
 # ---[ Boost
-find_package(Boost 1.46 REQUIRED COMPONENTS system thread filesystem)
+if(MSVC)
+set(boost_components system thread filesystem program_options)
+else()
+set(boost_components system thread filesystem)
+endif(MSVC)
+find_package(Boost 1.46 REQUIRED COMPONENTS ${boost_components})
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 list(APPEND Caffe_LINKER_LIBS ${Boost_LIBRARIES})
+if(MSVC)
+  list(APPEND Caffe_LINKER_LIBS Shlwapi.lib)
+endif(MSVC)
 
 # ---[ Threads
 find_package(Threads REQUIRED)

@@ -17,7 +17,7 @@ namespace caffe {
 
 /// @brief Fills a Blob with constant or randomly-generated data.
 template <typename Dtype>
-class Filler {
+class CAFFE_EXPORT Filler {
  public:
   explicit Filler(const FillerParameter& param) : filler_param_(param) {}
   virtual ~Filler() {}
@@ -29,7 +29,7 @@ class Filler {
 
 /// @brief Fills a Blob with constant values @f$ x = 0 @f$.
 template <typename Dtype>
-class ConstantFiller : public Filler<Dtype> {
+class CAFFE_EXPORT ConstantFiller : public Filler<Dtype> {
  public:
   explicit ConstantFiller(const FillerParameter& param)
       : Filler<Dtype>(param) {}
@@ -48,7 +48,7 @@ class ConstantFiller : public Filler<Dtype> {
 
 /// @brief Fills a Blob with uniformly distributed values @f$ x\sim U(a, b) @f$.
 template <typename Dtype>
-class UniformFiller : public Filler<Dtype> {
+class CAFFE_EXPORT UniformFiller : public Filler<Dtype> {
  public:
   explicit UniformFiller(const FillerParameter& param)
       : Filler<Dtype>(param) {}
@@ -66,7 +66,7 @@ class UniformFiller : public Filler<Dtype> {
 //         UniformStaticFillerdata. Followup calls to the Filler function
 //         will bypass RNG.
 template <typename Dtype>
-class UniformStaticFiller : public Filler<Dtype> {
+class CAFFE_EXPORT UniformStaticFiller : public Filler<Dtype> {
  public:
   explicit UniformStaticFiller(const FillerParameter& param)
       : Filler<Dtype>(param) {
@@ -97,7 +97,7 @@ class UniformStaticFiller : public Filler<Dtype> {
 
 /// @brief Fills a Blob with Gaussian-distributed values @f$ x = a @f$.
 template <typename Dtype>
-class GaussianFiller : public Filler<Dtype> {
+class CAFFE_EXPORT GaussianFiller : public Filler<Dtype> {
  public:
   explicit GaussianFiller(const FillerParameter& param)
       : Filler<Dtype>(param) {}
@@ -135,7 +135,7 @@ class GaussianFiller : public Filler<Dtype> {
 //         GaussianStaticFillerdata. Followup calls to the Filler function
 //         will bypass RNG.
 template <typename Dtype>
-class GaussianStaticFiller : public Filler<Dtype> {
+class CAFFE_EXPORT GaussianStaticFiller : public Filler<Dtype> {
  public:
   explicit GaussianStaticFiller(const FillerParameter& param)
       : Filler<Dtype>(param) {
@@ -185,7 +185,7 @@ class GaussianStaticFiller : public Filler<Dtype> {
  *         such that @f$ \forall i \sum_j x_{ij} = 1 @f$.
  */
 template <typename Dtype>
-class PositiveUnitballFiller : public Filler<Dtype> {
+class CAFFE_EXPORT PositiveUnitballFiller : public Filler<Dtype> {
  public:
   explicit PositiveUnitballFiller(const FillerParameter& param)
       : Filler<Dtype>(param) {}
@@ -218,7 +218,7 @@ class PositiveUnitballFiller : public Filler<Dtype> {
  *         will bypass RNG.
  */
 template <typename Dtype>
-class PositiveUnitballStaticFiller : public Filler<Dtype> {
+class CAFFE_EXPORT PositiveUnitballStaticFiller : public Filler<Dtype> {
  public:
   explicit PositiveUnitballStaticFiller(const FillerParameter& param)
       : Filler<Dtype>(param) {
@@ -276,7 +276,7 @@ class PositiveUnitballStaticFiller : public Filler<Dtype> {
  * TODO(dox): make notation in above comment consistent with rest & use LaTeX.
  */
 template <typename Dtype>
-class XavierFiller : public Filler<Dtype> {
+class CAFFE_EXPORT XavierFiller : public Filler<Dtype> {
  public:
   explicit XavierFiller(const FillerParameter& param)
       : Filler<Dtype>(param) {}
@@ -322,7 +322,7 @@ class XavierFiller : public Filler<Dtype> {
  * TODO(dox): make notation in above comment consistent with rest & use LaTeX.
  */
 template <typename Dtype>
-class XavierStaticFiller : public Filler<Dtype> {
+class CAFFE_EXPORT XavierStaticFiller : public Filler<Dtype> {
  public:
   explicit XavierStaticFiller(const FillerParameter& param)
       : Filler<Dtype>(param) {
@@ -379,7 +379,7 @@ class XavierStaticFiller : public Filler<Dtype> {
  * is currently not the case for inner product layers.
  */
 template <typename Dtype>
-class MSRAFiller : public Filler<Dtype> {
+class CAFFE_EXPORT MSRAFiller : public Filler<Dtype> {
  public:
   explicit MSRAFiller(const FillerParameter& param)
       : Filler<Dtype>(param) {}
@@ -426,7 +426,7 @@ class MSRAFiller : public Filler<Dtype> {
  * will bypass RNG.
  */
 template <typename Dtype>
-class MSRAStaticFiller : public Filler<Dtype> {
+class CAFFE_EXPORT MSRAStaticFiller : public Filler<Dtype> {
  public:
   explicit MSRAStaticFiller(const FillerParameter& param)
       : Filler<Dtype>(param) {
@@ -498,7 +498,7 @@ out = skimage.transform.rescale(img, factor, mode='constant', cval=0)
 \endcode
  */
 template <typename Dtype>
-class BilinearFiller : public Filler<Dtype> {
+class CAFFE_EXPORT BilinearFiller : public Filler<Dtype> {
  public:
   explicit BilinearFiller(const FillerParameter& param)
       : Filler<Dtype>(param) {}
@@ -556,7 +556,7 @@ out = skimage.transform.rescale(img, factor, mode='constant', cval=0)
  * will bypass RNG.
  */
 template <typename Dtype>
-class BilinearStaticFiller : public Filler<Dtype> {
+class CAFFE_EXPORT BilinearStaticFiller : public Filler<Dtype> {
  public:
   explicit BilinearStaticFiller(const FillerParameter& param)
       : Filler<Dtype>(param) {

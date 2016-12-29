@@ -16,7 +16,7 @@ namespace caffe {
  * forward, backward, and reshape are all no-ops.
  */
 template <typename Dtype>
-class InputLayer : public Layer<Dtype> {
+class CAFFE_EXPORT InputLayer : public Layer<Dtype> {
  public:
   explicit InputLayer(const LayerParameter& param)
       : Layer<Dtype>(param) {}

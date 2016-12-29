@@ -21,7 +21,7 @@ namespace caffe {
  * of the layer.
  */
 template <typename Dtype>
-class ScaleLayer: public Layer<Dtype> {
+class CAFFE_EXPORT ScaleLayer: public Layer<Dtype> {
  public:
   explicit ScaleLayer(const LayerParameter& param)
       : Layer<Dtype>(param) {}

@@ -16,7 +16,7 @@ namespace caffe {
  * scaling, mirroring, substracting the image mean...
  */
 template <typename Dtype>
-class DataTransformer {
+class CAFFE_EXPORT DataTransformer {
  public:
   explicit DataTransformer(const TransformationParameter& param, Phase phase);
   virtual ~DataTransformer() {}

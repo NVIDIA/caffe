@@ -30,7 +30,7 @@ namespace caffe {
  * their output Blob%s.
  */
 template <typename Dtype>
-class Layer {
+class CAFFE_EXPORT  Layer {
  public:
   /**
    * You should not implement your own constructor. Any set up code should go
@@ -504,7 +504,7 @@ inline void Layer<Dtype>::Backward(const vector<Blob<Dtype>*>& top,
 
 // Serialize LayerParameter to protocol buffer
 template <typename Dtype>
-void Layer<Dtype>::ToProto(LayerParameter* param, bool write_diff) {
+inline void Layer<Dtype>::ToProto(LayerParameter* param, bool write_diff) {
   param->Clear();
   param->CopyFrom(layer_param_);
   param->clear_blobs();

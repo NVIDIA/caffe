@@ -21,7 +21,7 @@ namespace caffe {
  *      @f$.  
  */
 template <typename Dtype>
-class ELULayer : public NeuronLayer<Dtype> {
+class CAFFE_EXPORT ELULayer : public NeuronLayer<Dtype> {
  public:
   /**
    * @param param provides ELUParameter elu_param,

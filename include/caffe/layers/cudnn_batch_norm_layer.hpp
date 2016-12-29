@@ -13,7 +13,7 @@ namespace caffe {
 
 #ifdef USE_CUDNN
 template <typename Dtype>
-class CuDNNBatchNormLayer : public BatchNormLayer<Dtype> {
+class CAFFE_EXPORT CuDNNBatchNormLayer : public BatchNormLayer<Dtype> {
  public:
   explicit CuDNNBatchNormLayer(const LayerParameter& param)
       : BatchNormLayer<Dtype>(param), handles_setup_(false) {}

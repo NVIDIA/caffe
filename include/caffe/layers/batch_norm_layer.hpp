@@ -43,7 +43,7 @@ namespace caffe {
  * TODO(dox): thorough documentation for Forward, Backward, and proto params.
  */
 template <typename Dtype>
-class BatchNormLayer : public Layer<Dtype> {
+class CAFFE_EXPORT BatchNormLayer : public Layer<Dtype> {
  public:
   explicit BatchNormLayer(const LayerParameter& param)
       : Layer<Dtype>(param) {}

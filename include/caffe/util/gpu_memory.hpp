@@ -11,13 +11,13 @@ namespace cub {
 
 namespace caffe {
 
-struct GPUMemory {
+struct CAFFE_EXPORT GPUMemory {
   static void GetInfo(size_t* free_mem, size_t* used_mem) {
-    return mgr_.GetInfo(free_mem, used_mem);
+    return mgr().GetInfo(free_mem, used_mem);
   }
 
   static cudaStream_t device_stream(int device) {
-    return mgr_.device_stream(device);
+    return mgr().device_stream(device);
   }
 
   template <class Any>
@@ -30,12 +30,12 @@ struct GPUMemory {
   }
 
   static void deallocate(void* ptr, int device, cudaStream_t stream) {
-    mgr_.deallocate(ptr, device, stream);
+    mgr().deallocate(ptr, device, stream);
   }
 
   static bool try_allocate(void** ptr, size_t size, int device,
       cudaStream_t stream) {
-    return mgr_.try_allocate(ptr, size, device, stream);
+    return mgr().try_allocate(ptr, size, device, stream);
   }
 
   enum Mode {
@@ -49,7 +49,7 @@ struct GPUMemory {
   struct Scope {
     Scope(const std::vector<int>& gpus, Mode m = CUB_ALLOCATOR,
           bool debug = false) {
-      mgr_.init(gpus, m, debug);
+      mgr().init(gpus, m, debug);
     }
   };
 
@@ -57,11 +57,11 @@ struct GPUMemory {
   // If pool is available, it returns memory to the pool and sets ptr to NULL
   // If pool is not available, it retains memory.
   // This is single GPU workspace. See MultiWorkspace for multi-GPU support.
-  struct Workspace {
+  struct CAFFE_EXPORT Workspace {
     Workspace()
       : ptr_(NULL), size_(0), device_(INVALID_DEVICE),
         stream_(cudaStreamDefault) {}
-    ~Workspace() { mgr_.deallocate(ptr_, device_, stream_); }
+    ~Workspace() { mgr().deallocate(ptr_, device_, stream_); }
 
     void* data() const {
       CHECK_NOTNULL(ptr_);
@@ -74,12 +74,12 @@ struct GPUMemory {
       bool status = true;
       if (size > size_ || ptr_ == NULL) {
         if (ptr_ != NULL) {
-          mgr_.deallocate(ptr_, device_, stream_);
+          mgr().deallocate(ptr_, device_, stream_);
         }
         if (device != INVALID_DEVICE) {
           device_ = device;  // switch from default to specific one
         }
-        status = mgr_.try_allocate(&ptr_, size, device_, stream);
+        status = mgr().try_allocate(&ptr_, size, device_, stream);
         if (status) {
           CHECK_NOTNULL(ptr_);
           size_ = size;
@@ -97,8 +97,8 @@ struct GPUMemory {
     }
 
     void release() {
-      if (mgr_.using_pool() && ptr_ != NULL) {
-        mgr_.deallocate(ptr_, device_, stream_);
+      if (mgr().using_pool() && ptr_ != NULL) {
+        mgr().deallocate(ptr_, device_, stream_);
         ptr_ = NULL;
         size_ = 0;
       }
@@ -115,7 +115,7 @@ struct GPUMemory {
   };
 
   // This implementation maintains workspaces on per-GPU basis.
-  struct MultiWorkspace {
+  struct CAFFE_EXPORT MultiWorkspace {
     bool try_reserve(size_t size) {
       const int device = current_device();
       cudaStream_t stream = device_stream(device);
@@ -142,7 +142,7 @@ struct GPUMemory {
   };
 
  private:
-  struct Manager {
+  struct CAFFE_EXPORT Manager {
     Manager();
     ~Manager();
     void lazy_init(int device);
@@ -178,7 +178,7 @@ struct GPUMemory {
     static const size_t MAX_CACHED_BYTES;  ///< Maximum aggregate cached bytes
   };
 
-  static Manager mgr_;
+  static Manager& mgr();
   static const int INVALID_DEVICE;  ///< Default is invalid: CUB takes care
 
   static int current_device() {

@@ -18,7 +18,7 @@ namespace caffe {
  * TODO(dox): thorough documentation for Forward and proto params.
  */
 template <typename Dtype>
-class BaseDataLayer : public Layer<Dtype> {
+class CAFFE_EXPORT BaseDataLayer : public Layer<Dtype> {
  public:
   explicit BaseDataLayer(const LayerParameter& param);
   // LayerSetUp: implements common data layer setup functionality, and calls
@@ -57,7 +57,7 @@ class Batch {
 };
 
 template <typename Dtype>
-class BasePrefetchingDataLayer :
+class CAFFE_EXPORT BasePrefetchingDataLayer :
     public BaseDataLayer<Dtype>, public InternalThread {
  public:
   explicit BasePrefetchingDataLayer(const LayerParameter& param);

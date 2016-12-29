@@ -28,32 +28,44 @@ void hdf5_load_nd_dataset_helper(
       file_id, dataset_name_, dims.data(), &class_, NULL);
   CHECK_GE(status, 0) << "Failed to get dataset info for " << dataset_name_;
   switch (class_) {
-  case H5T_FLOAT:
+  case H5T_FLOAT: {
     LOG_FIRST_N(INFO, 1) << "Datatype class: H5T_FLOAT";
     break;
-  case H5T_INTEGER:
+  }
+  case H5T_INTEGER: {
     LOG_FIRST_N(INFO, 1) << "Datatype class: H5T_INTEGER";
     break;
-  case H5T_TIME:
+  }
+  case H5T_TIME: {
     LOG(FATAL) << "Unsupported datatype class: H5T_TIME";
-  case H5T_STRING:
+  }
+  case H5T_STRING: {
     LOG(FATAL) << "Unsupported datatype class: H5T_STRING";
-  case H5T_BITFIELD:
+  }
+  case H5T_BITFIELD: {
     LOG(FATAL) << "Unsupported datatype class: H5T_BITFIELD";
-  case H5T_OPAQUE:
+  }
+  case H5T_OPAQUE: {
     LOG(FATAL) << "Unsupported datatype class: H5T_OPAQUE";
-  case H5T_COMPOUND:
+  }
+  case H5T_COMPOUND: {
     LOG(FATAL) << "Unsupported datatype class: H5T_COMPOUND";
-  case H5T_REFERENCE:
+  }
+  case H5T_REFERENCE: {
     LOG(FATAL) << "Unsupported datatype class: H5T_REFERENCE";
-  case H5T_ENUM:
+  }
+  case H5T_ENUM: {
     LOG(FATAL) << "Unsupported datatype class: H5T_ENUM";
-  case H5T_VLEN:
+  }
+  case H5T_VLEN: {
     LOG(FATAL) << "Unsupported datatype class: H5T_VLEN";
-  case H5T_ARRAY:
+  }
+  case H5T_ARRAY: {
     LOG(FATAL) << "Unsupported datatype class: H5T_ARRAY";
-  default:
+  }
+  default: {
     LOG(FATAL) << "Datatype class unknown";
+  }
   }
 
   vector<int> blob_dims(dims.size());
@@ -71,6 +83,9 @@ void hdf5_load_nd_dataset<float>(hid_t file_id, const char* dataset_name_,
     file_id, dataset_name_, blob->mutable_cpu_data());
   CHECK_GE(status, 0) << "Failed to read float dataset " << dataset_name_;
 }
+template CAFFE_EXPORT void hdf5_load_nd_dataset<float>(
+    hid_t file_id, const char* dataset_name_,
+    int min_dim, int max_dim, Blob<float>* blob);
 
 template <>
 void hdf5_load_nd_dataset<double>(hid_t file_id, const char* dataset_name_,
@@ -80,6 +95,10 @@ void hdf5_load_nd_dataset<double>(hid_t file_id, const char* dataset_name_,
     file_id, dataset_name_, blob->mutable_cpu_data());
   CHECK_GE(status, 0) << "Failed to read double dataset " << dataset_name_;
 }
+
+template CAFFE_EXPORT void hdf5_load_nd_dataset<double>(
+    hid_t file_id, const char* dataset_name_,
+    int min_dim, int max_dim, Blob<double>* blob);
 
 template <>
 void hdf5_save_nd_dataset<float>(
@@ -101,6 +120,10 @@ void hdf5_save_nd_dataset<float>(
   CHECK_GE(status, 0) << "Failed to make float dataset " << dataset_name;
   delete[] dims;
 }
+template CAFFE_EXPORT
+void hdf5_save_nd_dataset<float>(
+    const hid_t file_id, const string& dataset_name, const Blob<float>& blob,
+    bool write_diff);
 
 template <>
 void hdf5_save_nd_dataset<double>(
@@ -122,6 +145,11 @@ void hdf5_save_nd_dataset<double>(
   CHECK_GE(status, 0) << "Failed to make double dataset " << dataset_name;
   delete[] dims;
 }
+
+template CAFFE_EXPORT
+void hdf5_save_nd_dataset<double>(
+    hid_t file_id, const string& dataset_name, const Blob<double>& blob,
+    bool write_diff);
 
 string hdf5_load_string(hid_t loc_id, const string& dataset_name) {
   // Get size of dataset

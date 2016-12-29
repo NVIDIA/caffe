@@ -4,6 +4,7 @@
 #include <boost/python.hpp>
 #endif
 #include <string>
+#include <vector>
 
 #include "caffe/layer.hpp"
 #include "caffe/layer_factory.hpp"
@@ -32,10 +33,61 @@
 #ifdef WITH_PYTHON_LAYER
 #include "caffe/layers/python_layer.hpp"
 #endif
-
+#ifndef _MSC_VER
 #pragma GCC diagnostic ignored "-Wreturn-type"
-
+#endif
 namespace caffe {
+    template<typename T> typename LayerRegistry<T>::CreatorRegistry&
+        LayerRegistry<T>::Registry() {
+        static LayerRegistry<T>::CreatorRegistry* g_registry_
+            = new LayerRegistry<T>::CreatorRegistry();
+        return *g_registry_;
+    }
+
+    template<typename T> void LayerRegistry<T>::AddCreator(
+        const string& type, Creator creator) {
+        CreatorRegistry& registry = Registry();
+        CHECK_EQ(registry.count(type), 0)
+            << "Layer type " << type << " already registered.";
+        registry[type] = creator;
+    }
+
+    template<typename T> shared_ptr<Layer<T> > LayerRegistry<T>::CreateLayer(
+        const LayerParameter& param) {
+        if (Caffe::root_solver()) {
+            LOG(INFO) << "Creating layer " << param.name();
+        }
+        const string& type = param.type();
+        CreatorRegistry& registry = Registry();
+        CHECK_EQ(registry.count(type), 1) << "Unknown layer type: " << type
+            << " (known types: " << LayerTypeListString() << ")";
+        return registry[type](param);
+    }
+
+    template<typename T> vector<string> LayerRegistry<T>::LayerTypeList() {
+        CreatorRegistry& registry = Registry();
+        vector<string> layer_types;
+        for (typename CreatorRegistry::iterator iter = registry.begin();
+            iter != registry.end(); ++iter) {
+            layer_types.push_back(iter->first);
+        }
+        return layer_types;
+    }
+
+    template<typename T> string LayerRegistry<T>::LayerTypeListString() {
+        vector<string> layer_types = LayerTypeList();
+        string layer_types_str;
+        for (vector<string>::iterator iter = layer_types.begin();
+        iter != layer_types.end(); ++iter) {
+            if (iter != layer_types.begin()) {
+                layer_types_str += ", ";
+            }
+            layer_types_str += *iter;
+        }
+        return layer_types_str;
+    }
+
+INSTANTIATE_CLASS(LayerRegistry);
 
 // Get convolution layer according to engine.
 template <typename Dtype>

@@ -16,7 +16,7 @@ namespace caffe {
  * item needs to stay).
  */
 template <typename Dtype>
-class FilterLayer : public Layer<Dtype> {
+class CAFFE_EXPORT FilterLayer : public Layer<Dtype> {
  public:
   explicit FilterLayer(const LayerParameter& param)
       : Layer<Dtype>(param) {}

@@ -2,7 +2,6 @@
 #define CAFFE_COMMON_HPP_
 
 #include <boost/shared_ptr.hpp>
-#include <gflags/gflags.h>
 #include <glog/logging.h>
 
 #include <climits>
@@ -16,6 +15,7 @@
 #include <utility>  // pair
 #include <vector>
 
+#include "caffe/export.hpp"
 #include "caffe/util/device_alternate.hpp"
 
 // Convert macro to string
@@ -44,19 +44,19 @@ private:\
   template class classname<double>
 
 #define INSTANTIATE_LAYER_GPU_FORWARD(classname) \
-  template void classname<float>::Forward_gpu( \
+  template CAFFE_EXPORT void classname<float>::Forward_gpu( \
       const std::vector<Blob<float>*>& bottom, \
       const std::vector<Blob<float>*>& top); \
-  template void classname<double>::Forward_gpu( \
+  template CAFFE_EXPORT void classname<double>::Forward_gpu( \
       const std::vector<Blob<double>*>& bottom, \
       const std::vector<Blob<double>*>& top);
 
 #define INSTANTIATE_LAYER_GPU_BACKWARD(classname) \
-  template void classname<float>::Backward_gpu( \
+  template CAFFE_EXPORT void classname<float>::Backward_gpu( \
       const std::vector<Blob<float>*>& top, \
       const std::vector<bool>& propagate_down, \
       const std::vector<Blob<float>*>& bottom); \
-  template void classname<double>::Backward_gpu( \
+  template CAFFE_EXPORT void classname<double>::Backward_gpu( \
       const std::vector<Blob<double>*>& top, \
       const std::vector<bool>& propagate_down, \
       const std::vector<Blob<double>*>& bottom)
@@ -95,11 +95,11 @@ using std::vector;
 
 // A global initialization function that you should call in your main function.
 // Currently it initializes google flags and google logging.
-void GlobalInit(int* pargc, char*** pargv);
+CAFFE_EXPORT void GlobalInit(int* pargc, char*** pargv);
 
 // A singleton class to hold common caffe stuff, such as the handler that
 // caffe is going to use for cublas, curand, etc.
-class Caffe {
+class CAFFE_EXPORT Caffe {
  public:
   ~Caffe();
 
@@ -112,7 +112,7 @@ class Caffe {
 
   // This random number generator facade hides boost and CUDA rng
   // implementation from one another (for cross-platform compatibility).
-  class RNG {
+  class CAFFE_EXPORT RNG {
    public:
     RNG();
     explicit RNG(unsigned int seed);

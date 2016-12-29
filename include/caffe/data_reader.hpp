@@ -20,7 +20,7 @@ namespace caffe {
  * subset of the database. Data is distributed to solvers in a round-robin
  * way to keep parallel training deterministic.
  */
-class DataReader {
+class CAFFE_EXPORT DataReader {
  public:
   explicit DataReader(const LayerParameter& param);
   ~DataReader();
@@ -46,7 +46,7 @@ class DataReader {
   };
 
   // A single body is created per source
-  class Body : public InternalThread {
+  class CAFFE_EXPORT Body : public InternalThread {
    public:
     explicit Body(const LayerParameter& param);
     virtual ~Body();

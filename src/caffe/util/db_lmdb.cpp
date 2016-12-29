@@ -1,5 +1,6 @@
 #ifdef USE_LMDB
 #include "caffe/util/db_lmdb.hpp"
+#include <boost/filesystem.hpp>
 
 #include <sys/stat.h>
 
@@ -10,7 +11,17 @@ namespace caffe { namespace db {
 void LMDB::Open(const string& source, Mode mode) {
   MDB_CHECK(mdb_env_create(&mdb_env_));
   if (mode == NEW) {
-    CHECK_EQ(mkdir(source.c_str(), 0744), 0) << "mkdir " << source << "failed";
+#ifdef _MSC_VER
+      if (!boost::filesystem::exists(source)) {
+          // Returns a 1 on successful create, 0 on failed to create.
+          // Returns 0 if directory already exists
+          CHECK_EQ(boost::filesystem::create_directory(source), 1)
+              << " mkdir " << source << " failed";
+      }
+#else
+      CHECK_EQ(mkdir(source.c_str(), 0744), 0) << "mkdir "
+          << source << " failed";
+#endif
   }
   int flags = 0;
   if (mode == READ) {

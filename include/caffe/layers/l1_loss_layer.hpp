@@ -15,7 +15,7 @@ namespace caffe {
  * L1Loss
  */
 template <typename Dtype>
-class L1LossLayer : public LossLayer<Dtype> {
+class CAFFE_EXPORT L1LossLayer : public LossLayer<Dtype> {
  public:
   explicit L1LossLayer(const LayerParameter& param)
       : LossLayer<Dtype>(param), diff_() {}
