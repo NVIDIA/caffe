@@ -30,7 +30,7 @@ void L1LossLayer<Dtype>::Forward_cpu(const vector<Blob<Dtype>*>& bottom,
       diff_.mutable_cpu_data());
   caffe_cpu_sign(count, diff_.cpu_data(), sign_.mutable_cpu_data());
   Dtype abs_sum = caffe_cpu_asum(count, diff_.cpu_data());
-  Dtype loss = abs_sum / bottom[0]->num();
+  Dtype loss = abs_sum / count;
   top[0]->mutable_cpu_data()[0] = loss;
 }
 
@@ -41,7 +41,7 @@ void L1LossLayer<Dtype>::Backward_cpu(const vector<Blob<Dtype>*>& top,
   for (int i = 0; i < 2; ++i) {
     if (propagate_down[i]) {
       const Dtype sign = (i == 0) ? 1 : -1;
-      const Dtype alpha = sign * top[0]->cpu_diff()[0] / bottom[i]->num();
+      const Dtype alpha = sign * top[0]->cpu_diff()[0] / bottom[i]->count();
       caffe_cpu_axpby(
           bottom[i]->count(),              // count
           alpha,                              // alpha
