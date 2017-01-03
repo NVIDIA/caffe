@@ -146,8 +146,7 @@ void Net_Save(const Net<Dtype>& net, string filename) {
   WriteProtoToBinaryFile(net_param, filename.c_str());
 }
 
-void Net_SetInputArrays(Net<Dtype>* net, bp::object data_obj,
-    bp::object labels_obj) {
+shared_ptr<MemoryDataLayer<Dtype> > get_md_layer(Net<Dtype>* net) {
   // check that this network has an input MemoryDataLayer
   shared_ptr<MemoryDataLayer<Dtype> > md_layer =
     boost::dynamic_pointer_cast<MemoryDataLayer<Dtype> >(net->layers()[0]);
@@ -155,7 +154,17 @@ void Net_SetInputArrays(Net<Dtype>* net, bp::object data_obj,
     throw std::runtime_error("set_input_arrays may only be called if the"
         " first layer is a MemoryDataLayer");
   }
+  return md_layer;
+}
 
+void Net_SetDeepCopyMode(Net<Dtype>* net, bool deep_copy_mode) {
+  shared_ptr<MemoryDataLayer<Dtype> > md_layer = get_md_layer(net);
+  md_layer->set_deep_copy_mode(deep_copy_mode);
+}
+
+void Net_SetInputArrays(Net<Dtype>* net, bp::object data_obj,
+    bp::object labels_obj) {
+  shared_ptr<MemoryDataLayer<Dtype> > md_layer = get_md_layer(net);
   // check that we were passed appropriately-sized contiguous memory
   PyArrayObject* data_arr =
       reinterpret_cast<PyArrayObject*>(data_obj.ptr());
@@ -299,7 +308,9 @@ BOOST_PYTHON_MODULE(_caffe) {
         bp::return_value_policy<bp::copy_const_reference>()))
     .def("_set_input_arrays", &Net_SetInputArrays,
         bp::with_custodian_and_ward<1, 2, bp::with_custodian_and_ward<1, 3> >())
-    .def("save", &Net_Save);
+    .def("save", &Net_Save)
+    .def("set_deep_copy_mode", &Net_SetDeepCopyMode);
+
   BP_REGISTER_SHARED_PTR_TO_PYTHON(Net<Dtype>);
 
   bp::class_<Blob<Dtype>, shared_ptr<Blob<Dtype> >, boost::noncopyable>(

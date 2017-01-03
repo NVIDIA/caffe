@@ -20,7 +20,8 @@ template <typename Dtype>
 class MemoryDataLayer : public BaseDataLayer<Dtype> {
  public:
   explicit MemoryDataLayer(const LayerParameter& param)
-      : BaseDataLayer<Dtype>(param), has_new_data_(false) {}
+      : BaseDataLayer<Dtype>(param), has_new_data_(false),
+        deep_copy_mode_(false) {}
   virtual void DataLayerSetUp(const vector<Blob<Dtype>*>& bottom,
       const vector<Blob<Dtype>*>& top);
 
@@ -38,6 +39,9 @@ class MemoryDataLayer : public BaseDataLayer<Dtype> {
   //  will be given to Blob, which is mutable
   void Reset(Dtype* data, Dtype* label, int n);
   void set_batch_size(int new_size);
+  void set_deep_copy_mode(bool deep_copy_mode) {
+    deep_copy_mode_ = deep_copy_mode;
+  }
 
   int batch_size() { return batch_size_; }
   int channels() { return channels_; }
@@ -56,6 +60,7 @@ class MemoryDataLayer : public BaseDataLayer<Dtype> {
   Blob<Dtype> added_data_;
   Blob<Dtype> added_label_;
   bool has_new_data_;
+  bool deep_copy_mode_;
 };
 
 }  // namespace caffe
