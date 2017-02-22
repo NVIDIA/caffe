@@ -173,7 +173,7 @@ endif()
 
 # ---[ NCCL
 if(DEFINED USE_NCCL)
-  if(${USE_NCCL} STREQUAL "ON" AND NOT CPU_ONLY)
+  if(USE_NCCL AND NOT CPU_ONLY)
     find_package(NCCL REQUIRED)
   endif()
 else()
