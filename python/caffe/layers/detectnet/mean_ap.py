@@ -103,13 +103,13 @@ class mAP(caffe.Layer):
 
 
 def iou(det, rhs):
-    x_overlap = max(0, min(det[2], rhs[2]) - max(det[0], rhs[0]))
-    y_overlap = max(0, min(det[3], rhs[3]) - max(det[1], rhs[1]))
+    x_overlap = max(0, min(det[2], rhs[2]) - max(det[0], rhs[0]) + 1)
+    y_overlap = max(0, min(det[3], rhs[3]) - max(det[1], rhs[1]) + 1)
     overlap_area = x_overlap * y_overlap
     if overlap_area == 0:
         return 0
-    det_area = (det[2]-det[0])*(det[3]-det[1])
-    rhs_area = (rhs[2]-rhs[0])*(rhs[3]-rhs[1])
+    det_area = (det[2]-det[0]+1)*(det[3]-det[1]+1)
+    rhs_area = (rhs[2]-rhs[0]+1)*(rhs[3]-rhs[1]+1)
     unionarea = det_area + rhs_area - overlap_area
     return overlap_area/unionarea
 
