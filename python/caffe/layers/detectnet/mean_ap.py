@@ -144,10 +144,10 @@ def score_det(gt_bbox_list, det_bbox_list):
 
         tp = np.asarray([np.append(j, 1) for j in cur_det_bbox[np.where(det_matched == 1)]])
         fp = np.asarray([np.append(j, 2) for j in cur_det_bbox[np.where(det_matched == 0)]])
-        tn = np.asarray([np.append(j, 3) for j in cur_gt_bbox[np.where(gt_matched == 0)]])
+        fn = np.asarray([np.append(j, 3) for j in cur_gt_bbox[np.where(gt_matched == 0)]])
 
         temp = np.append(tp, fp)
-        temp = np.append(temp, tn)
+        temp = np.append(temp, fn)
         temp = temp.reshape([temp.size/5, 5])
         matched_bbox[k, 0:temp.shape[0], :] = temp
 
@@ -157,7 +157,7 @@ def score_det(gt_bbox_list, det_bbox_list):
 def calcmAP(scored_detections, self):
     self.true_positives = np.where(scored_detections[:, :, 4] == 1)[0].size
     self.false_positives = np.where(scored_detections[:, :, 4] == 2)[0].size
-    self.true_negatives = np.where(scored_detections[:, :, 4] == 3)[0].size
+    self.false_negatives = np.where(scored_detections[:, :, 4] == 3)[0].size
     self.precision = divide_zero_is_zero(self.true_positives, self.true_positives+self.false_positives)*100.00
-    self.recall = divide_zero_is_zero(self.true_positives, self.true_positives+self.true_negatives)*100.00
+    self.recall = divide_zero_is_zero(self.true_positives, self.true_positives+self.false_negatives)*100.00
     self.avp = self.precision * self.recall / 100.0
