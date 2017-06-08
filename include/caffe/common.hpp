@@ -384,8 +384,8 @@ class Caffe {
   static void set_solver_count(int val) { Get().solver_count_ = val; }
   static bool root_solver() { return Get().root_solver_; }
   static void set_root_solver(bool val) { Get().root_solver_ = val; }
-  static int restored_iter() { return restored_iter_; }
-  static void set_restored_iter(int val) { restored_iter_ = val; }
+  static int restored_iter() { return Get().restored_iter_; }
+  static void set_restored_iter(int val) { Get().restored_iter_ = val; }
 
   static void set_gpus(const std::vector<int>& gpus) {
     Properties::instance().gpus_ = gpus;
