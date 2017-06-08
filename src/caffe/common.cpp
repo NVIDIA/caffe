@@ -21,7 +21,7 @@ int Caffe::thread_count_ = 0;
 shared_mutex Caffe::caffe_mutex_;
 std::mutex Caffe::mutex_;
 std::mutex Caffe::mutex2_;
-int Caffe::restored_iter_;
+int Caffe::restored_iter_ = -1;
 
 
 #ifndef CPU_ONLY
