@@ -375,7 +375,6 @@ void Solver::Reduce(int device, Caffe::Brew mode, int rand_seed,
 }
 
 bool Solver::Solve(const char* resume_file) {
-
   callback_soft_barrier();
   LOG(INFO) << "Solving " << net_->name();
   LOG(INFO) << "Learning Rate Policy: " << param_.lr_policy();
@@ -389,7 +388,7 @@ bool Solver::Solve(const char* resume_file) {
 
   callback_soft_barrier();
   
-  if(Caffe::restored_iter() != -1) {
+  if (Caffe::restored_iter() != -1) {
     //set correct state for Rank > 0
     iter_ = Caffe::restored_iter();
     iterations_last_ = -1;
