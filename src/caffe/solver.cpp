@@ -375,6 +375,9 @@ void Solver::Reduce(int device, Caffe::Brew mode, int rand_seed,
 }
 
 bool Solver::Solve(const char* resume_file) {
+
+  Caffe::set_restored_iter(-1);
+
   callback_soft_barrier();
   LOG(INFO) << "Solving " << net_->name();
   LOG(INFO) << "Learning Rate Policy: " << param_.lr_policy();
@@ -384,6 +387,13 @@ bool Solver::Solve(const char* resume_file) {
   if (resume_file) {
     LOG(INFO) << "Restoring previous solver status from " << resume_file;
     Restore(resume_file);
+  }
+
+  callback_soft_barrier();
+  if(Caffe::restored_iter() != -1) {
+    //set correct state for Rank > 0
+    iter_ = Caffe::restored_iter();
+    iterations_last_ = -1;
   }
 
   // For a network that is trained by the solver, no bottom or top vecs

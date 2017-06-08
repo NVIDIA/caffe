@@ -286,6 +286,8 @@ void SGDSolver<Dtype>::RestoreSolverStateFromBinaryProto(const string& state_fil
   SolverState state;
   ReadProtoFromBinaryFile(state_file, &state);
   this->iter_ = state.iter();
+  LOG(INFO) << "restore iter is " << this->iter_;
+  Caffe::set_restored_iter(state.iter());
   this->iterations_restored_ = this->iter_;
   this->iterations_last_ = -1;  // for correct benchmarking
   if (state.has_learned_net()) {
