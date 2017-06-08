@@ -32,10 +32,11 @@ class DataReader : public InternalThread {
     const size_t parser_threads_, parser_thread_id_;
     const size_t rank_cycle_, full_cycle_;
     size_t rec_id_, rec_end_;
+    size_t num_skips_;
 
    public:
     CursorManager(shared_ptr<db::DB> db, size_t solver_count, size_t solver_rank,
-        size_t parser_threads, size_t parser_thread_id, size_t batch_size_);
+        size_t parser_threads, size_t parser_thread_id, size_t batch_size_, size_t num_skips_);
     ~CursorManager();
     void next(Datum* datum);
     void fetch(Datum* datum);
@@ -102,6 +103,7 @@ class DataReader : public InternalThread {
   string db_source_;
   const size_t solver_count_, solver_rank_;
   size_t batch_size_;
+  size_t num_skips_;
   const bool skip_one_batch_;
   DataParameter_DB backend_;
 
