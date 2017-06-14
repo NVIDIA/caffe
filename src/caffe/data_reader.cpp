@@ -46,7 +46,7 @@ DataReader::DataReader(const LayerParameter& param,
   }
   db_source_ = param.data_param().source();
   if (param.data_param().shuffle()) {
-  	num_skips_ = std::min(int(batch_size_)-1, 6);
+  	num_skips_ = std::min(int(batch_size_)-1, 3);
   } else {
 	num_skips_ = batch_size_;
   }
