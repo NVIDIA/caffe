@@ -386,6 +386,13 @@ bool Solver::Solve(const char* resume_file) {
     Restore(resume_file);
   }
 
+  callback_soft_barrier();
+  if (Caffe::restored_iter() != -1) {
+    //set correct state for Rank > 0
+    iter_ = Caffe::restored_iter();
+    iterations_last_ = -1;
+  }
+
   // For a network that is trained by the solver, no bottom or top vecs
   // should be given, and we will just provide dummy vecs.
   int start_iter = iter_;

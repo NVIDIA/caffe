@@ -18,11 +18,6 @@ namespace caffe {
 #endif
 
 template <typename Dtype>
-float gb_round2(Dtype val) {
-  return std::round(val * 1.e-7) * 0.01F;
-}
-
-template <typename Dtype>
 void createFilterDesc(cudnnFilterDescriptor_t* desc, int n, int c, int h, int w) {
   CUDNN_CHECK(cudnnCreateFilterDescriptor(desc));
   CUDNN_CHECK(cudnnSetFilter4dDescriptor(*desc, cudnn::dataType<Dtype>::type,
@@ -210,12 +205,8 @@ void CuDNNConvolutionLayer<Ftype, Btype>::LayerSetUp(
 
 template <typename Ftype, typename Btype>
 size_t CuDNNConvolutionLayer<Ftype, Btype>::ComputeFindExWorkspaceSize() {
-  if (was_reduced_) {
-    return workspace_.size();
-  }
   if (this->phase_ == TEST) {
-    workspace_.safe_reserve(INITIAL_WORKSPACE_SIZE * groups());
-    return workspace_.size();
+    return INITIAL_WORKSPACE_SIZE * groups();
   }
   size_t workspace_limit_bytes, total_memory, workspace_bytes = 0UL;
   GPUMemory::GetInfo(&workspace_limit_bytes, &total_memory, true);
@@ -224,8 +215,9 @@ size_t CuDNNConvolutionLayer<Ftype, Btype>::ComputeFindExWorkspaceSize() {
   }
   // Try to use the amount estimated for all groups
   workspace_bytes = align_down<7>(
-      std::min(static_cast<size_t>(total_memory / 2UL),
-          static_cast<size_t>(mem_size_estimated_) * groups()));
+      std::min(static_cast<size_t>(total_memory - PAGE_SIZE),
+          static_cast<size_t>(mem_size_estimated_)));
+  workspace_bytes *= groups();
   if (workspace_bytes <= workspace_.size()) {
     return workspace_.size();  // job is done by previous layer on this GPU
   }
@@ -233,8 +225,8 @@ size_t CuDNNConvolutionLayer<Ftype, Btype>::ComputeFindExWorkspaceSize() {
       workspace_limit_bytes - PAGE_SIZE : 0UL;
   if (workspace_bytes > workspace_limit_bytes) {
     LOG(WARNING) << "[" << Caffe::current_device()
-        << "] Current workspace (" << gb_round2(workspace_.size()) << "G)"
-        << " Estimated requirement (" << gb_round2(workspace_bytes) << "G)";
+        << "] Current workspace (" << std::round(workspace_.size() * 1.e-7) * 0.01F << "G)"
+        << " Estimated requirement (" << std::round(workspace_bytes * 1.e-7) * 0.01F << "G)";
     workspace_bytes = align_down<7>(workspace_limit_bytes);
   }
   int attempts = ATTEMPTS_TO_RESERVE_WS;
@@ -272,20 +264,6 @@ void CuDNNConvolutionLayer<Ftype, Btype>::Reshape(
     // If cached descriptors are not initialized yet, need to
     // do reshape which also initializes cached descriptors.
     use_reshape_ = true;
-  }
-  if ((this->iter() == 3 || (this->iter() > 3 && use_reshape_))
-      && this->phase_ == TRAIN
-      && mem_req_all_grps_ > 0UL
-      && workspace_.size() > mem_req_all_grps_ * 2UL) {
-    // Winner needs less than half of initial estimate - saving the rest
-    // Half because we want to reduce the number of allocs/deallocs
-    LOG(INFO) << "[" << Caffe::current_device() << "]"
-              << " Layer '" << this->name() << "' reallocating workspace: "
-              << gb_round2(workspace_.size()) << "G -> "
-              << gb_round2(mem_req_all_grps_ * 2UL) << "G";
-    workspace_.release();
-    workspace_.reserve(mem_req_all_grps_ * 2UL);
-    was_reduced_ = true;
   }
   if (!use_reshape_) {
     return;
@@ -371,7 +349,7 @@ void CuDNNConvolutionLayer<Ftype, Btype>::Reshape(
 
   // Ask cuDNN to find the best algorithm
   // When batch is small and every image is different we don't want to call Find* over and over
-  if (use_algo_seeker_ && this->iter() <= 2) {
+  if (use_algo_seeker_ && this->iter() <= 3) {
     // FindEx: A workspace of size workspace_bytes is allocated for FindEx.
     //         Besides, workspace, a buffer is allocated for the output of
     //         FindEx-backward-filter. The size of buffer is as big as weights.
@@ -385,10 +363,6 @@ void CuDNNConvolutionLayer<Ftype, Btype>::Reshape(
     } else {
       // Make sure it's all allocated before we take the rest
       this->blobs_[0]->allocate_data();
-      this->blobs_[0]->allocate_diff();
-      if (this->bias_term_) {
-        this->blobs_[1]->allocate_data();
-      }
       for (int i = 0; i < bottom.size(); ++i) {
         top[i]->allocate_data();
         top[i]->allocate_diff();
@@ -453,7 +427,7 @@ void CuDNNConvolutionLayer<Ftype, Btype>::Reshape(
   CUDA_CHECK(cudaStreamSynchronize(Caffe::thread_stream()));
 
   UpdateWorkspaceDemand(bottom.size());
-  workspace_.safe_reserve(mem_req_all_grps_);
+  workspace_.safe_reserve(align_up<7>(mem_req_all_grps_));
 
   // Tensor descriptor for bias.
   if (this->bias_term_) {
@@ -469,8 +443,6 @@ void CuDNNConvolutionLayer<Ftype, Btype>::EstimateMaxWorkspaceSize(const vector<
   size_t size;
   size_t available_memory, total_memory;
   GPUMemory::GetInfo(&available_memory, &total_memory, true);
-  // As per our experiments, it's not healthy to take more than 50% of total
-  available_memory = std::min(available_memory, total_memory / 2);
   std::list<int> algos_to_test;
   for (int i = 0; i < bottom.size(); ++i) {
     if (user_algos_override_[0] < 0) {
@@ -638,9 +610,8 @@ void CuDNNConvolutionLayer<Ftype, Btype>::FindExConvAlgo(
   bool bwd_filter_pseudo = false;
   bool bwd_data_pseudo = false;
 
-  const size_t ngroups = groups();
-  const size_t gsize = workspace_.size() / ngroups;
-  CHECK(is_even(gsize)) << workspace_.size() << " / " << ngroups << " -> " << gsize;
+  const size_t gsize = workspace_.size() / groups();
+  CHECK(is_even(gsize)) << workspace_.size() << " / " << groups() << " -> " << gsize;
 
   // Allocate temporary buffer for weights used for backward filter FindEx
   if (this->phase_ == TRAIN) {
@@ -699,8 +670,6 @@ void CuDNNConvolutionLayer<Ftype, Btype>::FindExConvAlgo(
             }
             fwd_algo_[i] = fwd_results[k].algo;
             workspace_fwd_sizes_[i] = fwd_results[k].memory;
-            mem_req_all_grps_ = std::max(mem_req_all_grps_,
-                align_up<7>(workspace_fwd_sizes_[i] * ngroups));
             fwd_pseudo = is_precise(forward_math_) && !is_precise(tp<Ftype>());
             break;
           }
@@ -760,8 +729,6 @@ void CuDNNConvolutionLayer<Ftype, Btype>::FindExConvAlgo(
               }
               bwd_filter_algo_[i] = bwd_filter_results[k].algo;
               workspace_bwd_filter_sizes_[i] = bwd_filter_results[k].memory;
-              mem_req_all_grps_ = std::max(mem_req_all_grps_,
-                  align_up<7>(workspace_bwd_filter_sizes_[i] * ngroups));
               bwd_filter_pseudo = is_precise(backward_filter_math_) && !is_precise(tp<Btype>());
               break;
             }
@@ -819,8 +786,6 @@ void CuDNNConvolutionLayer<Ftype, Btype>::FindExConvAlgo(
               }
               bwd_data_algo_[i] = bwd_data_results[k].algo;
               workspace_bwd_data_sizes_[i] = bwd_data_results[k].memory;
-              mem_req_all_grps_ = std::max(mem_req_all_grps_,
-                  align_up<7>(workspace_bwd_data_sizes_[i] * ngroups));
               bwd_data_pseudo = is_precise(backward_data_math_) && !is_precise(tp<Btype>());
               break;
             }
@@ -833,7 +798,7 @@ void CuDNNConvolutionLayer<Ftype, Btype>::FindExConvAlgo(
 
       LOG(INFO)<< "[" << Caffe::current_device() << "]"
           << " Conv Algos (F,BD,BF): '" << this->name() << "' with space "
-          << gb_round2(workspace_.size()) << "G/" << groups()
+          << std::round(workspace_.size() * 1.e-7) * 0.01F << "G/" << groups()
 #ifdef DEBUG
           << " -> [" << workspace_fwd_sizes_[i]
           << " " << workspace_bwd_data_sizes_[i]
@@ -845,8 +810,7 @@ void CuDNNConvolutionLayer<Ftype, Btype>::FindExConvAlgo(
       << (user_algos_override_[1] >= 0 ? "u " : (bwd_data_pseudo ? "p " : " "))
       << bwd_filter_algo_[i]
       << (user_algos_override_[2] >= 0 ? "u " : (bwd_filter_pseudo ? "p " : " "))
-      << " (limit " << gb_round2(workspace_limit_bytes) << "G, req "
-      << gb_round2(mem_req_all_grps_) << "G)";
+      << " (limit " << std::round(workspace_limit_bytes * 1.e-7) * 0.01F << "G)";
     }
   }
 }
@@ -956,21 +920,17 @@ bool CuDNNConvolutionLayer<Ftype, Btype>::data_algo_fallback(int i, int pad_h,
 
 template <typename Ftype, typename Btype>
 void CuDNNConvolutionLayer<Ftype, Btype>::UpdateWorkspaceDemand(int size) {
-  // Updating maximum mem_size_required_
-  const size_t ngroups = groups();
-  size_t req;
+  // Updating maximum mem_size_required_ and max_groups_
+  size_t pgroups = groups();
   for (int i = 0; i < size; ++i) {
-    req = align_up<7>(workspace_fwd_sizes_[i] * ngroups);
-    if (mem_req_all_grps_ < req) {
-      mem_req_all_grps_ = req;
+    if (align_up<7>(workspace_fwd_sizes_[i]) * pgroups > mem_req_all_grps_) {
+      mem_req_all_grps_ = align_up<7>(workspace_fwd_sizes_[i]) * pgroups;
     }
-    req = align_up<7>(workspace_bwd_data_sizes_[i] * ngroups);
-    if (mem_req_all_grps_ < req) {
-      mem_req_all_grps_ = req;
+    if (align_up<7>(workspace_bwd_data_sizes_[i]) * pgroups > mem_req_all_grps_) {
+      mem_req_all_grps_ = align_up<7>(workspace_bwd_data_sizes_[i]) * pgroups;
     }
-    req = align_up<7>(workspace_bwd_filter_sizes_[i] * ngroups);
-    if (mem_req_all_grps_ < req) {
-      mem_req_all_grps_ = req;
+    if (align_up<7>(workspace_bwd_filter_sizes_[i]) * pgroups > mem_req_all_grps_) {
+      mem_req_all_grps_ = align_up<7>(workspace_bwd_filter_sizes_[i]) * pgroups;
     }
   }
 }

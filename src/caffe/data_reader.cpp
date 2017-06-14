@@ -45,6 +45,11 @@ DataReader::DataReader(const LayerParameter& param,
     }
   }
   db_source_ = param.data_param().source();
+  if (param.data_param().shuffle()) {
+  	num_skips_ = std::min(int(batch_size_)-1, 3);
+  } else {
+	num_skips_ = batch_size_;
+  }
   init_ = make_shared<BlockingQueue<shared_ptr<Datum>>>();
   StartInternalThread();
 }
@@ -60,7 +65,7 @@ void DataReader::InternalThreadEntry() {
 void DataReader::InternalThreadEntryN(size_t thread_id) {
   shared_ptr<db::DB> db(db::GetDB(backend_));
   db->Open(db_source_, db::READ);
-  CursorManager cm(db, solver_count_, solver_rank_, parser_threads_num_, thread_id, batch_size_);
+  CursorManager cm(db, solver_count_, solver_rank_, parser_threads_num_, thread_id, batch_size_, num_skips_);
   shared_ptr<Datum> init_datum = make_shared<Datum>();
   cm.fetch(init_datum.get());
   init_->push(init_datum);
@@ -102,11 +107,11 @@ void DataReader::InternalThreadEntryN(size_t thread_id) {
 }
 
 DataReader::CursorManager::CursorManager(shared_ptr<db::DB> db, size_t solver_count,
-    size_t solver_rank, size_t parser_threads, size_t parser_thread_id, size_t batch_size)
+    size_t solver_rank, size_t parser_threads, size_t parser_thread_id, size_t batch_size, size_t num_skips)
     : db_(db), cursor_(db->NewCursor()), solver_count_(solver_count), solver_rank_(solver_rank),
       batch_size_(batch_size), parser_threads_(parser_threads), parser_thread_id_(parser_thread_id),
       rank_cycle_(parser_threads_ * batch_size_), full_cycle_(rank_cycle_ * solver_count_),
-      rec_id_(0UL), rec_end_(0UL) {}
+      rec_id_(0UL), rec_end_(0UL),num_skips_(num_skips) {}
 
 DataReader::CursorManager::~CursorManager() {
   cursor_.reset();
@@ -123,7 +128,14 @@ void DataReader::CursorManager::next(Datum* datum) {
     rec_end_ += full_cycle_;
   }
   for (size_t i = old_id; i < rec_id_; ++i) {
-    cursor_->Next();
+    if (num_skips_ != batch_size_) {
+      unsigned int skip = caffe_rng_rand() % num_skips_;
+      while(cursor_->valid() && skip-- >0 ) {
+	    cursor_->Next();
+      }
+    } else {
+       cursor_->Next();
+    }
     if (!cursor_->valid()) {
       LOG_IF(INFO, solver_rank_ == 0 && parser_thread_id_ == 0)
           << "Restarting data pre-fetching";
