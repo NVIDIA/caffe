@@ -1,13 +1,19 @@
 #include <cstdio>
-
+#include <cstring>
 #include <string>
 #include <vector>
 
+#include "caffe/layers/memory_data_layer.hpp"
 #include "caffe/solver.hpp"
 #include "caffe/util/format.hpp"
 #include "caffe/util/hdf5.hpp"
 #include "caffe/util/io.hpp"
 #include "caffe/util/upgrade_proto.hpp"
+
+#include "leveldb/db.h"
+#include "leveldb/write_batch.h"
+
+#include "lmdb.h"
 
 namespace caffe {
 
@@ -63,15 +69,262 @@ void Solver<Dtype>::Init(const SolverParameter& param) {
   current_step_ = 0;
 }
 
+
+template <typename Dtype>
+unsigned Solver<Dtype>::get_train_net_batch_size() {
+  const vector<shared_ptr<Layer<Dtype> > >& layers = this->net()->layers();
+  for (int ind = 0; ind < layers.size(); ++ind) {
+    if (strcmp(layers[ind]->type(), "Data") == 0) {
+      const LayerParameter& layer_param = layers[ind]->layer_param();
+      const DataParameter& data_param = layer_param.data_param();
+      return data_param.batch_size();
+    }
+  }
+  LOG(INFO) << "Failed to find the batch_size of train network.\n";
+  return 0;
+}
+
+
+template <typename Dtype>
+unsigned Solver<Dtype>::get_test_net_batch_size(int test_net_id) {
+  const vector<shared_ptr<Net<Dtype> > >& test_nets_ = this->test_nets();
+  assert(test_net_id < this->test_nets_.size());
+  const vector<shared_ptr<Layer<Dtype> > >& layers
+    = test_nets_[test_net_id]->layers();
+  for (int ind = 0; ind < layers.size(); ++ind) {
+    if (strcmp(layers[ind]->type(), "Data") == 0) {
+      const LayerParameter& layer_param = layers[ind]->layer_param();
+      const DataParameter& data_param = layer_param.data_param();
+      return data_param.batch_size();
+    }
+  }
+  LOG(INFO) << "Failed to find the batch_size of test network #"
+            << test_net_id << ".\n";
+  return 0;
+}
+
+template <typename Dtype>
+unsigned Solver<Dtype>::get_num_entries_db_core(
+  const DataParameter& data_param) {
+#ifdef USE_LEVELDB
+  if (data_param.backend() == DataParameter_DB_LEVELDB) {
+      string level_db_name = data_param.source();
+      LOG(INFO)
+        << "Reading leveldb <" << level_db_name
+        << "> to find the number of entries...\n";
+      leveldb::DB* db_ = NULL;
+      leveldb::Options options;
+      options.block_size = 65536;
+      options.write_buffer_size = 268435456;
+      options.max_open_files = 100;
+      options.error_if_exists = false;
+      options.create_if_missing = false;
+      // TODO: The following Open() fails because the level db is already
+      // opened in data_reader.cpp and level db does not allow multiple
+      // Open() of level db!  This means that the user has to manually
+      // specify epoch_size parameter when using level dbs. (level db
+      // needs to be fixed to allow multiple read-only Open()'s in the same
+      // process.)
+      leveldb::Status status = leveldb::DB::Open(options, level_db_name, &db_);
+      CHECK(status.ok()) << "Failed to open leveldb " << level_db_name
+                         << std::endl << status.ToString();
+      // level db does not provide an API function to determine the number of
+      // records.  Hence, we have to iterate through the db to count the
+      // the number of records!
+      leveldb::Iterator* iter_ = db_->NewIterator(leveldb::ReadOptions());
+      iter_->SeekToFirst();
+      unsigned num_level_db_entries = 0;
+      while (iter_->Valid()) {
+        ++num_level_db_entries;
+        iter_->Next();
+      }
+      if (iter_ != NULL) {
+          delete iter_;
+      }
+      if (db_ != NULL) {
+          delete db_;
+      }
+      LOG(INFO) << "leveldb <" << level_db_name
+                << "> has " << num_level_db_entries << " entries.\n";
+      return(num_level_db_entries);
+  }
+#endif  // USE_LEVELDB
+#ifdef USE_LMDB
+  if (data_param.backend() == DataParameter_DB_LMDB) {
+      LOG(INFO)
+        << "Reading lmdb <" << data_param.source()
+        << "> to find the number of entries...\n";
+      // open the source lmdb, get the number of entries and close it.
+      MDB_env* mdb_env_;
+      CHECK_EQ(mdb_env_create(&mdb_env_), MDB_SUCCESS);
+      int flags = MDB_RDONLY | MDB_NOTLS;
+      CHECK_EQ(
+        mdb_env_open(mdb_env_, data_param.source().c_str(), flags, 0664),
+        MDB_SUCCESS);
+      MDB_stat stat;
+      CHECK_EQ(mdb_env_stat(mdb_env_, &stat), MDB_SUCCESS);
+      unsigned num_lmdb_entries = stat.ms_entries;
+      mdb_env_close(mdb_env_);
+      LOG(INFO) << "lmdb <" << data_param.source()
+                << "> has " << num_lmdb_entries << " entries.\n";
+      return(num_lmdb_entries);
+  }
+#endif  // USE_LMDB
+  LOG(FATAL) << "Unknown database backend";
+  return 0;
+}
+
+
+template <typename Dtype>
+unsigned Solver<Dtype>::get_num_entries_train_net_db() {
+  const vector<shared_ptr<Layer<Dtype> > >& layers = this->net()->layers();
+  for (int ind = 0; ind < layers.size(); ++ind) {
+    if (strcmp(layers[ind]->type(), "Data") == 0) {
+      const LayerParameter& layer_param = layers[ind]->layer_param();
+      const DataParameter& data_param = layer_param.data_param();
+      return(this->get_num_entries_db_core(data_param));
+    }
+  }
+  LOG(INFO) << "Failed to find the number of records in the train network.\n";
+  return 0;
+}
+
+
+template <typename Dtype>
+unsigned Solver<Dtype>::get_num_entries_test_net_db(int test_net_id) {
+  const vector<shared_ptr<Net<Dtype> > > test_nets_ = this->test_nets();
+  assert(test_net_id < this->test_nets_.size());
+  const vector<shared_ptr<Layer<Dtype> > >& layers
+    = test_nets_[test_net_id]->layers();
+  for (int ind = 0; ind < layers.size(); ++ind) {
+    if (strcmp(layers[ind]->type(), "Data") == 0) {
+      const LayerParameter& layer_param = layers[ind]->layer_param();
+      const DataParameter& data_param = layer_param.data_param();
+      return(this->get_num_entries_db_core(data_param));
+    }
+  }
+  LOG(INFO)
+    << "Failed to find the batch_size of test network #"
+    << test_net_id << ".\n";
+  return 0;
+}
+
+
+// If max_iter parameter is not specified but max_iter_epoch parameter is
+// specified, then compute the max_iter parameter from the max_epoch parameter.
+// max_iter parameter specifies the number of batches to train.  Alternatively,
+// one can specify the number of training iterations in terms of epochs to
+// train (max_epoc).  max_iter = (max_epoch*epoch_size)/batch_size where
+// max_epoch is the number of epochs to train, epoch_size is the number of
+// records in the train database and batch size is the batch size of the train
+// network.  if epoch_size is not specified, then get the number of records by
+// looking up the database.
+template <typename Dtype>
+void Solver<Dtype>::compute_max_iter() {
+  if (!param_.has_max_iter() && param_.has_max_epoch()) {
+    LOG(INFO)
+      << "max_iter parameter is not specified."
+      << " Computing max_iter parameter...\n";
+    CHECK(param_.has_max_epoch());
+    if (!param_.has_epoch_size()) {
+      LOG(INFO)
+        << "epoch_size parameter is not specified. "
+        << "Reading it from db...\n";
+      unsigned rec_count = this->get_num_entries_train_net_db();
+      LOG(INFO)
+        << "Setting epoch_size to " << rec_count << "\n";
+      param_.set_epoch_size(rec_count);
+    }
+    CHECK(param_.has_epoch_size());
+    int train_net_batch_size = this->get_train_net_batch_size();
+    CHECK_GT(train_net_batch_size, 0);
+    unsigned my_max_iter =
+        (param_.max_epoch() * param_.epoch_size()) / train_net_batch_size;
+    LOG(INFO)
+      << "max_epoch = " << param_.max_epoch()
+      << ", epoch_size = " << param_.epoch_size()
+      << ", batch_size = " << train_net_batch_size
+      << ". Setting max_iter to " << my_max_iter  << "\n";
+    param_.set_max_iter(my_max_iter);
+  }
+}
+
+
+// If test_iter parameter is not specified, then compute it from the
+// test_epoch_size parameter and the test net's batch size parameter.
+// If test_epoch_size parameter of the test net is not specified,
+// read the db to get it.
+template <typename Dtype>
+void Solver<Dtype>::compute_test_iter(int num_test_net_instances) {
+  for (int i = 0; i < num_test_net_instances; ++i) {
+    if (param_.test_iter(i) == 0) {
+      LOG(INFO)
+        << "test_iter of test net #" << i << " is 0. "
+        << "Computing it using other parameters...\n";
+      int test_net_batch_size = get_test_net_batch_size(i);
+      LOG(INFO)
+        << "batch_size of test net #"
+        << i << " is " << test_net_batch_size << "\n";
+      CHECK_GT(test_net_batch_size, 0);
+      if (param_.test_epoch_size(i) == 0) {
+        LOG(INFO)
+          << "test_epoch_size of test net #" << i << " is 0. "
+          << "Reading it from db...\n";
+        unsigned rec_count = this->get_num_entries_test_net_db(i);
+        LOG(INFO)
+          << "Setting test_epoch_size of test net #"
+          << i << " to " << rec_count << "\n";
+        param_.set_test_epoch_size(i, rec_count);
+      }
+      int test_iter_val = param_.test_epoch_size(i) / test_net_batch_size;
+      LOG(INFO)
+        << "Setting test_iter of test net #"
+        << i << " to " << test_iter_val << "\n";
+      param_.set_test_iter(i, test_iter_val);
+    }
+  }
+}
+
+// if test_interval is not specified, but test_interva_epoch is specified, then
+// compute test_interval from test_interval_epoch and train net batch_size
+template <typename Dtype>
+void Solver<Dtype>::compute_test_interval() {
+  if (!param_.has_test_interval() && param_.has_test_interval_epoch()) {
+    LOG(INFO)
+      << "test_interval parameter is not specified. "
+      << "Computing it from other parameters...\n";
+    CHECK(param_.has_test_interval_epoch());
+    int train_net_batch_size = this->get_train_net_batch_size();
+    CHECK_GT(train_net_batch_size, 0);
+
+    // at this point we should have epoch_size either specified or computed.
+    CHECK(param_.has_epoch_size());
+    unsigned my_test_interval
+       = (param_.test_interval_epoch() * param_.epoch_size());
+    my_test_interval /= train_net_batch_size;
+    LOG(INFO)
+      << "test_interval_epoch = " << param_.test_interval_epoch()
+      << ", epoch_size = " << param_.epoch_size()
+      << ", batch_size = " << train_net_batch_size
+      << ". Setting test_interval to " << my_test_interval << "\n";
+    param_.set_test_interval(my_test_interval);
+    CHECK(param_.has_test_interval());
+  }
+}
+
 template <typename Dtype>
 void Solver<Dtype>::InitTrainNet() {
   const int num_train_nets = param_.has_net() + param_.has_net_param() +
       param_.has_train_net() + param_.has_train_net_param();
   const string& field_names = "net, net_param, train_net, train_net_param";
-  CHECK_GE(num_train_nets, 1) << "SolverParameter must specify a train net "
-      << "using one of these fields: " << field_names;
-  CHECK_LE(num_train_nets, 1) << "SolverParameter must not contain more than "
-      << "one of these fields specifying a train_net: " << field_names;
+  CHECK_GE(num_train_nets, 1)
+    << "SolverParameter must specify a train net "
+    << "using one of these fields: "
+    << field_names;
+  CHECK_LE(num_train_nets, 1)
+    << "SolverParameter must not contain more than "
+    << "one of these fields specifying a train_net: "
+    << field_names;
   NetParameter net_param;
   if (param_.has_train_net_param()) {
     LOG_IF(INFO, Caffe::root_solver())
@@ -106,6 +359,10 @@ void Solver<Dtype>::InitTrainNet() {
   } else {
     net_.reset(new Net<Dtype>(net_param, root_solver_->net_.get()));
   }
+
+  // If max_iter parameter is not specified, then compute it from
+  // alternate parameters.  See function compute_max_iter for details.
+  compute_max_iter();
 }
 
 template <typename Dtype>
@@ -119,13 +376,7 @@ void Solver<Dtype>::InitTestNets() {
   const int num_test_net_params = param_.test_net_param_size();
   const int num_test_net_files = param_.test_net_size();
   const int num_test_nets = num_test_net_params + num_test_net_files;
-  if (num_generic_nets) {
-      CHECK_GE(param_.test_iter_size(), num_test_nets)
-          << "test_iter must be specified for each test network.";
-  } else {
-      CHECK_EQ(param_.test_iter_size(), num_test_nets)
-          << "test_iter must be specified for each test network.";
-  }
+
   // If we have a generic net (specified by net or net_param, rather than
   // test_net or test_net_param), we may have an unlimited number of actual
   // test networks -- the actual number is given by the number of remaining
@@ -137,9 +388,7 @@ void Solver<Dtype>::InitTestNets() {
     CHECK_EQ(param_.test_state_size(), num_test_net_instances)
         << "test_state must be unspecified or specified once per test net.";
   }
-  if (num_test_net_instances) {
-    CHECK_GT(param_.test_interval(), 0);
-  }
+
   int test_net_id = 0;
   vector<string> sources(num_test_net_instances);
   vector<NetParameter> net_params(num_test_net_instances);
@@ -187,6 +436,24 @@ void Solver<Dtype>::InitTestNets() {
           root_solver_->test_nets_[i].get()));
     }
     test_nets_[i]->set_debug_info(param_.debug_info());
+  }
+
+  // If test_iter parameters are not specified, then compute them from
+  // alternate parameters.  See compute_test_iter() function for details.
+  compute_test_iter(num_test_net_instances);
+  if (num_generic_nets) {
+      CHECK_GE(param_.test_iter_size(), num_test_nets)
+          << "test_iter must be specified for each test network.";
+  } else {
+      CHECK_EQ(param_.test_iter_size(), num_test_nets)
+          << "test_iter must be specified for each test network.";
+  }
+
+  // if test_interval is not specified, then compute it from
+  // alternate parameters.  See compute_test_interval() function for details.
+  compute_test_interval();
+  if (num_test_net_instances) {
+    CHECK_GT(param_.test_interval(), 0);
   }
 }
 
@@ -298,6 +565,7 @@ void Solver<Dtype>::Step(int iters) {
   }
 }
 
+
 template <typename Dtype>
 void Solver<Dtype>::Solve(const char* resume_file) {
   CHECK(Caffe::root_solver());
@@ -316,6 +584,7 @@ void Solver<Dtype>::Solve(const char* resume_file) {
   // should be given, and we will just provide dummy vecs.
   int start_iter = iter_;
   Step(param_.max_iter() - iter_);
+
   // If we haven't already, save a snapshot after optimization, unless
   // overridden by setting snapshot_after_train := false
   if (param_.snapshot_after_train()
