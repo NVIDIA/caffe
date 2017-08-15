@@ -5,8 +5,6 @@ import numpy as np
 
 import caffe
 
-MAX_BOXES = 50
-
 
 class ClusterGroundtruth(caffe.Layer):
     """
@@ -31,8 +29,8 @@ class ClusterGroundtruth(caffe.Layer):
         python_param {
             module: 'caffe.layers.detectnet.clustering'
             layer: 'ClusterGroundtruth'
-            # parameters - img_size_x, img_size_y, stride, num_classes
-            param_str : '1248,352,16,2'
+            # parameters - img_size_x, img_size_y, stride, num_classes, max_boxes
+            param_str : '1248,352,16,2,50'
         }
         include: { phase: TEST }
     }
@@ -46,6 +44,8 @@ class ClusterGroundtruth(caffe.Layer):
             self.image_size_y = int(plist[1])
             self.stride = int(plist[2])
             self.num_classes = int(plist[3]) if len(plist) > 3 else 1
+            self.max_boxes = int(plist[4]) if len(plist) > 4 else 50
+
         except ValueError:
             raise ValueError("Parameter string missing or data type is wrong!")
         if len(top) != self.num_classes:
@@ -58,7 +58,7 @@ class ClusterGroundtruth(caffe.Layer):
             raise ValueError("Unexpected number of classes: %d != %d, bottom[0] shape=%s" % (num_classes, self.num_classes, repr(bottom[0].data.shape)))
         for i in xrange(num_classes):
             # Assuming that max booxes per image are MAX_BOXES
-            top[i].reshape(n_images, MAX_BOXES, 5)
+            top[i].reshape(n_images, self.max_boxes, 5)
 
     def forward(self, bottom, top):
         for i in xrange(self.num_classes):
@@ -94,8 +94,8 @@ class ClusterDetections(caffe.Layer):
             module: 'caffe.layers.detectnet.clustering'
             layer: 'ClusterDetections'
             # parameters - img_size_x, img_size_y, stride,
-            # gridbox_cvg_threshold,gridbox_rect_threshold,gridbox_rect_eps,min_height,num_classes
-            param_str : '1248,352,16,0.05,1,0.025,22,2'
+            # gridbox_cvg_threshold,gridbox_rect_threshold,gridbox_rect_eps,min_height,num_classes,max_boxes
+            param_str : '1248,352,16,0.05,1,0.025,22,2,50'
         }
         include: { phase: TEST }
     }
@@ -113,6 +113,7 @@ class ClusterDetections(caffe.Layer):
             self.gridbox_rect_eps = float(plist[5])
             self.min_height = int(plist[6])
             self.num_classes = int(plist[7]) if len(plist) > 7 else 1
+            self.max_boxes = int(plist[8]) if len(plist) > 8 else 50
         except ValueError:
             raise ValueError("Parameter string missing or data type is wrong!")
         if len(top) != self.num_classes:
@@ -125,7 +126,7 @@ class ClusterDetections(caffe.Layer):
             raise ValueError("Unexpected number of classes: %d != %d, bottom[0] shape=%s" % (num_classes, self.num_classes, repr(bottom[0].data.shape)))
         for i in xrange(num_classes):
             # Assuming that max booxes per image are MAX_BOXES
-            top[i].reshape(n_images, MAX_BOXES, 5)
+            top[i].reshape(n_images, self.max_boxes, 5)
 
     def forward(self, bottom, top):
         for i in xrange(self.num_classes):
@@ -206,7 +207,7 @@ def cluster(self, net_cvg, net_boxes):
     Read output of inference and turn into Bounding Boxes
     """
     batch_size = net_cvg.shape[0]
-    boxes = np.zeros([batch_size, MAX_BOXES, 5])
+    boxes = np.zeros([batch_size, self.max_boxes, 5])
 
     for i in range(batch_size):
 
