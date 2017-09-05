@@ -35,7 +35,22 @@ template <>
 inline constexpr Type tp<unsigned int>() {
   return UINT;
 }
+template <>
+inline constexpr Type tp<bool>() {
+  //CHECK(false) << "Should not reach here: tp<bool>()";
+  return BOOL;
+}
 
+template <typename Dtype>
+constexpr DatumTypeInfo datum_tp();
+template <>
+inline constexpr DatumTypeInfo datum_tp<Datum>() {
+  return DatumTypeInfo_DATUM;
+}
+template <>
+inline constexpr DatumTypeInfo datum_tp<AnnotatedDatum>() {
+  return DatumTypeInfo_ANNOTATED_DATUM;
+}
 
 template <typename T1, typename T2>
 Type tpmax() {

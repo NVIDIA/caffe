@@ -20,8 +20,12 @@ class LevelDBCursor : public Cursor {
   void Next() override { iter_->Next(); }
   string key() const override { return iter_->key().ToString(); }
   string value() const override { return iter_->value().ToString(); }
-  bool parse(Datum* datum) const override {
-    return datum->ParseFromArray(iter_->value().data(), iter_->value().size());
+  bool parse(void* datum, DatumTypeInfo datum_type_info) const override {
+    if(datum_type_info == DatumTypeInfo_ANNOTATED_DATUM) {
+      return static_cast<AnnotatedDatum*>(datum)->ParseFromArray(iter_->value().data(), iter_->value().size());
+    } else {
+      return static_cast<Datum*>(datum)->ParseFromArray(iter_->value().data(), iter_->value().size());
+    }
   }
   const void* data() const override {
     return iter_->value().data();

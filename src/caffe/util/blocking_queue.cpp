@@ -98,6 +98,7 @@ template class BlockingQueue<shared_ptr<Batch<double>>>;
 template class BlockingQueue<shared_ptr<Batch<float16>>>;
 #endif
 template class BlockingQueue<shared_ptr<Datum>>;
+template class BlockingQueue<shared_ptr<AnnotatedDatum>>;
 template class BlockingQueue<P2PSync*>;
 
 }  // namespace caffe

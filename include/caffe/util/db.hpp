@@ -20,7 +20,7 @@ class Cursor {
   virtual string value() const = 0;
   virtual const void* data() const = 0;
   virtual size_t size() const = 0;
-  virtual bool parse(Datum* datum) const = 0;
+  virtual bool parse(void* datum, DatumTypeInfo datum_type_info) const = 0;
   virtual bool valid() const = 0;
 
   DISABLE_COPY_MOVE_AND_ASSIGN(Cursor);

@@ -36,7 +36,7 @@ struct SharedScores {
 
  private:
   vector<vector<Dtype>> memory_;
-  static constexpr size_t MAX_SCORES = 1000;
+  static constexpr size_t MAX_SCORES = 1000*10;
 };
 
 template<typename Dtype>

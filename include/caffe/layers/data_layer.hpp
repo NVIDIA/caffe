@@ -54,7 +54,7 @@ class DataLayer : public BasePrefetchingDataLayer<Ftype, Btype> {
     reader_->start_reading();
   }
 
-  shared_ptr<DataReader> sample_reader_, reader_;
+  shared_ptr<DataReader<Datum>> sample_reader_, reader_;
   mutable vector<size_t> parser_offsets_, queue_ids_;
   Flag layer_inititialized_flag_;
   std::atomic_bool sample_only_;

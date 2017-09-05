@@ -10,6 +10,7 @@ namespace bp = boost::python;
 
 #include "caffe/caffe.hpp"
 #include "caffe/util/signal_handler.h"
+#include "caffe/util/bbox_util.hpp"
 
 
 using caffe::TBlob;
@@ -45,6 +46,10 @@ DEFINE_string(sigint_effect, "stop",
 DEFINE_string(sighup_effect, "snapshot",
              "Optional; action to take when a SIGHUP signal is received: "
              "snapshot, stop or none.");
+DEFINE_string(ap_version, "11point",
+    "Average Precision type for object detection");
+DEFINE_bool(show_per_class_result, true,
+    "Show per class result for object detection");
 
 // A simple registry for caffe commands.
 typedef int (*BrewFunction)();
@@ -322,6 +327,186 @@ int test() {
   return 0;
 }
 RegisterBrewFunction(test);
+
+
+// Test: score a detection model.
+int test_detection() {
+  typedef float Dtype;
+  CHECK_GT(FLAGS_model.size(), 0) << "Need a model definition to score.";
+  CHECK_GT(FLAGS_weights.size(), 0) << "Need model weights to score.";
+
+  // Read flags for list of GPUs
+  vector<int> gpus;
+  get_gpus(&gpus);
+  while (gpus.size() > 1) {
+    // Only use one GPU
+    LOG(INFO) << "Not using GPU #" << gpus.back() << " for single-GPU function";
+    gpus.pop_back();
+  }
+#ifndef CPU_ONLY
+  if (gpus.size() > 0) {
+    Caffe::SetDevice(gpus[0]);
+  }
+  caffe::GPUMemory::Scope gpu_memory_scope(gpus);
+#endif
+
+  // Set mode and device id
+  if (gpus.size() != 0) {
+    LOG(INFO) << "Use GPU with device ID " << gpus[0];
+#ifndef CPU_ONLY
+    cudaDeviceProp device_prop;
+    cudaGetDeviceProperties(&device_prop, gpus[0]);
+    LOG(INFO) << "GPU device name: " << device_prop.name;
+#endif
+    Caffe::set_mode(Caffe::GPU);
+  } else {
+    LOG(INFO) << "Use CPU.";
+    Caffe::set_mode(Caffe::CPU);
+  }
+
+  // Instantiate the caffe net.
+  Net caffe_net(FLAGS_model, caffe::TEST, 0U);
+  caffe_net.CopyTrainedLayersFrom(FLAGS_weights);
+  LOG(INFO) << "Running for " << FLAGS_iterations << " iterations.";
+
+  std::map<int, std::map<int, vector<std::pair<float, int> > > > all_true_pos;
+  std::map<int, std::map<int, vector<std::pair<float, int> > > > all_false_pos;
+  std::map<int, std::map<int, int> > all_num_pos;
+  
+  vector<int> test_score_output_id;
+  vector<float> test_score;
+  float loss = 0;
+  for (int i = 0; i < FLAGS_iterations; ++i) {
+    float iter_loss;
+    const vector<Blob*>& result =
+        caffe_net.Forward(&iter_loss);
+    loss += iter_loss;
+    int idx = 0;
+    for (int j = 0; j < result.size(); ++j) {
+      const float* result_vec = result[j]->cpu_data<float>();
+      for (int k = 0; k < result[j]->count(); ++k, ++idx) {
+        const float score = result_vec[k];
+        if (i == 0) {
+          test_score.push_back(score);
+          test_score_output_id.push_back(j);
+        } else {
+          test_score[idx] += score;
+        }
+        const std::string& output_name = caffe_net.blob_names()[
+            caffe_net.output_blob_indices()[j]];
+        LOG(INFO) << "Batch " << i << ", " << output_name << " = " << score;
+      }
+    }
+	
+    //To compute mAP
+    for (int j = 0; j < result.size(); ++j) {	
+      CHECK_EQ(result[j]->width(), 5);
+      const Dtype* result_vec = result[j]->cpu_data<Dtype>();
+      int num_det = result[j]->height();
+      for (int k = 0; k < num_det; ++k) {
+        int item_id = static_cast<int>(result_vec[k * 5]);
+        int label = static_cast<int>(result_vec[k * 5 + 1]);
+        if (item_id == -1) {
+          // Special row of storing number of positives for a label.
+          if (all_num_pos[j].find(label) == all_num_pos[j].end()) {
+            all_num_pos[j][label] = static_cast<int>(result_vec[k * 5 + 2]);
+          } else {
+            all_num_pos[j][label] += static_cast<int>(result_vec[k * 5 + 2]);
+          }
+        } else {
+          // Normal row storing detection status.
+          float score = result_vec[k * 5 + 2];
+          int tp = static_cast<int>(result_vec[k * 5 + 3]);
+          int fp = static_cast<int>(result_vec[k * 5 + 4]);
+          if (tp == 0 && fp == 0) {
+            // Ignore such case. It happens when a detection bbox is matched to
+            // a difficult gt bbox and we don't evaluate on difficult gt bbox.
+            continue;
+          }
+          all_true_pos[j][label].push_back(std::make_pair(score, tp));
+          all_false_pos[j][label].push_back(std::make_pair(score, fp));
+        }
+      }
+    }	
+  }
+  loss /= FLAGS_iterations;
+  LOG(INFO) << "Loss: " << loss;
+
+  for (int i = 0; i < test_score.size(); ++i) {
+    int test_score_output_id_value = test_score_output_id[i];
+    const vector<int>& output_blob_indices = caffe_net.output_blob_indices();
+    const vector<string>& blob_names = caffe_net.blob_names();
+    const vector<float>& blob_loss_weights = caffe_net.blob_loss_weights();
+    if(test_score_output_id_value < output_blob_indices.size()) {
+      int blob_index = output_blob_indices[test_score_output_id_value];
+      if(blob_index < blob_names.size() && blob_index < blob_loss_weights.size()) {
+        const std::string& output_name = blob_names[blob_index];
+        const float loss_weight = blob_loss_weights[blob_index];
+        std::ostringstream loss_msg_stream;
+        const float mean_score = test_score[i] / FLAGS_iterations;
+        if (loss_weight) {
+          loss_msg_stream << " (* " << loss_weight
+                          << " = " << (loss_weight * mean_score) << " loss)";
+        }
+        LOG(INFO) << output_name << " = " << mean_score << loss_msg_stream.str();
+      }
+    }
+  }
+
+  //To compute mAP
+  for (int i = 0; i < all_true_pos.size(); ++i) {
+    if (all_true_pos.find(i) == all_true_pos.end()) {
+      LOG(FATAL) << "Missing output_blob true_pos: " << i;
+    }
+    const std::map<int, vector<std::pair<float, int> > >& true_pos =
+        all_true_pos.find(i)->second;
+    if (all_false_pos.find(i) == all_false_pos.end()) {
+      LOG(FATAL) << "Missing output_blob false_pos: " << i;
+    }
+    const std::map<int, vector<std::pair<float, int> > >& false_pos =
+        all_false_pos.find(i)->second;
+    if (all_num_pos.find(i) == all_num_pos.end()) {
+      LOG(FATAL) << "Missing output_blob num_pos: " << i;
+    }
+    const std::map<int, int>& num_pos = all_num_pos.find(i)->second;
+    std::map<int, float> APs;
+    float mAP = 0.;
+    // Sort true_pos and false_pos with descend scores.
+    for (std::map<int, int>::const_iterator it = num_pos.begin();
+         it != num_pos.end(); ++it) {
+      int label = it->first;
+      int label_num_pos = it->second;
+      if (true_pos.find(label) == true_pos.end()) {
+        LOG(WARNING) << "Missing true_pos for label: " << label;
+        continue;
+      }
+      const vector<std::pair<float, int> >& label_true_pos =
+          true_pos.find(label)->second;
+      if (false_pos.find(label) == false_pos.end()) {
+        LOG(WARNING) << "Missing false_pos for label: " << label;
+        continue;
+      }
+      const vector<std::pair<float, int> >& label_false_pos =
+          false_pos.find(label)->second;
+      vector<float> prec, rec;
+      caffe::ComputeAP(label_true_pos, label_num_pos, label_false_pos,
+                FLAGS_ap_version, &prec, &rec, &(APs[label]));
+      mAP += APs[label];
+      if (FLAGS_show_per_class_result) {
+        LOG(INFO) << "class AP " << label << ": " << APs[label];
+      }
+    }
+    mAP /= num_pos.size();
+    const int output_blob_index = caffe_net.output_blob_indices()[i];
+    const string& output_name = caffe_net.blob_names()[output_blob_index];
+    LOG(INFO) << "Test net output mAP #" << i << ": " << output_name << " = "
+              << mAP;	
+  }  
+  
+  return 0;
+}
+RegisterBrewFunction(test_detection);
+
 
 // Time: benchmark the execution time of a model.
 int time() {
