@@ -21,6 +21,9 @@ struct GPUMemory {
   }
 
   static int current_device() {
+    if (!Caffe::has_device()) {
+      return INVALID_DEVICE;
+    }
     int device;
     CUDA_CHECK(cudaGetDevice(&device));
     return device;

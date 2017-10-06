@@ -255,8 +255,10 @@ void Net::Init(const NetParameter& in_param) {
           << "    with loss weight " << layer->loss(top_id);
       }
 #ifndef CPU_ONLY
-      gpu_top_memory_data_use_ += top_vecs_[layer_id][top_id]->gpu_memory_data_use();
-      gpu_top_memory_diff_use_ += top_vecs_[layer_id][top_id]->gpu_memory_diff_use();
+      if (Caffe::has_device()) {
+        gpu_top_memory_data_use_ += top_vecs_[layer_id][top_id]->gpu_memory_data_use();
+        gpu_top_memory_diff_use_ += top_vecs_[layer_id][top_id]->gpu_memory_diff_use();
+      }
 #endif
     }
     const int param_size = layer_param.param_size();
@@ -382,23 +384,25 @@ void Net::Init(const NetParameter& in_param) {
   }
 
 #ifndef CPU_ONLY
-  learnable_space_count_ = 0UL;
-  reduce_buckets_ = (size_t) in_param.reduce_buckets();
-  LOG_IF(INFO, Caffe::root_solver())
-      << "Top memory (" << Phase_Name(phase_) << ") required for data: "
-      << gpu_top_memory_data_use_ << " diff: " << gpu_top_memory_diff_use_;
-  LOG_IF(INFO, Caffe::root_solver())
-      << "Bottom memory (" << Phase_Name(phase_) << ") required for data: "
-      << gpu_btm_memory_data_use_ << " diff: " << gpu_btm_memory_diff_use_;
-  LOG_IF(INFO, Caffe::root_solver())
-      << "Shared (in-place) memory (" << Phase_Name(phase_) << ") by data: "
-      << gpu_shr_memory_data_use_ << " diff: " << gpu_shr_memory_diff_use_;
-  LOG_IF(INFO, Caffe::root_solver())
-      << "Parameters memory (" << Phase_Name(phase_) << ") required for data: "
-      << gpu_prm_memory_data_use_ << " diff: " << gpu_prm_memory_diff_use_;
-  LOG_IF(INFO, Caffe::root_solver())
-      << "Parameters shared memory (" << Phase_Name(phase_) << ") by data: "
-          << gpu_shp_memory_data_use_ << " diff: " << gpu_shp_memory_diff_use_;
+  if (Caffe::has_device()) {
+    learnable_space_count_ = 0UL;
+    reduce_buckets_ = (size_t) in_param.reduce_buckets();
+    LOG_IF(INFO, Caffe::root_solver())
+        << "Top memory (" << Phase_Name(phase_) << ") required for data: "
+        << gpu_top_memory_data_use_ << " diff: " << gpu_top_memory_diff_use_;
+    LOG_IF(INFO, Caffe::root_solver())
+        << "Bottom memory (" << Phase_Name(phase_) << ") required for data: "
+        << gpu_btm_memory_data_use_ << " diff: " << gpu_btm_memory_diff_use_;
+    LOG_IF(INFO, Caffe::root_solver())
+        << "Shared (in-place) memory (" << Phase_Name(phase_) << ") by data: "
+        << gpu_shr_memory_data_use_ << " diff: " << gpu_shr_memory_diff_use_;
+    LOG_IF(INFO, Caffe::root_solver())
+        << "Parameters memory (" << Phase_Name(phase_) << ") required for data: "
+        << gpu_prm_memory_data_use_ << " diff: " << gpu_prm_memory_diff_use_;
+    LOG_IF(INFO, Caffe::root_solver())
+        << "Parameters shared memory (" << Phase_Name(phase_) << ") by data: "
+            << gpu_shp_memory_data_use_ << " diff: " << gpu_shp_memory_diff_use_;
+  }
 #endif
   debug_info_ = param.debug_info();
   trained_layers_shared_ = false;
@@ -513,8 +517,10 @@ void Net::AppendTop(const NetParameter& param, const int layer_id, const int top
     top_vecs_[layer_id].push_back(blobs_[(*blob_name_to_idx)[blob_name]].get());
     top_id_vecs_[layer_id].push_back((*blob_name_to_idx)[blob_name]);
 #ifndef CPU_ONLY
-    gpu_shr_memory_data_use_ += top_vecs_[layer_id].back()->gpu_memory_data_use();
-    gpu_shr_memory_diff_use_ += top_vecs_[layer_id].back()->gpu_memory_diff_use();
+    if (Caffe::has_device()) {
+      gpu_shr_memory_data_use_ += top_vecs_[layer_id].back()->gpu_memory_data_use();
+      gpu_shr_memory_diff_use_ += top_vecs_[layer_id].back()->gpu_memory_diff_use();
+    }
 #endif
   } else if (blob_name_to_idx &&
              blob_name_to_idx->find(blob_name) != blob_name_to_idx->end()) {
@@ -568,8 +574,10 @@ int Net::AppendBottom(const NetParameter& param, const int layer_id,
   }
   bottom_need_backward_[layer_id].push_back(need_backward);
 #ifndef CPU_ONLY
-  gpu_btm_memory_data_use_ += bottom_vecs_[layer_id].back()->gpu_memory_data_use();
-  gpu_btm_memory_diff_use_ += bottom_vecs_[layer_id].back()->gpu_memory_diff_use();
+  if (Caffe::has_device()) {
+    gpu_btm_memory_data_use_ += bottom_vecs_[layer_id].back()->gpu_memory_data_use();
+    gpu_btm_memory_diff_use_ += bottom_vecs_[layer_id].back()->gpu_memory_diff_use();
+  }
 #endif
   return blob_id;
 }
@@ -758,6 +766,7 @@ void Net::Finalize() {
 
 void Net::ReduceAndUpdate() {
 #ifndef CPU_ONLY
+  const bool has_device = Caffe::has_device();
   cublasHandle_t handle = nullptr;
   if (Caffe::solver_count() > 1) {
     handle = solver_->callback()->cublas_handle();
@@ -770,10 +779,12 @@ void Net::ReduceAndUpdate() {
 
 #ifndef CPU_ONLY
   cudaStream_t stream;
-  CUBLAS_CHECK(cublasGetStream(handle, &stream));
+  if (has_device) {
+    CUBLAS_CHECK(cublasGetStream(handle, &stream));
+  }
   int max_params_per_bucket = 0;
   size_t bucket_space_count = 0UL;
-  if (Caffe::solver_count() > 1) {
+  if (Caffe::solver_count() > 1) {  // Can only happen if has_device == true
     CHECK_GT(reduce_buckets_, 0);
     max_params_per_bucket = (int) (learnable_params_.size() + 1UL) / (int) reduce_buckets_;
     if (max_params_per_bucket < 1) {
@@ -793,14 +804,18 @@ void Net::ReduceAndUpdate() {
     SolverAction::Enum request = solver_->GetRequestedAction();
     if (SolverAction::STOP == request) {
 #ifndef CPU_ONLY
-      CUDA_CHECK(cudaStreamSynchronize(stream));
+      if (has_device) {
+        CUDA_CHECK(cudaStreamSynchronize(stream));
+      }
 #endif
       solver_->request_early_exit();
       break;
     }
     if (param_id == END_OF_BATCH) {
 #ifndef CPU_ONLY
-      CUDA_CHECK(cudaStreamSynchronize(stream));
+      if (has_device) {
+        CUDA_CHECK(cudaStreamSynchronize(stream));
+      }
 #endif
       break;
     }
@@ -867,7 +882,9 @@ void Net::ReduceAndUpdate() {
 
     if (param_id == END_OF_ITERATION) {
 #ifndef CPU_ONLY
-      CUDA_CHECK(cudaStreamSynchronize(stream));
+      if (has_device) {
+        CUDA_CHECK(cudaStreamSynchronize(stream));
+      }
       received_count = 0U;
       id_from = id_to = -1;
       au_ids.clear();
@@ -1273,8 +1290,10 @@ void Net::ShareWeights() {
   for (int i = 0; i < params_.size(); ++i) {
     if (param_owners_[i] < 0) {
 #ifndef CPU_ONLY
-      gpu_prm_memory_data_use_ += params_[i]->gpu_memory_data_use();
-      gpu_prm_memory_diff_use_ += params_[i]->gpu_memory_diff_use();
+      if (Caffe::has_device()) {
+        gpu_prm_memory_data_use_ += params_[i]->gpu_memory_data_use();
+        gpu_prm_memory_diff_use_ += params_[i]->gpu_memory_diff_use();
+      }
 #endif
       continue;
     }
@@ -1282,8 +1301,10 @@ void Net::ShareWeights() {
     params_[i]->ShareData(*params_[param_owners_[i]]);
     params_[i]->ShareDiff(*params_[param_owners_[i]]);
 #ifndef CPU_ONLY
-    gpu_shp_memory_data_use_ += params_[i]->gpu_memory_data_use();
-    gpu_shp_memory_diff_use_ += params_[i]->gpu_memory_diff_use();
+    if (Caffe::has_device()) {
+      gpu_shp_memory_data_use_ += params_[i]->gpu_memory_data_use();
+      gpu_shp_memory_diff_use_ += params_[i]->gpu_memory_diff_use();
+    }
 #endif
   }
 }
@@ -1327,6 +1348,9 @@ void Net::set_solver(Solver* s) {
 
 #ifndef CPU_ONLY
 void Net::InitializeLearnableDiffSpace() {
+  if (!Caffe::has_device()) {
+    return;
+  }
   learnable_space_count_ = 0;
   size_t workspace_size = 0UL;
   size_t max_tsize = 0UL;
