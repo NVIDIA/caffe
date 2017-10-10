@@ -144,6 +144,10 @@ struct GPUMemory {
     std::string report_dev_info(int device);
     shared_mutex& read_write_mutex() { return mutex_; }
 
+    // keep a reference to which streams have been used, so that we can call
+    // deallocate before the streams themselves have been destroyed
+    std::set<shared_ptr<CudaStream>> used_streams_;
+
     Mode mode_;
     bool debug_;
 

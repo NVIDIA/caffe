@@ -167,6 +167,7 @@ void GPUMemory::Manager::reset() {
     return;
   }
   cub_allocator_.reset();
+  used_streams_.clear();
   mode_ = CUDA_MALLOC;
   initialized_ = false;
 }
@@ -205,6 +206,7 @@ bool GPUMemory::Manager::try_allocate(void** ptr, size_t size, int device, int g
       // wait for "writers" like NCCL and potentially others
       shared_lock<shared_mutex> lock(GPUMemory::read_write_mutex());
       shared_ptr<CudaStream> pstream = Caffe::thread_pstream(group);
+      used_streams_.insert(pstream); // mark this stream as used
       size_t size_allocated = 0;
       // Clean Cache & Retry logic is inside now
       status = cub_allocator_->DeviceAllocate(device, ptr, size, pstream->get(), size_allocated);
