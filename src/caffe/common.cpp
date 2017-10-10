@@ -27,11 +27,6 @@ std::mutex Caffe::pstream_mutex_;
 std::mutex Caffe::cublas_mutex_;
 std::mutex Caffe::seed_mutex_;
 
-#ifndef CPU_ONLY
-// Lifecycle management for CUDA streams
-std::list<shared_ptr<CudaStream>> Caffe::all_streams_;
-#endif
-
 Caffe& Caffe::Get() {
   // Make sure each thread can have different values.
   static thread_local unique_ptr<Caffe> thread_instance_;
@@ -246,7 +241,6 @@ shared_ptr<CudaStream> Caffe::device_pstream(int group) {
   }
   if (!group_streams[group]) {
     group_streams[group] = CudaStream::create();
-    all_streams_.push_back(group_streams[group]);
   }
   return group_streams[group];
 }
@@ -259,7 +253,6 @@ shared_ptr<CudaStream> Caffe::device_pstream_aux(int id) {
   }
   if (!streams[id]) {
     streams[id] = CudaStream::create();
-    all_streams_.push_back(streams[id]);
   }
   return streams[id];
 }

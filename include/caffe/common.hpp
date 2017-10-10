@@ -459,7 +459,6 @@ class Caffe {
 
  protected:
 #ifndef CPU_ONLY
-  static std::list<shared_ptr<CudaStream>> all_streams_;
   vector<vector<shared_ptr<CudaStream>>> device_streams_;  // [device][group]
   vector<vector<shared_ptr<CudaStream>>> device_streams_aux_;  // [device][id]
   vector<vector<cublasHandle_t>> cublas_handles_;  // [device][group]
