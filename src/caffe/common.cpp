@@ -79,7 +79,7 @@ void Caffe::set_random_seed(uint64_t random_seed) {
     return;  // i.e. root solver was previously set to 0+ and there is no need to re-generate
   }
 #ifndef CPU_ONLY
-  {
+  if (has_device()) {
     // Curand seed
     std::lock_guard<std::mutex> lock(seed_mutex_);
     if (random_seed == Caffe::SEED_NOT_SET) {
@@ -170,8 +170,8 @@ void* Caffe::RNG::generator() {
 
 Caffe::Caffe()
     : random_generator_(), mode_(Caffe::CPU), solver_count_(1), root_solver_(true) {
-  int count;
-  CUDA_CHECK(cudaGetDeviceCount(&count));
+  int count = 0;
+  cudaGetDeviceCount(&count); // in can of failure, assume no GPU
   device_streams_.resize(count);
   device_streams_aux_.resize(count);
   cublas_handles_.resize(count);
@@ -265,6 +265,9 @@ shared_ptr<CudaStream> Caffe::device_pstream_aux(int id) {
 }
 
 cublasHandle_t Caffe::device_cublas_handle(int group) {
+  if (!has_device()) {  // no device detected
+    return nullptr;
+  }
   std::lock_guard<std::mutex> lock(cublas_mutex_);
   vector<cublasHandle_t>& group_cublas_handles = cublas_handles_[current_device()];
   if (group + 1 > group_cublas_handles.size()) {
@@ -510,31 +513,33 @@ Caffe::Properties::Properties() :
       main_thread_id_(std::this_thread::get_id()),
       caffe_version_(AS_STRING(CAFFE_VERSION)) {
 #ifndef CPU_ONLY
-  int count = 0;
-  CUDA_CHECK(cudaGetDeviceCount(&count));
-  compute_capabilities_.resize(count);
-  cudaDeviceProp device_prop;
-  for (int gpu = 0; gpu < compute_capabilities_.size(); ++gpu) {
-    CUDA_CHECK(cudaGetDeviceProperties(&device_prop, gpu));
-    compute_capabilities_[gpu] = device_prop.major * 100 + device_prop.minor;
-    DLOG(INFO) << "GPU " << gpu << " '" << device_prop.name << "' has compute capability "
-        << device_prop.major << "." << device_prop.minor;
-  }
-#ifdef USE_CUDNN
-  cudnn_version_ = std::to_string(cudnnGetVersion());
-#else
-  cudnn_version_ = "USE_CUDNN is not defined";
-#endif
   int cublas_version = 0;
-  CUBLAS_CHECK(cublasGetVersion(Caffe::cublas_handle(), &cublas_version));
-  cublas_version_ = std::to_string(cublas_version);
-
   int cuda_version = 0;
-  CUDA_CHECK(cudaRuntimeGetVersion(&cuda_version));
-  cuda_version_ = std::to_string(cuda_version);
-
   int cuda_driver_version = 0;
-  CUDA_CHECK(cudaDriverGetVersion(&cuda_driver_version));
+
+  if (has_device()) {
+    int count;
+    CUDA_CHECK(cudaGetDeviceCount(&count));
+    compute_capabilities_.resize(count);
+    cudaDeviceProp device_prop;
+    for (int gpu = 0; gpu < compute_capabilities_.size(); ++gpu) {
+      CUDA_CHECK(cudaGetDeviceProperties(&device_prop, gpu));
+      compute_capabilities_[gpu] = device_prop.major * 100 + device_prop.minor;
+      DLOG(INFO) << "GPU " << gpu << " '" << device_prop.name << "' has compute capability "
+          << device_prop.major << "." << device_prop.minor;
+    }
+#ifdef USE_CUDNN
+    cudnn_version_ = std::to_string(cudnnGetVersion());
+#else
+    cudnn_version_ = "USE_CUDNN is not defined";
+#endif
+    CUBLAS_CHECK(cublasGetVersion(Caffe::cublas_handle(), &cublas_version));
+    CUDA_CHECK(cudaRuntimeGetVersion(&cuda_version));
+    CUDA_CHECK(cudaDriverGetVersion(&cuda_driver_version));
+  }
+
+  cublas_version_ = std::to_string(cublas_version);
+  cuda_version_ = std::to_string(cuda_version);
   cuda_driver_version_ = std::to_string(cuda_driver_version);
 #endif
 }

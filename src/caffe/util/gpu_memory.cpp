@@ -53,8 +53,10 @@ bool GPUMemory::Workspace::try_reserve(size_t size, int device) {
 }
 
 GPUMemory::Manager::Manager() : mode_(CUDA_MALLOC), debug_(false), initialized_(false) {
-  int count;
-  CUDA_CHECK(cudaGetDeviceCount(&count));
+  int count = 0;
+  if (Caffe::has_device()) {
+    CUDA_CHECK(cudaGetDeviceCount(&count));
+  }
   pinned_host_buffers_.resize(count);
   pinned_device_buffers_.resize(count);
   pinned_buffer_sizes_.resize(count);

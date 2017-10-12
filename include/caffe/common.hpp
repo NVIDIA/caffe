@@ -363,6 +363,9 @@ class Caffe {
   // freed in a non-pinned way, which may cause problems - I haven't verified
   // it personally but better to note it here in the header file.
   static void set_mode(Brew mode) {
+    if (mode == Caffe::GPU && !has_device()) {
+      LOG(ERROR) << "Cannot use GPU: no device detected";
+    }
     Get().mode_ = mode;
   }
   // Next seed. It's deterministic if root seed is already set.
@@ -393,6 +396,22 @@ class Caffe {
   static int restored_iter() { return restored_iter_; }
   static void set_restored_iter(int val);
 
+  static bool has_device() {
+#ifndef CPU_ONLY
+    static bool first_time = true;
+    static int device_count = 0;
+    if (first_time) {
+      // in case of failure of cudaGetDeviceCount, device_count == 0
+      if (cudaGetDeviceCount(&device_count) != cudaSuccess) {
+        LOG(WARNING) << "Failed to access GPU count. Assuming has_device == false";
+      }
+      first_time = false;
+    }
+    return device_count > 0;
+#else
+    return false;
+#endif
+  }
   static void set_gpus(const std::vector<int>& gpus) {
     props().gpus_ = gpus;
   }
@@ -433,8 +452,8 @@ class Caffe {
 
   static int current_device() {
 #ifndef CPU_ONLY
-    int device;
-    CUDA_CHECK(cudaGetDevice(&device));
+    int device = 0;
+    cudaGetDevice(&device); // in case of fail, return same value as CPU_ONLY
     return device;
 #else
     return 0;

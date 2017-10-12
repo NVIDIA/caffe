@@ -94,7 +94,8 @@ shared_ptr<LayerBase> GetBatchNormLayer(const LayerParameter& param,
   if (engine == BatchNormParameter_Engine_DEFAULT) {
     engine = BatchNormParameter_Engine_CAFFE;
 #ifdef USE_CUDNN
-    engine = BatchNormParameter_Engine_CUDNN;
+    if (Caffe::mode() == Caffe::GPU)
+      engine = BatchNormParameter_Engine_CUDNN;
 #endif
   }
   if (engine == BatchNormParameter_Engine_CAFFE) {
