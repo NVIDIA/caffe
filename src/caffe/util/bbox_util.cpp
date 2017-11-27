@@ -317,7 +317,9 @@ Dtype JaccardOverlap(const Dtype* bbox1, const Dtype* bbox2) {
 
 template float JaccardOverlap(const float* bbox1, const float* bbox2);
 template double JaccardOverlap(const double* bbox1, const double* bbox2);
+#ifndef CPU_ONLY
 template float16 JaccardOverlap(const float16* bbox1, const float16* bbox2);
+#endif
 
 float BBoxCoverage(const NormalizedBBox& bbox1, const NormalizedBBox& bbox2) {
   NormalizedBBox intersect_bbox;
@@ -1051,6 +1053,7 @@ template void MineHardExamples(const TBlob<double>& conf_blob,
     int* num_matches, int* num_negs,
     vector<map<int, vector<int> > >* all_match_indices,
     vector<vector<int> >* all_neg_indices);
+#ifndef CPU_ONLY
 template void MineHardExamples(const TBlob<float16>& conf_blob,
     const vector<LabelBBox>& all_loc_preds,
     const map<int, vector<NormalizedBBox> >& all_gt_bboxes,
@@ -1061,7 +1064,7 @@ template void MineHardExamples(const TBlob<float16>& conf_blob,
     int* num_matches, int* num_negs,
     vector<map<int, vector<int> > >* all_match_indices,
     vector<vector<int> >* all_neg_indices);
-
+#endif
 template <typename Dtype>
 void GetGroundTruth(const Dtype* gt_data, const int num_gt,
       const int background_label_id, const bool use_difficult_gt,
@@ -1101,9 +1104,11 @@ template void GetGroundTruth(const float* gt_data, const int num_gt,
 template void GetGroundTruth(const double* gt_data, const int num_gt,
       const int background_label_id, const bool use_difficult_gt,
       map<int, vector<NormalizedBBox> >* all_gt_bboxes);
+#ifndef CPU_ONLY
 template void GetGroundTruth(const float16* gt_data, const int num_gt,
       const int background_label_id, const bool use_difficult_gt,
       map<int, vector<NormalizedBBox> >* all_gt_bboxes);
+#endif
 
 template <typename Dtype>
 void GetGroundTruth(const Dtype* gt_data, const int num_gt,
@@ -1143,10 +1148,11 @@ template void GetGroundTruth(const float* gt_data, const int num_gt,
 template void GetGroundTruth(const double* gt_data, const int num_gt,
       const int background_label_id, const bool use_difficult_gt,
       map<int, LabelBBox>* all_gt_bboxes);
+#ifndef CPU_ONLY
 template void GetGroundTruth(const float16* gt_data, const int num_gt,
       const int background_label_id, const bool use_difficult_gt,
       map<int, LabelBBox>* all_gt_bboxes);
-
+#endif
 template <typename Dtype>
 void GetLocPredictions(const Dtype* loc_data, const int num,
       const int num_preds_per_class, const int num_loc_classes,
@@ -1182,10 +1188,11 @@ template void GetLocPredictions(const float* loc_data, const int num,
 template void GetLocPredictions(const double* loc_data, const int num,
       const int num_preds_per_class, const int num_loc_classes,
       const bool share_location, vector<LabelBBox>* loc_preds);
+#ifndef CPU_ONLY
 template void GetLocPredictions(const float16* loc_data, const int num,
       const int num_preds_per_class, const int num_loc_classes,
       const bool share_location, vector<LabelBBox>* loc_preds);
-
+#endif
 template <typename Dtype>
 void EncodeLocPrediction(const vector<LabelBBox>& all_loc_preds,
       const map<int, vector<NormalizedBBox> >& all_gt_bboxes,
@@ -1288,6 +1295,7 @@ template void EncodeLocPrediction(const vector<LabelBBox>& all_loc_preds,
       const vector<vector<float> >& prior_variances,
       const MultiBoxLossParameter& multibox_loss_param,
       double* loc_pred_data, double* loc_gt_data);
+#ifndef CPU_ONLY
 template void EncodeLocPrediction(const vector<LabelBBox>& all_loc_preds,
       const map<int, vector<NormalizedBBox> >& all_gt_bboxes,
       const vector<map<int, vector<int> > >& all_match_indices,
@@ -1295,7 +1303,7 @@ template void EncodeLocPrediction(const vector<LabelBBox>& all_loc_preds,
       const vector<vector<float> >& prior_variances,
       const MultiBoxLossParameter& multibox_loss_param,
       float16* loc_pred_data, float16* loc_gt_data);
-
+#endif
 template <typename Dtype>
 void ComputeLocLoss(const TBlob<Dtype>& loc_pred, const TBlob<Dtype>& loc_gt,
       const vector<map<int, vector<int> > >& all_match_indices,
@@ -1358,12 +1366,13 @@ template void ComputeLocLoss(const TBlob<double>& loc_pred,
       const vector<map<int, vector<int> > >& all_match_indices,
       const int num, const int num_priors, const LocLossType loc_loss_type,
       vector<vector<float> >* all_loc_loss);
+#ifndef CPU_ONLY
 template void ComputeLocLoss(const TBlob<float16>& loc_pred,
       const TBlob<float16>& loc_gt,
       const vector<map<int, vector<int> > >& all_match_indices,
       const int num, const int num_priors, const LocLossType loc_loss_type,
       vector<vector<float> >* all_loc_loss);
-
+#endif
 template <typename Dtype>
 void GetConfidenceScores(const Dtype* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
@@ -1389,10 +1398,11 @@ template void GetConfidenceScores(const float* conf_data, const int num,
 template void GetConfidenceScores(const double* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
       vector<map<int, vector<float> > >* conf_preds);
+#ifndef CPU_ONLY
 template void GetConfidenceScores(const float16* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
       vector<map<int, vector<float> > >* conf_preds);
-
+#endif
 template <typename Dtype>
 void GetConfidenceScores(const Dtype* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
@@ -1425,10 +1435,11 @@ template void GetConfidenceScores(const float* conf_data, const int num,
 template void GetConfidenceScores(const double* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
       const bool class_major, vector<map<int, vector<float> > >* conf_preds);
+#ifndef CPU_ONLY
 template void GetConfidenceScores(const float16* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
       const bool class_major, vector<map<int, vector<float> > >* conf_preds);
-
+#endif
 template <typename Dtype>
 void ComputeConfLoss(const Dtype* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
@@ -1487,11 +1498,12 @@ template void ComputeConfLoss(const double* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
       const int background_label_id, const ConfLossType loss_type,
       vector<vector<float> >* all_conf_loss);
+#ifndef CPU_ONLY
 template void ComputeConfLoss(const float16* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
       const int background_label_id, const ConfLossType loss_type,
       vector<vector<float> >* all_conf_loss);
-
+#endif
 template <typename Dtype>
 void ComputeConfLoss(const Dtype* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
@@ -1577,13 +1589,14 @@ template void ComputeConfLoss(const double* conf_data, const int num,
       const vector<map<int, vector<int> > >& all_match_indices,
       const map<int, vector<NormalizedBBox> >& all_gt_bboxes,
       vector<vector<float> >* all_conf_loss);
+#ifndef CPU_ONLY
 template void ComputeConfLoss(const float16* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
       const int background_label_id, const ConfLossType loss_type,
       const vector<map<int, vector<int> > >& all_match_indices,
       const map<int, vector<NormalizedBBox> >& all_gt_bboxes,
       vector<vector<float> >* all_conf_loss);
-
+#endif
 template <typename Dtype>
 void EncodeConfPrediction(const Dtype* conf_data, const int num,
       const int num_priors, const MultiBoxLossParameter& multibox_loss_param,
@@ -1698,13 +1711,14 @@ template void EncodeConfPrediction(const double* conf_data, const int num,
       const vector<vector<int> >& all_neg_indices,
       const map<int, vector<NormalizedBBox> >& all_gt_bboxes,
       double* conf_pred_data, double* conf_gt_data);
+#ifndef CPU_ONLY
 template void EncodeConfPrediction(const float16* conf_data, const int num,
       const int num_priors, const MultiBoxLossParameter& multibox_loss_param,
       const vector<map<int, vector<int> > >& all_match_indices,
       const vector<vector<int> >& all_neg_indices,
       const map<int, vector<NormalizedBBox> >& all_gt_bboxes,
       float16* conf_pred_data, float16* conf_gt_data);
-
+#endif
 template <typename Dtype>
 void GetPriorBBoxes(const Dtype* prior_data, const int num_priors,
       vector<NormalizedBBox>* prior_bboxes,
@@ -1740,10 +1754,11 @@ template void GetPriorBBoxes(const float* prior_data, const int num_priors,
 template void GetPriorBBoxes(const double* prior_data, const int num_priors,
       vector<NormalizedBBox>* prior_bboxes,
       vector<vector<float> >* prior_variances);
+#ifndef CPU_ONLY
 template void GetPriorBBoxes(const float16* prior_data, const int num_priors,
       vector<NormalizedBBox>* prior_bboxes,
       vector<vector<float> >* prior_variances);
-
+#endif
 template <typename Dtype>
 void GetDetectionResults(const Dtype* det_data, const int num_det,
       const int background_label_id,
@@ -1777,10 +1792,11 @@ template void GetDetectionResults(const float* det_data, const int num_det,
 template void GetDetectionResults(const double* det_data, const int num_det,
       const int background_label_id,
       map<int, map<int, vector<NormalizedBBox> > >* all_detections);
+#ifndef CPU_ONLY
 template void GetDetectionResults(const float16* det_data, const int num_det,
       const int background_label_id,
       map<int, map<int, vector<NormalizedBBox> > >* all_detections);
-
+#endif
 void GetTopKScoreIndex(const vector<float>& scores, const vector<int>& indices,
       const int top_k, vector<pair<float, int> >* score_index_vec) {
   CHECK_EQ(scores.size(), indices.size());
@@ -1846,11 +1862,12 @@ template
 void GetMaxScoreIndex(const double* scores, const int num,
       const float threshold, const int top_k,
       vector<pair<double, int> >* score_index_vec);
+#ifndef CPU_ONLY
 template
 void GetMaxScoreIndex(const float16* scores, const int num,
       const float threshold, const int top_k,
       vector<pair<float16, int> >* score_index_vec);
-
+#endif
 void ApplyNMS(const vector<NormalizedBBox>& bboxes, const vector<float>& scores,
       const float threshold, const int top_k, const bool reuse_overlaps,
       map<int, map<int, float> >* overlaps, vector<int>* indices) {
@@ -2040,11 +2057,12 @@ template
 void ApplyNMSFast(const double* bboxes, const double* scores, const int num,
       const float score_threshold, const float nms_threshold,
       const float eta, const int top_k, vector<int>* indices);
+#ifndef CPU_ONLY
 template
 void ApplyNMSFast(const float16* bboxes, const float16* scores, const int num,
       const float score_threshold, const float nms_threshold,
       const float eta, const int top_k, vector<int>* indices);
-
+#endif
 void CumSum(const vector<pair<float, int> >& pairs, vector<int>* cumsum) {
   // Sort the pairs based on first item of the pair.
   vector<pair<float, int> > sort_pairs = pairs;
@@ -2312,13 +2330,14 @@ void VisualizeBBox(const vector<cv::Mat>& images,
                    const float threshold, const vector<cv::Scalar>& colors,
                    const map<int, string>& label_to_display_name,
                    const string& save_file);
+#ifndef CPU_ONLY
 template
 void VisualizeBBox(const vector<cv::Mat>& images,
                    const TBlob<float16>* detections,
                    const float threshold, const vector<cv::Scalar>& colors,
                    const map<int, string>& label_to_display_name,
                    const string& save_file);
-
+#endif
 #endif  // USE_OPENCV
 
 }  // namespace caffe
