@@ -128,7 +128,7 @@ DataLayer<Ftype, Btype>::DataLayerSetUp(const vector<Blob*>& bottom, const vecto
 
   if (this->auto_mode_) {
     if (!sample_reader_) {
-      sample_reader_ = make_shared<DataReader>(param,
+      sample_reader_ = make_shared<DataReader<Datum>>(param,
           Caffe::solver_count(),
           this->solver_rank_,
           this->parsers_num_,
@@ -139,7 +139,7 @@ DataLayer<Ftype, Btype>::DataLayerSetUp(const vector<Blob*>& bottom, const vecto
           cache,
           shuffle);
     } else if (!reader_) {
-      reader_ = make_shared<DataReader>(param,
+      reader_ = make_shared<DataReader<Datum>>(param,
           Caffe::solver_count(),
           this->solver_rank_,
           this->parsers_num_,
@@ -151,7 +151,7 @@ DataLayer<Ftype, Btype>::DataLayerSetUp(const vector<Blob*>& bottom, const vecto
           shuffle);
     }
   } else if (!reader_) {
-    reader_ = make_shared<DataReader>(param,
+    reader_ = make_shared<DataReader<Datum>>(param,
         Caffe::solver_count(),
         this->solver_rank_,
         this->parsers_num_,
@@ -227,7 +227,7 @@ void DataLayer<Ftype, Btype>::load_batch(Batch<Ftype>* batch, int thread_id, siz
   const int batch_size = this->layer_param_.data_param().batch_size();
 
   const size_t qid = sample_only ? 0UL : queue_id;
-  DataReader* reader = sample_only ? sample_reader_.get() : reader_.get();
+  DataReader<Datum>* reader = sample_only ? sample_reader_.get() : reader_.get();
   shared_ptr<Datum> init_datum = reader->full_peek(qid);
   CHECK(init_datum);
 

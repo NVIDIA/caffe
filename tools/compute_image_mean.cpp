@@ -49,7 +49,7 @@ int main(int argc, char** argv) {
   int count = 0;
   // load first datum
   Datum datum;
-  cursor->parse(&datum);
+  cursor->parse(&datum, DatumTypeInfo_DATUM);
 
   if (DecodeDatumNative(&datum)) {
     LOG(INFO) << "Decoding Datum";
@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
   LOG(INFO) << "Starting Iteration";
   while (cursor->valid()) {
     Datum datum;
-    cursor->parse(&datum);
+    cursor->parse(&datum, DatumTypeInfo_DATUM);
     DecodeDatumNative(&datum);
 
     const std::string& data = datum.data();
