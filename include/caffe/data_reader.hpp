@@ -23,6 +23,7 @@ namespace caffe {
  * to allow deterministic ordering down the road. Data is distributed to solvers
  * in a round-robin way to keep parallel training deterministic.
  */
+template <typename DatumType>
 class DataReader : public InternalThread {
  private:
   class CursorManager {
@@ -41,8 +42,8 @@ class DataReader : public InternalThread {
         size_t solver_rank, size_t parser_threads, size_t parser_thread_id, size_t batch_size_,
         bool cache, bool shuffle);
     ~CursorManager();
-    void next(shared_ptr<Datum>& datum);
-    void fetch(Datum* datum);
+    void next(shared_ptr<DatumType>& datum);
+    void fetch(DatumType* datum);
     void rewind();
 
     size_t full_cycle() const {
@@ -64,8 +65,8 @@ class DataReader : public InternalThread {
       return data_cache_inst_.get();
     }
 
-    shared_ptr<Datum>& next_new();
-    shared_ptr<Datum>& next_cached();
+    shared_ptr<DatumType>& next_new();
+    shared_ptr<DatumType>& next_cached();
     bool check_memory();
     void check_db(const std::string& db_source) {
       std::lock_guard<std::mutex> lock(cache_mutex_);
@@ -90,7 +91,7 @@ class DataReader : public InternalThread {
           just_cached_(false) {}
 
     std::string db_source_;
-    vector<shared_ptr<Datum>> cache_buffer_;
+    vector<shared_ptr<DatumType>> cache_buffer_;
     size_t cache_idx_;
     boost::barrier cache_bar_;
     bool shuffle_;
@@ -117,37 +118,37 @@ class DataReader : public InternalThread {
     start_reading_flag_.set();
   }
 
-  void free_push(size_t queue_id, const shared_ptr<Datum>& datum) {
+  void free_push(size_t queue_id, const shared_ptr<DatumType>& datum) {
     if (!sample_only_) {
       free_[queue_id]->push(datum);
     }
   }
 
-  shared_ptr<Datum> free_pop(size_t queue_id) {
+  shared_ptr<DatumType> free_pop(size_t queue_id) {
     return free_[queue_id]->pop();
   }
 
-  shared_ptr<Datum> sample() {
+  shared_ptr<DatumType> sample() {
     return init_->peek();
   }
 
-  void full_push(size_t queue_id, const shared_ptr<Datum>& datum) {
+  void full_push(size_t queue_id, const shared_ptr<DatumType>& datum) {
     full_[queue_id]->push(datum);
   }
 
-  shared_ptr<Datum> full_peek(size_t queue_id) {
+  shared_ptr<DatumType> full_peek(size_t queue_id) {
     return full_[queue_id]->peek();
   }
 
-  shared_ptr<Datum> full_pop(size_t queue_id, const char* log_on_wait) {
+  shared_ptr<DatumType> full_pop(size_t queue_id, const char* log_on_wait) {
     return full_[queue_id]->pop(log_on_wait);
   }
 
-  shared_ptr<Datum>& next_new() {
+  shared_ptr<DatumType>& next_new() {
     return data_cache_->next_new();
   }
 
-  shared_ptr<Datum>& next_cached() {
+  shared_ptr<DatumType>& next_cached() {
     return data_cache_->next_cached();
   }
 
@@ -171,9 +172,9 @@ class DataReader : public InternalThread {
   const bool skip_one_batch_;
   DataParameter_DB backend_;
 
-  shared_ptr<BlockingQueue<shared_ptr<Datum>>> init_;
-  vector<shared_ptr<BlockingQueue<shared_ptr<Datum>>>> free_;
-  vector<shared_ptr<BlockingQueue<shared_ptr<Datum>>>> full_;
+  shared_ptr<BlockingQueue<shared_ptr<DatumType>>> init_;
+  vector<shared_ptr<BlockingQueue<shared_ptr<DatumType>>>> free_;
+  vector<shared_ptr<BlockingQueue<shared_ptr<DatumType>>>> full_;
 
  private:
   int current_rec_;

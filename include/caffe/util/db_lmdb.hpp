@@ -35,8 +35,12 @@ class LMDBCursor : public Cursor {
     return string(static_cast<const char*>(mdb_value_.mv_data),
         mdb_value_.mv_size);
   }
-  bool parse(Datum* datum) const override {
-    return datum->ParseFromArray(mdb_value_.mv_data, mdb_value_.mv_size);
+  bool parse(void* datum, DatumTypeInfo datum_type_info) const override {
+    if(datum_type_info == DatumTypeInfo_ANNOTATED_DATUM) {
+      return static_cast<AnnotatedDatum*>(datum)->ParseFromArray(mdb_value_.mv_data, mdb_value_.mv_size);
+    } else {
+      return static_cast<Datum*>(datum)->ParseFromArray(mdb_value_.mv_data, mdb_value_.mv_size);
+    }
   }
   const void* data() const override {
     return mdb_value_.mv_data;

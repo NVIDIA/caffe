@@ -21,6 +21,7 @@ const float kLOG_THRESHOLD = 1e-20;
  */
 template <typename Ftype, typename Btype>
 class LossLayer : public Layer<Ftype, Btype> {
+ typedef Ftype Dtype;
  public:
   explicit LossLayer(const LayerParameter& param)
      : Layer<Ftype, Btype>(param) {}
@@ -28,6 +29,16 @@ class LossLayer : public Layer<Ftype, Btype> {
       const vector<Blob*>& bottom, const vector<Blob*>& top);
   virtual void Reshape(
       const vector<Blob*>& bottom, const vector<Blob*>& top);
+
+  /**
+   * Read the normalization mode parameter and compute the normalizer based
+   * on the blob size. If normalization_mode is VALID, the count of valid
+   * outputs will be read from valid_count, unless it is -1 in which case
+   * all outputs are assumed to be valid.
+   */
+  Ftype GetNormalizer(
+      const LossParameter_NormalizationMode normalization_mode,
+      const int outer_num, const int inner_num, const int valid_count);
 
   virtual inline int ExactNumBottomBlobs() const { return 2; }
 
