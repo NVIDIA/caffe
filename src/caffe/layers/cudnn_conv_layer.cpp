@@ -995,7 +995,6 @@ bool CuDNNConvolutionLayer<Ftype, Btype>::IsConvDescChanged(
 
 template <typename Ftype, typename Btype>
 CuDNNConvolutionLayer<Ftype, Btype>::~CuDNNConvolutionLayer() {
-  GPUMemory::Finalize();  // clean workspaces before everything dies
   const int dev = Caffe::current_device();
   ws_released_[dev] = false;  // For next unit test
   // Check that handles have been setup before destroying.
