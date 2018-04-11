@@ -216,8 +216,8 @@ int train() {
     for (int i = 0; i < gpus.size(); ++i) {
       s << (i ? ", " : "") << gpus[i];
     }
-    LOG(INFO) << "Using GPUs " << s.str(); 
-      
+    LOG(INFO) << "Using GPUs " << s.str();
+
     caffe::GPUMemory::Scope gpu_memory_scope(gpus);
 
     cudaDeviceProp device_prop;
