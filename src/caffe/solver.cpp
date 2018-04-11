@@ -226,8 +226,7 @@ void Solver::Step(int iters) {
     callback_soft_barrier();
     LOG(INFO) << "Starting Optimization on GPU " << Caffe::current_device();
   }
-  const bool use_multi_gpu_testing = Caffe::solver_count() > 1;
-  const string mgpu_str = use_multi_gpu_testing ? "[MultiGPU] " : "";
+
 
   uint64_t random_seed = param_.random_seed() >= 0 ?
       static_cast<uint64_t>(param_.random_seed()) : Caffe::next_seed();
@@ -263,6 +262,8 @@ void Solver::Step(int iters) {
 
     // Just started or restored?
     const bool first_loop = iter_ == 0 || iterations_last_ < 0;
+    const bool use_multi_gpu_testing = Caffe::solver_count() > 1;
+    const string mgpu_str = use_multi_gpu_testing ? "[MultiGPU] " : "";
     if (iter_ == 0) {
       LOG_IF(INFO, Caffe::root_solver()) << mgpu_str << "Initial Test started...";
       iteration_timer_->Start();
