@@ -418,7 +418,7 @@ void caffe_rng_uniform<float16>(int n, float16 a, float16 b, float16* r) {
 template <typename Ftype>
 void caffe_rng_gaussian(int n, Ftype mu, Ftype sigma, Blob* blob) {
   CHECK_GE(n, 0);
-  CHECK_LE(mu, sigma);
+  CHECK_GT(sigma, 0);
   boost::normal_distribution<float> random_distribution(mu, sigma);
   boost::variate_generator<caffe::rng_t*, boost::normal_distribution<float> >
       variate_generator(caffe_rng(), random_distribution);
@@ -447,7 +447,7 @@ void caffe_rng_gaussian(int n, Ftype mu, Ftype sigma, Blob* blob) {
 template <typename Ftype>
 void caffe_rng_gaussian(int n, Ftype mu, Ftype sigma, Ftype* r) {
   CHECK_GE(n, 0);
-  CHECK_LE(mu, sigma);
+  CHECK_GT(sigma, 0);
   boost::normal_distribution<float> random_distribution(mu, sigma);
   boost::variate_generator<caffe::rng_t*, boost::normal_distribution<float> >
       variate_generator(caffe_rng(), random_distribution);
@@ -471,7 +471,7 @@ void caffe_rng_gaussian<double>(int n, double mu, double sigma, double* r);
 template<>
 void caffe_rng_gaussian<float16>(int n, float16 mu, float16 sigma, float16* r) {
   CHECK_GE(n, 0);
-  CHECK_LE(mu, sigma);
+  CHECK_GT(sigma, 0);
   boost::normal_distribution<float> random_distribution(static_cast<float>(mu),
       static_cast<float>(sigma));
   boost::variate_generator<caffe::rng_t*, boost::normal_distribution<float>>
