@@ -110,7 +110,7 @@ BatchNormLayer<Ftype, Btype>::LayerSetUp(const vector<Blob*>& bottom, const vect
 
   // =====================================
   int N = bottom[0]->shape(0);
-  int C = (bottom[0]->num_axes() > 1) ? bottom[0]->shape(1) : 1;
+  int C = channels_;
   int H = (bottom[0]->num_axes() > 2) ? bottom[0]->shape(2) : 1;
   int W = (bottom[0]->num_axes() > 3) ? bottom[0]->shape(3) : 1;
 
@@ -140,7 +140,7 @@ void BatchNormLayer<Ftype, Btype>::Reshape(const vector<Blob*>& bottom, const ve
   top[0]->ReshapeLike(*bottom[0]);
 
   int N = bottom[0]->shape(0);
-  int C = (bottom[0]->num_axes() > 1) ? bottom[0]->shape(1) : 1;
+  int C = channels_;
   int H = (bottom[0]->num_axes() > 2) ? bottom[0]->shape(2) : 1;
   int W = (bottom[0]->num_axes() > 3) ? bottom[0]->shape(3) : 1;
 
