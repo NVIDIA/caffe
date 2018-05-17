@@ -5,6 +5,10 @@
 #include "caffe/parallel.hpp"
 #include "caffe/data_reader.hpp"
 
+#ifdef USE_MPI
+#include "caffe/clusters.hpp"
+#endif
+
 namespace caffe {
 
 template<typename DatumType>
@@ -250,6 +254,14 @@ bool DataReader<DatumType>::DataCache::check_memory() {
 #endif
 }
 
+size_t cycle_count(size_t rank_cycle, size_t solver_count) {
+#ifdef USE_MPI
+return rank_cycle * solver_count * Clusters::node_count();
+#else
+return rank_cycle * solver_count;
+#endif
+}
+
 template<typename DatumType>
 DataReader<DatumType>::CursorManager::CursorManager(db::DB* db, DataReader<DatumType>* reader,
     size_t solver_count, size_t solver_rank, size_t parser_threads, size_t parser_thread_id,
@@ -263,7 +275,7 @@ DataReader<DatumType>::CursorManager::CursorManager(db::DB* db, DataReader<Datum
       parser_threads_(parser_threads),
       parser_thread_id_(parser_thread_id),
       rank_cycle_(parser_threads_ * batch_size_),
-      full_cycle_(rank_cycle_ * solver_count_),
+      full_cycle_(cycle_count(rank_cycle_,  solver_count_)),
       rec_id_(0UL),
       rec_end_(0UL),
       cache_(cache),
@@ -348,7 +360,14 @@ S1 |                          r1pt1.q1                    --> S1.tr0 S1.q2
 template<typename DatumType>
 void DataReader<DatumType>::CursorManager::rewind() {
   CHECK(parser_threads_);
+#ifdef USE_MPI
+  size_t rank_cycle_per_solver = parser_threads_ * batch_size_;
+  size_t rank_cycle_per_node = rank_cycle_per_solver * solver_count_;
+  size_t rank_cycle_begin = rank_cycle_per_solver * solver_rank_
+                        + rank_cycle_per_node * Clusters::node_rank();
+#else
   size_t rank_cycle_begin = rank_cycle_ * solver_rank_;
+#endif
   rec_id_ = rank_cycle_begin + parser_thread_id_ * batch_size_;
   rec_end_ = rec_id_ + batch_size_;
   cursor_->SeekToFirst();
