@@ -152,6 +152,7 @@ function(caffe_print_configuration_summary)
     else()
       caffe_status("  NCCL              : " NCCL_FOUND THEN "Yes (ver. ${NCCL_VERSION})" ELSE "Not found (not requested)")
     endif()
+    caffe_status("  USE_MPI           :   ${USE_MPI}")
 
     if(NVML_FOUND)
       caffe_status("  NVML              :   ${NVML_LIBRARY} ")

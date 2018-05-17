@@ -10,6 +10,10 @@
 #include "caffe/util/nccl.hpp"
 #endif
 
+#ifdef USE_MPI
+#include "caffe/clusters.hpp"
+#endif
+
 namespace caffe {
 
 unique_ptr<boost::barrier> P2PManager::dl_bar(new boost::barrier(1));
@@ -35,7 +39,14 @@ void P2PManager::Run(const vector<int>& gpus) {
 #ifdef USE_NCCL
   CHECK_EQ(nranks_, gpus.size());
   CHECK_EQ(nranks_, Caffe::solver_count());
+#ifdef USE_MPI
+  if(Clusters::node_rank() == 0) {
+    NCCL_CHECK(ncclGetUniqueId(&nccl_id_));
+  }  
+  MPI_Bcast((void*) &nccl_id_, sizeof(nccl_id_), MPI_BYTE, 0, MPI_COMM_WORLD);
+#else
   NCCL_CHECK(ncclGetUniqueId(&nccl_id_));
+#endif
 #else
   LOG(FATAL) << "Multi-GPU execution not available - rebuild with USE_NCCL";
 #endif  // USE_NCCL
@@ -123,7 +134,26 @@ void P2PSync::InternalThreadEntry() {
 #ifdef USE_NCCL
   ncclUniqueId* nccl_id = reinterpret_cast<ncclUniqueId*>(this->aux_);
   soft_barrier();
+#ifdef USE_MPI
+  if(Caffe::root_solver()) {
+    MPI_Barrier(MPI_COMM_WORLD);
+  }
+  
+  auto total = nranks_ * Clusters::node_count();
+  auto nrank = Clusters::node_rank() * nranks_ + rank_;
+  LOG(INFO) << "MPI world: ("<< Clusters::node_rank() << "/" << Clusters::node_count() << ") local:(" << Clusters::node_local_rank() <<"/" << Clusters::node_local_count() << ")";
+  LOG(INFO) << "[" << nrank << " / " << total << "] P2pSync";
+  NCCL_CHECK(ncclCommInitRank(&nccl_comm_, 
+                              total,
+                              *nccl_id, 
+                              nrank));
+  LOG(INFO) << "MPI barrier: ("<< Clusters::node_rank() << "/" << Clusters::node_count() << ") local:(" << Clusters::node_local_rank() <<"/" << Clusters::node_local_count() << ")";
+  if(Caffe::root_solver()) {
+    MPI_Barrier(MPI_COMM_WORLD);
+  }  
+#else
   NCCL_CHECK(ncclCommInitRank(&nccl_comm_, nranks_, *nccl_id, rank_));
+#endif
   soft_barrier();
 #endif
   comm_stream_[0] = CudaStream::create(true);
@@ -159,7 +189,12 @@ void P2PSync::on_start(const vector<shared_ptr<Blob>>& net) {
 #ifdef USE_NCCL
   int count = 0;
   NCCL_CHECK(ncclCommCount(nccl_comm_, &count));
+#ifdef USE_MPI
+  CHECK_EQ(count, nranks_ * Clusters::node_count());
+#else
   CHECK_EQ(count, nranks_);
+#endif
+
   for (int i = 0; i < net.size(); ++i) {
     Blob* param = net[i].get();
     const Type param_type = param->data_type();

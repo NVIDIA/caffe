@@ -12,6 +12,9 @@ namespace bp = boost::python;
 #include "caffe/caffe.hpp"
 #include "caffe/util/signal_handler.h"
 #include "caffe/util/bbox_util.hpp"
+#ifdef USE_MPI
+#include "caffe/clusters.hpp"
+#endif
 
 
 using caffe::TBlob;
@@ -248,7 +251,13 @@ int train() {
     CopyLayers(solver.get(), FLAGS_weights);
   }
 
-  if (gpus.size() > 1) {
+  bool force_p2p = false;
+#ifdef USE_MPI
+  Clusters::Init();
+  force_p2p = true;
+#endif
+
+  if (gpus.size() > 1 || force_p2p) {
     Caffe::set_solver_count(gpus.size());
     caffe::P2PManager p2p_mgr(solver, gpus.size(), solver->param());
     p2p_mgr.Run(gpus);
@@ -264,6 +273,9 @@ int train() {
       LOG(INFO) << os.str();
     }
   }
+#ifdef USE_MPI
+  Clusters::Finalize();  
+#endif
   LOG(INFO) << "Optimization Done in " << Caffe::time_from_init();
   return 0;
 }
