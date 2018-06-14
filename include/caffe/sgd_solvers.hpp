@@ -36,7 +36,7 @@ class SGDSolver : public Solver {
   void PreSolve();
   float GetMomentum();
   float GetWeightDecay() const;
-  float GetLocalRate(int param_id, float& wgrad_sq) const;
+  float GetLocalRate(int param_id, float& wgrad_sq) ;
   float local_decay(int param_id) const;
 
   float ApplyUpdate(int param_id, void* handle, float rate, bool normalize,

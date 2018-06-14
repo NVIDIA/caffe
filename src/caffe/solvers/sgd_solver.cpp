@@ -102,7 +102,7 @@ float SGDSolver<Dtype>::GetWeightDecay() const {
   float weight_decay = wd;
   if (wd_policy == "poly") {
     float power = this->param_.weight_decay_power();
-    weight_decay = wd * pow(float(this->iter_)/this->param_.max_iter(), power);
+    weight_decay = wd * pow(1.f - float(this->iter_)/this->param_.max_iter(), power);
   }
   return weight_decay;
 }
@@ -169,7 +169,9 @@ void SGDSolver<Dtype>::PrintRate(float rate) {
     }
     float moment = GetMomentum();
     float wd = GetWeightDecay();
-    LOG(INFO) << "Iteration " << this->iter_ << ", lr = " << rate << ", m = " << moment
+    LOG(INFO) << "Iteration " << this->iter_
+    		  << ", lr = " << rate << ", m = " << moment
+    		  << ", lrm = " << rate / (1.F- moment)
               << ", wd = " << wd  << ", gs = " << f_round2(net_->global_grad_scale());
   }
 }
@@ -307,7 +309,7 @@ float SGDSolver<Dtype>::ComputeUpdateValue(int param_id, void* handle, float rat
 }
 
 template<typename Dtype>
-float SGDSolver<Dtype>::GetLocalRate(int param_id, float& wgrad_sq) const {
+float SGDSolver<Dtype>::GetLocalRate(int param_id, float& wgrad_sq) {
   const vector<float>& net_params_lr = this->net_->params_lr();
   float local_lr = net_params_lr[param_id];
   if (this->net_->global_grad_scale_enabled() || this->param_.larc()) {
@@ -322,10 +324,11 @@ float SGDSolver<Dtype>::GetLocalRate(int param_id, float& wgrad_sq) const {
       const float w_norm = std::sqrt(param->sumsq_data(type_id));
       const float gw_ratio = this->param_.larc_eta();
       float rate = 1.F;
+      float momentum = this->GetMomentum();
       if (w_norm > 0.F && wgrad_norm > 0.F) {
         //float weight_decay = this->param_.weight_decay();
         //rate = gw_ratio * w_norm / (wgrad_norm + weight_decay * w_norm);
-        rate = gw_ratio * w_norm / wgrad_norm;
+        rate = (1.F - momentum) * gw_ratio * w_norm / wgrad_norm;
       }
       if (local_lr > 0.) {
         local_lr = rate;

@@ -1,0 +1,42 @@
+net: "models/bvlc_alexnet/train_val_ls.prototxt"
+
+test_iter: 196             #1562 = 50000/32
+test_interval:  1250   
+test_initialization: false
+
+display:  100
+
+max_iter:  62500 #125000 
+
+lr_policy: "poly"
+power: 2
+
+base_lr: 1.0               # B=1024
+min_lr: 1.e-5
+
+larc: true
+larc_policy: "clip"
+larc_eta: 0.002
+
+momentum: 0.9
+weight_decay: 0.0005
+
+snapshot: 500000
+snapshot_prefix: "models/bvlc_alexnet/snapshots/alexnet_fp32"
+snapshot_after_train: false
+
+solver_mode: GPU
+random_seed: 1
+
+# Train dataset size = 1,281,167
+# Test dataset size  =    50,000
+
+# batch 64  --> epoch = 20,000
+# batch 96  --> epoch = 15,000
+# batch 128 --> epoch = 10,000 
+# batch 256 --> epoch =  5,000  
+# batch 512 --> epoch =  2,500  
+# batch 1024--> epoch =  1,250
+# batch 2048--> epoch =    625
+# batch 4096--> epoch =    312
+# batch 8192--> epoch =    156

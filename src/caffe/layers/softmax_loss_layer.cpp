@@ -39,6 +39,7 @@ void SoftmaxWithLossLayer<Ftype, Btype>::LayerSetUp(
   } else {
     normalization_ = this->layer_param_.loss_param().normalization();
   }
+  label_smoothing_ = this->layer_param_.loss_param().label_smoothing();
 }
 
 template <typename Ftype, typename Btype>
