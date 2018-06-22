@@ -15,7 +15,7 @@ BatchNormLayer<Ftype, Btype>::LayerSetUp(const vector<Blob*>& bottom, const vect
 
   clip_variance_ = false;
   //use_global_stats_ = false;
-  use_global_stats_= param.use_global_stats();
+  use_global_stats_ = param.use_global_stats();
 
   if (bottom[0]->num_axes() == 1)
     channels_ = 1;
@@ -38,8 +38,8 @@ BatchNormLayer<Ftype, Btype>::LayerSetUp(const vector<Blob*>& bottom, const vect
       this->blobs_.resize(3);
 
     const Type btype = blobs_type();
-    const vector<int> shape { channels_ };
-    const vector<int> shape1 { 1 };
+    const vector<int> shape{channels_};
+    const vector<int> shape1{1};
     this->blobs_[0] = Blob::create(btype, btype);  // mean
     this->blobs_[0]->Reshape(shape);
     this->blobs_[0]->set_data(0.);
@@ -58,11 +58,11 @@ BatchNormLayer<Ftype, Btype>::LayerSetUp(const vector<Blob*>& bottom, const vect
         // TODO
         if (btype == tp<Ftype>()) {
           shared_ptr<Filler<Ftype>> scale_filler(
-              GetFiller<Ftype>(this->layer_param_.batch_norm_param().scale_filler()));
+                  GetFiller<Ftype>(this->layer_param_.batch_norm_param().scale_filler()));
           scale_filler->Fill(this->blobs_[3].get());
         } else {
           shared_ptr<Filler<float>> scale_filler(
-              GetFiller<float>(this->layer_param_.batch_norm_param().scale_filler()));
+                  GetFiller<float>(this->layer_param_.batch_norm_param().scale_filler()));
           scale_filler->Fill(this->blobs_[3].get());
         }
       } else {
@@ -72,11 +72,11 @@ BatchNormLayer<Ftype, Btype>::LayerSetUp(const vector<Blob*>& bottom, const vect
         // TODO
         if (btype == tp<Ftype>()) {
           shared_ptr<Filler<Ftype>> bias_filler(
-              GetFiller<Ftype>(this->layer_param_.batch_norm_param().bias_filler()));
+                  GetFiller<Ftype>(this->layer_param_.batch_norm_param().bias_filler()));
           bias_filler->Fill(this->blobs_[4].get());
         } else {
           shared_ptr<Filler<float>> bias_filler(
-              GetFiller<float>(this->layer_param_.batch_norm_param().bias_filler()));
+                  GetFiller<float>(this->layer_param_.batch_norm_param().bias_filler()));
           bias_filler->Fill(this->blobs_[4].get());
         }
       } else {
@@ -111,8 +111,16 @@ BatchNormLayer<Ftype, Btype>::LayerSetUp(const vector<Blob*>& bottom, const vect
   // =====================================
   int N = bottom[0]->shape(0);
   int C = bottom[0]->shape(1);
-  int H = bottom[0]->shape(2);
-  int W = bottom[0]->shape(3);
+  int H = 1;
+  int W = 1;
+  if (bottom[0]->shape().size() < 3) {
+    H = 1;
+    W = 1;
+  } else
+  {
+    H = bottom[0]->shape(2);
+    W = bottom[0]->shape(3);
+  }
 
   mean_ = Blob::create<Ftype>(C);
   var_ = Blob::create<Ftype>(C);
@@ -141,8 +149,16 @@ void BatchNormLayer<Ftype, Btype>::Reshape(const vector<Blob*>& bottom, const ve
 
   int N = bottom[0]->shape(0);
   int C = bottom[0]->shape(1);
-  int H = bottom[0]->shape(2);
-  int W = bottom[0]->shape(3);
+	int H = 1;
+	int W = 1;
+	if (bottom[0]->shape().size() < 3) {
+		H = 1;
+		W = 1;
+	} else
+	{
+		H = bottom[0]->shape(2);
+		W = bottom[0]->shape(3);
+	}
 
   mean_->Reshape(C);
   var_->Reshape(C);
