@@ -119,7 +119,8 @@ PROTO_GEN_PY := $(foreach file,${PROTO_SRCS:.proto=_pb2.py}, \
 CXX_OBJS := $(addprefix $(BUILD_DIR)/, ${CXX_SRCS:.cpp=.o})
 CU_OBJS := $(addprefix $(BUILD_DIR)/cuda/, ${CU_SRCS:.cu=.o})
 PROTO_OBJS := ${PROTO_GEN_CC:.cc=.o}
-OBJS := $(PROTO_OBJS) $(CXX_OBJS) $(CU_OBJS)
+# adjust the compile error while enable multi-threads
+OBJS := $(PROTO_OBJS) $(CU_OBJS) $(CXX_OBJS) 
 # tool, example, and test objects
 TOOL_OBJS := $(addprefix $(BUILD_DIR)/, ${TOOL_SRCS:.cpp=.o})
 TOOL_BUILD_DIR := $(BUILD_DIR)/tools
@@ -179,6 +180,8 @@ CUDA_LIB_DIR :=
 # add <cuda>/lib64 only if it exists
 ifneq ("$(wildcard $(CUDA_DIR)/lib64)","")
 	CUDA_LIB_DIR += $(CUDA_DIR)/lib64
+# fix link error while use cuda higher than 9.
+	CUDA_LIB_DIR += $(CUDA_DIR)/lib64/stubs
 	CUDA_LIB_DIR += /usr/lib/nvidia-396 /usr/lib/nvidia-390 /usr/lib/nvidia-387 /usr/lib/nvidia-384 /usr/lib/nvidia-381 /usr/lib/nvidia-375 /usr/lib/nvidia-367 /usr/lib/nvidia-361 /usr/lib/nvidia-352
 endif
 CUDA_LIB_DIR += $(CUDA_DIR)/lib
