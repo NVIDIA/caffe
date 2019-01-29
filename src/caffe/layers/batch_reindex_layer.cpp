@@ -11,15 +11,12 @@ void BatchReindexLayer<Ftype, Btype>::Reshape(const vector<Blob*>& bottom,
   CHECK_EQ(1, bottom[1]->num_axes());
 
   const auto& shape0 = bottom[0]->shape();
-  
   vector<int> newshape;
   newshape.reserve(shape0.size());
-  
   newshape.push_back(bottom[1]->shape(0));
   for (int i = 1; i < shape0.size(); ++i) {
     newshape.push_back(shape0[i]);
   }
-  
   top[0]->Reshape(newshape);
 }
 
