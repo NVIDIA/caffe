@@ -22,10 +22,13 @@ namespace caffe {
  *  - use matched boxes and confidences to compute loss.
  *
  */
+
+  //@RefineDet
+  //Diff: @DataType 
 template <typename Ftype, typename Btype>
 class MultiBoxLossLayer : public LossLayer<Ftype, Btype> {
   typedef Ftype Dtype;
-
+//Blob<Dtype> -> Blob 
  public:
   explicit MultiBoxLossLayer(const LayerParameter& param)
       : LossLayer<Ftype, Btype>(param) {}
@@ -39,7 +42,11 @@ class MultiBoxLossLayer : public LossLayer<Ftype, Btype> {
   // bottom[1] stores the confidence predictions.
   // bottom[2] stores the prior bounding boxes.
   // bottom[3] stores the ground truth bounding boxes.
-  virtual inline int ExactNumBottomBlobs() const { return 4; }
+  //@Original 
+  //virtual inline int ExactNumBottomBlobs() const { return 4; }
+  //@RefineDet
+  //Diff: @Function
+  virtual inline int ExactNumBottomBlobs() const { return -1; }
   virtual inline int ExactNumTopBlobs() const { return 1; }
 
  protected:

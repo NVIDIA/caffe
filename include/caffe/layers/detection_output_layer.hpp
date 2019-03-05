@@ -46,7 +46,11 @@ class DetectionOutputLayer : public Layer<Ftype, Btype> {
 
   virtual inline const char* type() const { return "DetectionOutput"; }
   virtual inline int MinBottomBlobs() const { return 3; }
-  virtual inline int MaxBottomBlobs() const { return 4; }
+  //@Original
+  //virtual inline int MaxBottomBlobs() const { return 4; }
+  //@RefineDet
+  //Diff: @Param 
+  virtual inline int MaxBottomBlobs() const { return 5; }
   virtual inline int ExactNumTopBlobs() const { return 1; }
 
  protected:
@@ -78,6 +82,11 @@ class DetectionOutputLayer : public Layer<Ftype, Btype> {
       const vector<bool>& propagate_down, const vector<Blob*>& bottom) {
     NOT_IMPLEMENTED;
   }
+
+  //@RefineDet
+  //Diff: @Var 
+  float objectness_score_;
+  //end
 
   int num_classes_;
   bool share_location_;
@@ -112,11 +121,16 @@ class DetectionOutputLayer : public Layer<Ftype, Btype> {
 
   bool visualize_;
   float visualize_threshold_;
+
+  //@RefineDet
+  //Diff: @DataType
+  //Blob<Dtype> -> Tblob<Ftype> 
   shared_ptr<DataTransformer<Ftype>> data_transformer_;
   string save_file_;
   TBlob<Ftype> bbox_preds_;
   TBlob<Ftype> bbox_permute_;
   TBlob<Ftype> conf_permute_;
+  //end 
 };
 
 }  // namespace caffe

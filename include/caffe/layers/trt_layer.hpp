@@ -5,8 +5,11 @@
 #include <vector>
 #include <fstream>
 
-#include <NvCaffeParser.h>
-#include <NvInfer.h>
+#include "caffe/layers/NvCaffeParser.h"
+#include "caffe/layers/NvInfer.h"
+
+//#include <NvCaffeParser.h>
+//#include <NvInfer.h>
 
 #include "caffe/blob.hpp"
 #include "caffe/layer.hpp"

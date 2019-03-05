@@ -134,6 +134,24 @@ void DecodeBBoxesAll(const vector<LabelBBox>& all_loc_pred,
     const CodeType code_type, const bool variance_encoded_in_target,
     const bool clip, vector<LabelBBox>* all_decode_bboxes);
 
+
+//@RefineDet 
+//Diff: @Function
+void CasRegDecodeBBoxesAll(const vector<LabelBBox>& all_loc_pred,
+    const vector<NormalizedBBox>& prior_bboxes,
+    const vector<vector<float> >& prior_variances,
+    const int num, const bool share_location,
+    const int num_loc_classes, const int background_label_id,
+    const CodeType code_type, const bool variance_encoded_in_target,
+    const bool clip, vector<LabelBBox>* all_decode_bboxes,
+  const vector<LabelBBox>& all_arm_loc_pred);
+//end 
+
+
+
+
+
+
 // Match prediction bboxes with ground truth bboxes.
 void MatchBBox(const vector<NormalizedBBox>& gt,
     const vector<NormalizedBBox>& pred_bboxes, const int label,
@@ -156,7 +174,26 @@ void FindMatches(const vector<LabelBBox>& all_loc_preds,
       const vector<vector<float> >& prior_variances,
       const MultiBoxLossParameter& multibox_loss_param,
       vector<map<int, vector<float> > >* all_match_overlaps,
-      vector<map<int, vector<int> > >* all_match_indices);
+      vector<map<int, vector<int> > >* all_match_indices); 
+
+
+
+//@RefineDet
+//Diff: @Function 
+void CasRegFindMatches(const vector<LabelBBox>& all_loc_preds,
+      const map<int, vector<NormalizedBBox> >& all_gt_bboxes,
+      const vector<NormalizedBBox>& prior_bboxes,
+      const vector<vector<float> >& prior_variances,
+      const MultiBoxLossParameter& multibox_loss_param,
+      vector<map<int, vector<float> > >* all_match_overlaps,
+      vector<map<int, vector<int> > >* all_match_indices,
+    const vector<LabelBBox>& all_arm_loc_preds);
+//end
+
+
+
+
+
 
 // Count the number of matches from the match indices.
 int CountNumMatches(const vector<map<int, vector<int> > >& all_match_indices,
@@ -173,6 +210,8 @@ int CountNumMatches(const vector<map<int, vector<int> > >& all_match_indices,
 //    multibox_loss_param: stores the parameters for MultiBoxLossLayer.
 //    all_match_indices: stores mapping between predictions and ground truth.
 //    all_loc_loss: stores the confidence loss per location for each image.
+
+//Diff: @DataType
 template <typename Dtype>
 void MineHardExamples(const Blob& conf_blob,
     const vector<LabelBBox>& all_loc_preds,
@@ -184,6 +223,27 @@ void MineHardExamples(const Blob& conf_blob,
     int* num_matches, int* num_negs,
     vector<map<int, vector<int> > >* all_match_indices,
     vector<vector<int> >* all_neg_indices);
+
+//@RefineDet
+//Diff: @Function 
+template <typename Dtype>
+void MineHardExamples(const Blob& conf_blob,
+    const vector<LabelBBox>& all_loc_preds,
+    const map<int, vector<NormalizedBBox> >& all_gt_bboxes,
+    const vector<NormalizedBBox>& prior_bboxes,
+    const vector<vector<float> >& prior_variances,
+    const vector<map<int, vector<float> > >& all_match_overlaps,
+    const MultiBoxLossParameter& multibox_loss_param,
+    int* num_matches, int* num_negs,
+    vector<map<int, vector<int> > >* all_match_indices,
+    vector<vector<int> >* all_neg_indices,
+  const Dtype* arm_conf_data);
+//end 
+
+
+
+
+
 
 // Retrieve bounding box ground truth from gt_data.
 //    gt_data: 1 x 1 x num_gt x 7 blob.
@@ -235,6 +295,21 @@ void EncodeLocPrediction(const vector<LabelBBox>& all_loc_preds,
       const MultiBoxLossParameter& multibox_loss_param,
       Dtype* loc_pred_data, Dtype* loc_gt_data);
 
+
+//@RefineDet
+//Diff: @Function 
+template <typename Dtype>
+void CasRegEncodeLocPrediction(const vector<LabelBBox>& all_loc_preds,
+      const map<int, vector<NormalizedBBox> >& all_gt_bboxes,
+      const vector<map<int, vector<int> > >& all_match_indices,
+      const vector<NormalizedBBox>& prior_bboxes,
+      const vector<vector<float> >& prior_variances,
+      const MultiBoxLossParameter& multibox_loss_param,
+      Dtype* loc_pred_data, Dtype* loc_gt_data,
+      const vector<LabelBBox>& all_arm_loc_preds);
+//end
+
+
 // Compute the localization loss per matched prior.
 //    loc_pred: stores the location prediction results.
 //    loc_gt: stores the encoded location ground truth.
@@ -261,6 +336,17 @@ void GetConfidenceScores(const Dtype* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
       vector<map<int, vector<float> > >* conf_scores);
 
+//@RefineDet
+//Diff: @Function 
+template <typename Dtype>
+void OSGetConfidenceScores(const Dtype* conf_data, const Dtype* arm_conf_data,
+    const int num, const int num_preds_per_class, const int num_classes,
+      vector<map<int, vector<float> > >* conf_scores, float objectness_score);
+//@Param
+//end
+
+
+
 // Get confidence predictions from conf_data.
 //    conf_data: num x num_preds_per_class * num_classes blob.
 //    num: the number of images.
@@ -274,7 +360,18 @@ void GetConfidenceScores(const Dtype* conf_data, const int num,
 template <typename Dtype>
 void GetConfidenceScores(const Dtype* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
-      const bool class_major, vector<map<int, vector<float> > >* conf_scores);
+      const bool class_major, vector<map<int, vector<float> > >* conf_scores); 
+
+
+//@RefineDet
+//Diff: @Function, @!Check 
+template <typename Dtype>
+void OSGetConfidenceScores(const Dtype* conf_data, const Dtype* arm_conf_data,
+    const int num, const int num_preds_per_class, const int num_classes,
+    const bool class_major, vector<map<int, vector<float> > >* conf_scores, float objectness_score);
+//end
+
+
 
 // Compute the confidence loss for each prior from conf_data.
 //    conf_data: num x num_preds_per_class * num_classes blob.
@@ -468,10 +565,29 @@ void DecodeBBoxesGPU(const int nthreads,
           const int num_loc_classes, const int background_label_id,
           const bool clip_bbox, Dtype* bbox_data);
 
+//@RefineDet
+//Diff: @Function 
+template <typename Dtype>
+void CasRegDecodeBBoxesGPU(const int nthreads,
+          const Dtype* loc_data, const Dtype* prior_data,
+          const CodeType code_type, const bool variance_encoded_in_target,
+          const int num_priors, const bool share_location,
+          const int num_loc_classes, const int background_label_id,
+          const bool clip_bbox, Dtype* bbox_data, const Dtype* arm_loc_data);
+//end
+
 template <typename Dtype>
 void PermuteDataGPU(const int nthreads,
           const Dtype* data, const int num_classes, const int num_data,
           const int num_dim, Dtype* new_data);
+
+//@RefineDet 
+//Diff: @Function
+template <typename Dtype>
+void OSPermuteDataGPU(const int nthreads,
+          const Dtype* data, const Dtype* arm_data, const int num_classes, const int num_data,
+          const int num_dim, Dtype* new_data, float objectness_score);
+//end
 
 template <typename Dtype>
 void SoftMaxGPU(const Dtype* data, const int outer_num, const int channels,
@@ -492,13 +608,18 @@ void ApplyNMSGPU(const Dtype* bbox_data, const Dtype* conf_data,
           const int num_bboxes, const float confidence_threshold,
           const int top_k, const float nms_threshold, vector<int>* indices);
 
+//@RefineDet
+//Diff: @DataType: Blob->TBlob
 template <typename Dtype>
 void GetDetectionsGPU(const Dtype* bbox_data, const Dtype* conf_data,
           const int image_id, const int label, const vector<int>& indices,
           const bool clip_bbox, TBlob<Dtype>* detection_blob);
 
+
+
+
 template <typename Dtype>
-  void ComputeConfLossGPU(const Blob& conf_blob, const int num,
+void ComputeConfLossGPU(const Blob& conf_blob, const int num,
       const int num_preds_per_class, const int num_classes,
       const int background_label_id, const ConfLossType loss_type,
       const vector<map<int, vector<int> > >& all_match_indices,
