@@ -588,9 +588,6 @@ void DecodeBBoxesAll(const vector<LabelBBox>& all_loc_preds,
 }
 
 
-//@RefineDet
-//Diff: @Function 
-
 void CasRegDecodeBBoxesAll(const vector<LabelBBox>& all_loc_preds,
     const vector<NormalizedBBox>& prior_bboxes,
     const vector<vector<float> >& prior_variances,
@@ -604,14 +601,10 @@ void CasRegDecodeBBoxesAll(const vector<LabelBBox>& all_loc_preds,
   all_decode_bboxes->resize(num);
   for (int i = 0; i < num; ++i) {
   //apply arm_loc_preds to prior_box
-  //Diff: @Var 
-  //arm_loc_preds 
   const vector<NormalizedBBox>& arm_loc_preds = all_arm_loc_preds[i].find(-1)->second;
-  //Diff: @Var: @Check!
   //prior_boxes -> decode_prior_boxes
   vector<NormalizedBBox> decode_prior_bboxes;
   bool clip_bbox = false;
-  //Diff: @Var: @Check!
   DecodeBBoxes(prior_bboxes, prior_variances,
         code_type, variance_encoded_in_target, clip_bbox,
       arm_loc_preds, &decode_prior_bboxes);
@@ -629,7 +622,6 @@ void CasRegDecodeBBoxesAll(const vector<LabelBBox>& all_loc_preds,
       }
       const vector<NormalizedBBox>& label_loc_preds =
           all_loc_preds[i].find(label)->second;
-      //Diff: @Var: @Check!
       DecodeBBoxes(decode_prior_bboxes, prior_variances,
                    code_type, variance_encoded_in_target, clip,
                    label_loc_preds, &(decode_bboxes[label]));
@@ -638,11 +630,6 @@ void CasRegDecodeBBoxesAll(const vector<LabelBBox>& all_loc_preds,
 }
 
 
-//end
-
-
-//Diff: @Param 
-//ignore_difficult_gt
 void MatchBBox(const vector<NormalizedBBox>& gt_bboxes,
     const vector<NormalizedBBox>& pred_bboxes, const int label,
     const MatchType match_type, const float overlap_threshold,
@@ -675,7 +662,6 @@ void MatchBBox(const vector<NormalizedBBox>& gt_bboxes,
   if (num_gt == 0) {
     return;
   }
-
   // Store the positive overlap between predictions and ground truth.
   map<int, map<int, float> > overlaps;
   for (int i = 0; i < num_pred; ++i) {
@@ -693,8 +679,6 @@ void MatchBBox(const vector<NormalizedBBox>& gt_bboxes,
   }
 
   // Bipartite matching.
-  //Diff: @DataType
-  //vector->set
   set<int> gt_pool;
   for (int i = 0; i < num_gt; ++i) {
     gt_pool.insert(i);
@@ -710,7 +694,6 @@ void MatchBBox(const vector<NormalizedBBox>& gt_bboxes,
         // The prediction already has matched ground truth or is ignored.
         continue;
       }
-
       for (auto ov_map : it->second) {
         const int j = ov_map.first;
         if (gt_pool.count(j) > 0) {
@@ -731,7 +714,6 @@ void MatchBBox(const vector<NormalizedBBox>& gt_bboxes,
     } else {
       CHECK_EQ((*match_indices)[max_idx], -1);
       bool is_ignored_gt = ignore_difficult_gt && gt_bboxes[gt_indices[max_gt_idx]].difficult();
-      //Diff: @Var
       if (is_ignored_gt) { //pred matches with ignored gt. set to -2 to ignore
         (*match_indices)[max_idx] = -2;
       } else {
@@ -840,8 +822,6 @@ void FindMatches(const vector<LabelBBox>& all_loc_preds,
         DecodeBBoxes(prior_bboxes, prior_variances,
                      code_type, encode_variance_in_target, clip_bbox,
                      all_loc_preds[i].find(label)->second, &loc_bboxes);
-        //Diff: @Param
-        //ignore~
         MatchBBox(gt_bboxes, loc_bboxes, label, match_type,
                   overlap_threshold, ignore_cross_boundary_bbox,
                   &match_indices[label], &match_overlaps[label],
@@ -891,9 +871,6 @@ void FindMatches(const vector<LabelBBox>& all_loc_preds,
 }
 
 
-
-//@RefineDet
-//Diff: @Function
 void CasRegFindMatches(const vector<LabelBBox>& all_loc_preds,
       const map<int, vector<NormalizedBBox> >& all_gt_bboxes,
       const vector<NormalizedBBox>& prior_bboxes,
@@ -947,13 +924,11 @@ void CasRegFindMatches(const vector<LabelBBox>& all_loc_preds,
         DecodeBBoxes(prior_bboxes, prior_variances,
                      code_type, encode_variance_in_target, clip_bbox,
                      all_loc_preds[i].find(label)->second, &loc_bboxes);
-        //@RefineDet
-        //Diff: @Param: @Check!
+
         MatchBBox(gt_bboxes, loc_bboxes, label, match_type,
                   overlap_threshold, ignore_cross_boundary_bbox,
                   &match_indices[label], &match_overlaps[label],
-                  //@RefineDet 
-                  multibox_loss_param.ignore_difficult_gt()
+		  multibox_loss_param.ignore_difficult_gt()
                   );
       }
     } else {
@@ -961,24 +936,18 @@ void CasRegFindMatches(const vector<LabelBBox>& all_loc_preds,
       vector<int> temp_match_indices;
       vector<float> temp_match_overlaps;
       const int label = -1;
-
-      //Diff: @Var
       //apply arm_loc_preds to prior_box
       const vector<NormalizedBBox>& arm_loc_preds = all_arm_loc_preds[i].find(label)->second;
-      //Diff: @Var: @Check!
       //decode_prior_bboxes  
       vector<NormalizedBBox> decode_prior_bboxes;
       bool clip_bbox = false;
-      //Diff: @Function: @Check!
       //prior_box -> decode_prior_box
       DecodeBBoxes(prior_bboxes, prior_variances,
           code_type, encode_variance_in_target, clip_bbox,
         arm_loc_preds, &decode_prior_bboxes);
-      //@Check!: @Value: decode_prior_bboxes 
       MatchBBox(gt_bboxes, decode_prior_bboxes, label, match_type, overlap_threshold,
                 ignore_cross_boundary_bbox, &temp_match_indices,
-                &temp_match_overlaps,
-                 //@RefineDet 
+                &temp_match_overlaps, 
                 multibox_loss_param.ignore_difficult_gt()
                 );
       if (share_location) {
@@ -1016,25 +985,6 @@ void CasRegFindMatches(const vector<LabelBBox>& all_loc_preds,
 }
 
 
-//end 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 int CountNumMatches(const vector<map<int, vector<int> > >& all_match_indices,
                     const int num) {
@@ -1065,7 +1015,6 @@ inline bool IsEligibleMining(const MiningType mining_type, const int match_idx,
   }
 }
 
-//@Original 
 template <typename Dtype>
 void MineHardExamples(const Blob& conf_blob,
     const vector<LabelBBox>& all_loc_preds,
@@ -1277,8 +1226,6 @@ template void MineHardExamples<float16>(const Blob& conf_blob,
 
 
 
-//@RefineDet
-//Diff: @Function: @Param: @Check 
 template <typename Dtype>
 void MineHardExamples(const Blob& conf_blob,
     const vector<LabelBBox>& all_loc_preds,
@@ -1300,7 +1247,6 @@ void MineHardExamples(const Blob& conf_blob,
   int num_priors = prior_bboxes.size();
   CHECK_EQ(num_priors, prior_variances.size());
   // Get parameters.
-  //Diff: @Var
   float objectness_score = multibox_loss_param.objectness_score();
   CHECK(multibox_loss_param.has_num_classes()) << "Must provide num_classes.";
   const int num_classes = multibox_loss_param.num_classes();
@@ -1333,9 +1279,6 @@ void MineHardExamples(const Blob& conf_blob,
       background_label_id, conf_loss_type, *all_match_indices, all_gt_bboxes,
       &all_conf_loss);
 #else
-  //@RefineDet 
-  //origin: ComputeConfLossGPU 
-  //Diff: @Function: @Template
   ComputeConfLossGPU<Dtype>(conf_blob, num, num_priors, num_classes,
       background_label_id, conf_loss_type, *all_match_indices, all_gt_bboxes,
       &all_conf_loss);
@@ -1343,8 +1286,6 @@ void MineHardExamples(const Blob& conf_blob,
   vector<vector<float> > all_loc_loss;
   if (mining_type == MultiBoxLossParameter_MiningType_HARD_EXAMPLE) {
     // Compute localization losses based on matching results.
-    //@RefineDet
-    //edit
     TBlob<Dtype> loc_pred, loc_gt;
 
     if (*num_matches != 0) {
@@ -1388,7 +1329,6 @@ void MineHardExamples(const Blob& conf_blob,
       for (int m = 0; m < match_indices[label].size(); ++m) {
         if (IsEligibleMining(mining_type, match_indices[label][m],
             match_overlaps.find(label)->second[m], neg_overlap)) {
-          //Diff: @Check!
           if (arm_conf_data == NULL) {
             loss_indices.push_back(std::make_pair(loss[m], m));
             ++num_sel;
@@ -1398,14 +1338,6 @@ void MineHardExamples(const Blob& conf_blob,
               loss_indices.push_back(std::make_pair(loss[m], m));
               ++num_sel;
               }
-              //@RefineDet 
-              //Diff: @Check: @Log -> too many logs for it
-              /*
-            else{
-              LOG(INFO) <<"@Check: MineHardExamples: case"<< m;
-              //else case? loss_indice ** 
-            }
-            */
           }
 
         }
@@ -1512,9 +1444,6 @@ template void MineHardExamples<double>(const Blob& conf_blob,
     vector<map<int, vector<int> > >* all_match_indices,
     vector<vector<int> >* all_neg_indices,
   const double* arm_conf_data);
-//@RefineDet
-//Diff: @Param: @DataType: @Float16
-//@Check -> arm_conf_data -> flaot16 
 template void MineHardExamples<float16>(const Blob& conf_blob,
     const vector<LabelBBox>& all_loc_preds,
     const map<int, vector<NormalizedBBox> >& all_gt_bboxes,
@@ -1526,10 +1455,6 @@ template void MineHardExamples<float16>(const Blob& conf_blob,
     vector<map<int, vector<int> > >* all_match_indices,
     vector<vector<int> >* all_neg_indices,
   const float16* arm_conf_data);
-//end
-
-
-
 
 
 template <typename Dtype>
@@ -1544,15 +1469,9 @@ void GetGroundTruth(const Dtype* gt_data, const int num_classes, const int num_g
       continue;
     }
     int label = std::round(gt_data[start_idx + 1]);
-    //@RefineDet
-    //Diff: @Condition: @Check  
     if (num_classes == 2 && label >= 2){
       label = 1;
     }
-   // CHECK_NE(background_label_id, label)<< "Found background label in the dataset.";
-    //end
-
-
     if (label <= background_label_id) {
       DLOG(WARNING) << "Ignoring background label in the dataset: " << gt_data[start_idx + 1];
       continue;
@@ -1590,7 +1509,6 @@ template void GetGroundTruth(const float16* gt_data, const int num_classes, cons
       const int background_label_id, const bool use_difficult_gt,
       map<int, vector<NormalizedBBox> >* all_gt_bboxes);
 
-//Diff: @ParamOrder 
 template <typename Dtype>
 void GetGroundTruth(const Dtype* gt_data, const int num_classes, const int num_gt,
       const int background_label_id, const bool use_difficult_gt,
@@ -1604,14 +1522,10 @@ void GetGroundTruth(const Dtype* gt_data, const int num_classes, const int num_g
     }
     NormalizedBBox bbox;
     int label = std::round(gt_data[start_idx + 1]);
-    //@RefineDet
-    //Diff: @Condition 
      if (num_classes == 2 && label >= 2){
       label = 1;
     }
    // CHECK_NE(background_label_id, label) << "Found background label in the dataset.";
-    //end
-
     if (label <= background_label_id) {
       DLOG(WARNING) << "Ignoring background label in the dataset: " << gt_data[start_idx + 1];
       continue;
@@ -1795,10 +1709,6 @@ template void EncodeLocPrediction(const vector<LabelBBox>& all_loc_preds,
       float16* loc_pred_data, float16* loc_gt_data);
 
 
-
-//@RefineDet
-//Diff: @Function
-
 template <typename Dtype>
 void CasRegEncodeLocPrediction(const vector<LabelBBox>& all_loc_preds,
       const map<int, vector<NormalizedBBox> >& all_gt_bboxes,
@@ -1822,13 +1732,10 @@ void CasRegEncodeLocPrediction(const vector<LabelBBox>& all_loc_preds,
     //apply arm_loc_preds to prior_box
     const vector<NormalizedBBox>& arm_loc_preds = all_arm_loc_preds[i].find(-1)->second;
     vector<NormalizedBBox> decode_prior_bboxes;
-    bool clip_bbox = false;
-    //Diff: @Function: @Check! 
+    bool clip_bbox = false; 
     DecodeBBoxes(prior_bboxes, prior_variances,
         code_type, encode_variance_in_target, clip_bbox,
       arm_loc_preds, &decode_prior_bboxes);
-    //@Check!: decode_prior_bboxes
-
     for (map<int, vector<int> >::const_iterator
          it = all_match_indices[i].begin();
          it != all_match_indices[i].end(); ++it) {
@@ -1847,8 +1754,7 @@ void CasRegEncodeLocPrediction(const vector<LabelBBox>& all_loc_preds,
         CHECK_LT(gt_idx, all_gt_bboxes.find(i)->second.size());
         const NormalizedBBox& gt_bbox = all_gt_bboxes.find(i)->second[gt_idx];
         NormalizedBBox gt_encode;
-        CHECK_LT(j, decode_prior_bboxes.size());
-        //Diff: @Param 
+        CHECK_LT(j, decode_prior_bboxes.size()); 
         EncodeBBox(decode_prior_bboxes[j], prior_variances[j], code_type,
                    encode_variance_in_target, gt_bbox, &gt_encode);
         loc_gt_data[count * 4] = gt_encode.xmin();
@@ -1861,7 +1767,6 @@ void CasRegEncodeLocPrediction(const vector<LabelBBox>& all_loc_preds,
           NormalizedBBox match_bbox = decode_prior_bboxes[j];
           if (!use_prior_for_matching) {
             const bool clip_bbox = false;
-            //Diff: @Param
             DecodeBBox(decode_prior_bboxes[j], prior_variances[j], code_type,
                        encode_variance_in_target, clip_bbox, loc_pred[j],
                        &match_bbox);
@@ -1917,8 +1822,6 @@ template void CasRegEncodeLocPrediction(const vector<LabelBBox>& all_loc_preds,
       double* loc_pred_data, double* loc_gt_data,
     const vector<LabelBBox>& all_arm_loc_preds);
 
-//@RefineDet
-//Diff: @Function: @DataType: @Flaot16
 template void CasRegEncodeLocPrediction(const vector<LabelBBox>& all_loc_preds,
       const map<int, vector<NormalizedBBox> >& all_gt_bboxes,
       const vector<map<int, vector<int> > >& all_match_indices,
@@ -1927,11 +1830,7 @@ template void CasRegEncodeLocPrediction(const vector<LabelBBox>& all_loc_preds,
       const MultiBoxLossParameter& multibox_loss_param,
       float16* loc_pred_data, float16* loc_gt_data,
     const vector<LabelBBox>& all_arm_loc_preds);
-//end 
 
-
-//Diff: @Param: @DataType
-//Blob -> TBlob
 template <typename Dtype>
 void ComputeLocLoss(const TBlob<Dtype>& loc_pred, const TBlob<Dtype>& loc_gt,
       const vector<map<int, vector<int> > >& all_match_indices,
@@ -1983,9 +1882,7 @@ void ComputeLocLoss(const TBlob<Dtype>& loc_pred, const TBlob<Dtype>& loc_gt,
   }
 }
 
-//Diff: @Param: @DataType: @Check!
 
-// Explicit initialization.
 template void ComputeLocLoss(const TBlob<float>& loc_pred,
       const TBlob<float>& loc_gt,
       const vector<map<int, vector<int> > >& all_match_indices,
@@ -2030,12 +1927,6 @@ template void GetConfidenceScores(const float16* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
       vector<map<int, vector<float> > >* conf_preds);
 
-
-
-
-
-//@RefineDet
-//Diff: @Function
 template <typename Dtype>
 void OSGetConfidenceScores(const Dtype* conf_data,
     const Dtype* arm_conf_data, const int num,
@@ -2047,11 +1938,9 @@ void OSGetConfidenceScores(const Dtype* conf_data,
   for (int i = 0; i < num; ++i) {
     map<int, vector<float> >& label_scores = (*conf_preds)[i];
     for (int p = 0; p < num_preds_per_class; ++p) {
-      int start_idx = p * num_classes;
-      //Diff: @Condition 
+      int start_idx = p * num_classes; 
       if (arm_conf_data[p * 2 + 1] < objectness_score) {
         for (int c = 0; c < num_classes; ++c) {
-          //Diff: @Check!: @Value: label_scores
           if (c == 0) {
           label_scores[c].push_back(1.0);
           }
@@ -2060,14 +1949,13 @@ void OSGetConfidenceScores(const Dtype* conf_data,
           }
         }
       }
-      else { //@Original
+      else { 
         for (int c = 0; c < num_classes; ++c) {
           label_scores[c].push_back(conf_data[start_idx + c]);
         }
       }
     }
     conf_data += num_preds_per_class * num_classes;
-    //Diff: @Value: @Check!
     arm_conf_data += num_preds_per_class * 2;
   }
 }
@@ -2083,18 +1971,11 @@ template void OSGetConfidenceScores(const double* conf_data,
       const int num_preds_per_class, const int num_classes,
       vector<map<int, vector<float> > >* conf_preds,
       float objectness_score);
-//@RefineDet
-//Diff: @Function: @Param: @DataType: @Float16
 template void OSGetConfidenceScores(const float16* conf_data,
     const float16* arm_conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
       vector<map<int, vector<float> > >* conf_preds,
       float objectness_score);
-//end 
-
-
-
-
 
 template <typename Dtype>
 void GetConfidenceScores(const Dtype* conf_data, const int num,
@@ -2131,9 +2012,6 @@ template void GetConfidenceScores(const double* conf_data, const int num,
 template void GetConfidenceScores(const float16* conf_data, const int num,
       const int num_preds_per_class, const int num_classes,
       const bool class_major, vector<map<int, vector<float> > >* conf_preds);
-
-
-
 
 
 template <typename Dtype>
