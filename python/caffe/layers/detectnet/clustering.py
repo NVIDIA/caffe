@@ -228,6 +228,7 @@ def cluster(self, net_cvg, net_boxes):
 
         if (boxes_cur_image.shape[0] != 0):
             [r, c] = boxes_cur_image.shape
-            boxes[i, 0:r, 0:c] = boxes_cur_image
+            r = min(r, MAX_BOXES)
+            boxes[i, 0:r, 0:c] = boxes_cur_image[0:r]
 
     return boxes
